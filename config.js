@@ -7,6 +7,6 @@
    Project settings → General → Your apps → your web app → "SDK setup and configuration" → Config.
    Paste each value between the quotation marks, then commit the change. */
 window.BW_FIREBASE = {
-  apiKey: "",
-  projectId: ""
+  apiKey: "AIzaSyAdtuKcQdnN0KLcYcLb6OdfekgG3QFj0ng",
+  projectId: "british-english-74d43"
 };
