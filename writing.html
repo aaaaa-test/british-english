@@ -126,6 +126,37 @@ h1,h2,h3{text-wrap:balance}
 .istep p{margin:6px 0 0;font-size:15px;line-height:1.45}
 .ic{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:9px;background:var(--panel-2);border:1px solid var(--line);color:var(--def)}
 .ic svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* light background, chosen in Me (kept on this device) */
+html.light{color-scheme:light;--ink:#ffffff;--panel:#f4f7f7;--panel-2:#e9eff0;--line:#d3dee1;--word:#c0157a;--def:#0a7c76;--ex:#1f4f4b;--text:#132322;--muted:#5c6f6d;--good:#1f7a46;--bad:#c0392b;--gold:#8a6400}
+html.light .tabs{background:rgba(255,255,255,.94)}
+html.light .btn.primary{background:#ff80d5;border-color:#ff80d5;color:#22001a}
+html.light .btn.teal,html.light .seg button[aria-pressed="true"]{background:#19b5ae;border-color:#19b5ae;color:#001c1a}
+html.light .switch input:checked{background:#19b5ae;border-color:#19b5ae}
+html.light .istep .n{background:#ff80d5}
+html.light .nbrow.on .tick{background:#19b5ae;border-color:#19b5ae}
+html.light .band{border-color:rgba(0,0,0,.2)}
+html.light .box.gb{border-color:#e3d29a}
+html.light .tline .wt{border-color:#f2bddf}
+/* notebooks */
+.nbwrap{display:grid;gap:14px;max-width:520px;margin:0 auto;width:100%}
+.nblist{display:grid;gap:10px}
+.nbrow{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:4px 14px 8px}
+.nbrow.on{border-color:var(--def)}
+.nbpick{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;color:var(--text);font:600 17px/1.3 var(--f-ui);padding:10px 0;text-align:left;cursor:pointer;min-height:48px}
+.nbpick .tick{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:15px;line-height:1;color:#000;flex:none}
+.nbrow.on .tick{background:var(--def);border-color:var(--def)}
+.nbpick .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nbpick .tag{font:600 12px/1 var(--f-ui);color:var(--def);text-transform:uppercase;letter-spacing:.08em;flex:none}
+.nbacts{display:flex;gap:20px;padding-left:38px}
+.nbedit{display:grid;gap:8px;padding:10px 0 4px}
+.nbnew{display:grid;gap:8px;background:var(--panel);border:1px dashed var(--line);border-radius:16px;padding:14px}
+.nbnew label{font:600 14px/1.2 var(--f-ui);color:var(--muted)}
+.nbnew .btn{margin-top:6px}
+.nbrow .confirm{margin:10px 0 4px}
+.nbline{display:flex;align-items:center;gap:10px;width:100%;background:none;border:1px solid var(--line);border-radius:14px;color:var(--muted);font:500 15px/1.3 var(--f-ui);padding:10px 14px;cursor:pointer;text-align:left;min-height:44px}
+.nbline b{color:var(--text);font-weight:600}
+.nbline svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nbline .chev{margin-left:auto;font-size:22px;line-height:1}
 /* accounts (website copies) */
 .acct .big1{font:600 18px/1.25 var(--f-ui)}
 .who{display:flex;align-items:center;gap:12px}
@@ -287,6 +318,8 @@ details.more>.in{display:grid;gap:10px;padding-top:10px}
 <body>
 <script>window.BW_HOME = "index.html";</script>
 <script src="config.js"></script>
+<script>try { if (localStorage.getItem('bw-theme') === 'light') document.documentElement.classList.add('light'); } catch (e) {}</script>
+
 <main id="view" aria-live="polite"></main>
 <nav class="tabs" aria-label="Sections">
   <button class="tab" data-tab="today" type="button"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Today</button>
@@ -340,6 +373,7 @@ function el(tag, attrs, ...kids) {
 const put = (n, ...k) => n.replaceChildren(...k.flat(Infinity).filter(x => x != null && x !== false));
 const svg = d => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 24 24'); s.innerHTML = d; return s; };
 const ICON = {
+  book:'<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19"/><path d="M9 7.5h6"/>',
   phone:'<rect x="6.5" y="2.5" width="11" height="19" rx="2.5"/><path d="M12 7v7M9 11l3 3 3-3"/>',
   share:'<path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-8"/>',
   addsq:'<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8M8 12h8"/>',
@@ -403,7 +437,26 @@ const ACC_KEY = 'bw-account-v1';   // shared by both apps on one site, so one si
 let ACC = null;
 try { const a = JSON.parse(localStorage.getItem(ACC_KEY) || 'null'); if (FB && a && a.uid && a.rt) ACC = a; } catch (e) {}
 function saveAcc() { try { if (ACC) localStorage.setItem(ACC_KEY, JSON.stringify(ACC)); else localStorage.removeItem(ACC_KEY); } catch (e) {} }
-const stateKey = () => (ACC ? LS + ':' + ACC.uid : LS);   // each account keeps its own copy on the device; LS is for no account
+/* notebooks: separate sets of progress, each with its own name. Resetting one leaves the others alone.
+   On the device each notebook has its own copy. In an account its parts are stored as <notebook>-<part>
+   (the first notebook keeps the plain part names), next to a 'notebooks' list. */
+const NB_MAIN = 'main';
+const baseKey = () => (ACC ? LS + ':' + ACC.uid : LS);   // each account keeps its own copies on the device; LS is for no account
+const nbStateKey = (nb, base = baseKey()) => (nb === NB_MAIN ? base : base + ':nb:' + nb);
+const docKey = (id, nb = NB) => (nb === NB_MAIN ? id : nb + '-' + id);
+function loadNbs(base = baseKey()) {
+  try {
+    const o = JSON.parse(localStorage.getItem(base + ':notebooks') || 'null');
+    if (o && Array.isArray(o.list)) { const list = o.list.filter(x => x && x.id && x.name); if (list.length) return {t:+o.t || 0, list}; }
+  } catch (e) {}
+  return {t:0, list:[{id:NB_MAIN, name:'My notebook'}]};
+}
+function loadCur(base = baseKey()) { try { return localStorage.getItem(base + ':notebook') || NB_MAIN; } catch (e) { return NB_MAIN; } }
+let NBS = loadNbs(), NB = loadCur();
+if (!NBS.list.some(x => x.id === NB)) NB = NBS.list[0].id;
+function saveNbs() { try { localStorage.setItem(baseKey() + ':notebooks', JSON.stringify(NBS)); localStorage.setItem(baseKey() + ':notebook', NB); } catch (e) {} }
+const nbName = (id = NB) => (NBS.list.find(x => x.id === id) || {name:'My notebook'}).name;
+const stateKey = () => nbStateKey(NB);
 function loadState(key) {
   let s = blank();
   try { const raw = localStorage.getItem(key); if (raw) { const o = JSON.parse(raw); s = Object.assign(blank(), o); s.set = Object.assign(blank().set, o.set || {}); s.ts = o.ts || {}; } }
@@ -421,12 +474,12 @@ function touch(id) { S.ts[id] = Date.now(); dirty.add(id); saveLocal(); schedule
 const cloud = {mode:'connecting', put:null, pull:null, pulled:0, err:''};   // put(id, body) and pull() -> Map(id -> {t, d})
 function setSync(m) { cloud.mode = m; if ((TAB === 'me' || TAB === 'today') && !OV.open) render(); }
 function trimLog(log) { const keep = DAY() - 150; const o = {}; for (const [k, v] of Object.entries(log)) if (+k >= keep) o[k] = v; return o; }
-function docData(id) {
-  if (id === 'meta') return {log:trimLog(S.log), set:S.set};
-  if (id === 'r') return S.r;
-  if (id[0] === 'g') { const d = {}; for (const [k, v] of Object.entries(S.g)) if (k[0] === id[1]) d[k] = v; return d; }
+function docData(id, s = S) {   // s: a notebook's progress (the one in use unless given)
+  if (id === 'meta') return {log:trimLog(s.log), set:s.set};
+  if (id === 'r') return s.r;
+  if (id[0] === 'g') { const d = {}; for (const [k, v] of Object.entries(s.g)) if (k[0] === id[1]) d[k] = v; return d; }
   const lv = +id.slice(1), d = {};
-  for (const [k, v] of Object.entries(S.w)) { const t = TASK.get(k); if (t && t.lv === lv) d[k] = v; }
+  for (const [k, v] of Object.entries(s.w)) { const t = TASK.get(k); if (t && t.lv === lv) d[k] = v; }
   return d;
 }
 function applyDoc(id, d) {
@@ -438,9 +491,21 @@ function applyDoc(id, d) {
   for (const k of Object.keys(S.w)) { const t = TASK.get(k); if (t && t.lv === lv) delete S.w[k]; }
   Object.assign(S.w, d);
 }
+let nbDirty = false;
+const ops = [];   // other notebooks' parts to upload ({nb, id}) and stored parts to remove ({del})
+function mergeNbs(m) {   // the list of notebooks: the newer copy wins. True if the notebook in use had to change
+  const b = m.get('notebooks'), st = (b && +b.t) || 0;
+  const list = b && b.d && Array.isArray(b.d.list) ? b.d.list.filter(x => x && x.id && x.name) : [];
+  if (list.length && st > NBS.t) { NBS = {t:st, list}; nbDirty = false; }
+  else if (NBS.t > st) nbDirty = true;
+  let moved = false;
+  if (!NBS.list.some(x => x.id === NB)) { NB = NBS.list[0].id; S = loadState(stateKey()); dirty.clear(); stateChanged(); moved = true; }   // deleted on another device
+  saveNbs();
+  return moved;
+}
 function mergeParts(m) {   // the same learner's copy from elsewhere: for each part, the newer copy wins
   for (const id of DOCS) {
-    const b = m.get(id), lt = S.ts[id] || 0;
+    const b = m.get(docKey(id)), lt = S.ts[id] || 0;
     if (!b) { if (lt) dirty.add(id); continue; }
     const st = +b.t || 0;
     if (st > lt) { applyDoc(id, b.d); S.ts[id] = st; dirty.delete(id); }
@@ -456,13 +521,16 @@ async function initCloud() {
       const uid = await user.id();
       if (!uid) { setSync('device'); return; }
       const col = db.collection('data/users/' + uid);
-      cloud.pull = async () => {
-        const m = new Map(), snaps = await Promise.all(DOCS.map(id => col.doc(id).get().catch(() => null)));
-        snaps.forEach((s, k) => { if (s && s.exists) m.set(DOCS[k], s.data() || {}); });
+      cloud.pull = async () => {   // the notebook list and the parts of the notebook in use
+        const ids = ['notebooks', ...DOCS.map(id => docKey(id))], m = new Map();
+        const snaps = await Promise.all(ids.map(id => col.doc(id).get().catch(() => null)));
+        snaps.forEach((s, k) => { if (s && s.exists) m.set(ids[k], s.data() || {}); });
         return m;
       };
-      mergeParts(await cloud.pull());
-      cloud.put = (id, body) => col.doc(id).set(body); cloud.pulled = Date.now();
+      let m = await cloud.pull();
+      if (mergeNbs(m)) m = await cloud.pull();
+      mergeParts(m);
+      cloud.put = (sid, body) => col.doc(sid).set(body); cloud.del = sid => col.doc(sid).delete(); cloud.pulled = Date.now();
       saveLocal(); setSync('cloud');
       if (!OV.open) render();
       scheduleCloud(400);
@@ -481,12 +549,21 @@ async function flush() {
   flushing = true;
   const put = cloud.put;
   try {
-    while (dirty.size && cloud.put === put) {
-      const id = dirty.values().next().value; dirty.delete(id);
-      const body = {t:S.ts[id] || Date.now(), d:docData(id)};
-      try { await put(id, body); }
+    while ((nbDirty || ops.length || dirty.size) && cloud.put === put) {
+      let job, undo;
+      if (nbDirty) { nbDirty = false; const body = {t:NBS.t || Date.now(), d:{list:NBS.list}}; job = () => put('notebooks', body); undo = () => { nbDirty = true; }; }
+      else if (ops.length) {
+        const op = ops.shift(); undo = () => ops.unshift(op);
+        if (op.del) job = () => (cloud.del ? cloud.del(op.del) : null);
+        else { const st = loadState(nbStateKey(op.nb)), sid = docKey(op.id, op.nb), body = {t:st.ts[op.id] || Date.now(), d:docData(op.id, st)}; job = () => put(sid, body); }
+      } else {
+        const id = dirty.values().next().value; dirty.delete(id); undo = () => dirty.add(id);
+        const sid = docKey(id), body = {t:S.ts[id] || Date.now(), d:docData(id)};
+        job = () => put(sid, body);
+      }
+      try { await job(); }
       catch (e) {
-        if (cloud.put === put) dirty.add(id);
+        if (cloud.put === put) undo();
         const c = e && e.code;
         if (c === 'invalid_argument' || c === 'revoked' || c === 'not_granted' || c === 'quota_exceeded' || c === 'capability_disabled') { cloud.put = cloud.pull = null; setSync('device'); }
         else if (c === 'SIGNED_OUT') accountLost();
@@ -495,7 +572,7 @@ async function flush() {
         break;
       }
     }
-    if (!dirty.size && FB && ACC && cloud.put === put && (cloud.mode === 'offline' || cloud.mode === 'error')) { cloud.err = ''; setSync('account'); }
+    if (!dirty.size && !ops.length && !nbDirty && FB && ACC && cloud.put === put && (cloud.mode === 'offline' || cloud.mode === 'error')) { cloud.err = ''; setSync('account'); }
   } finally { flushing = false; }
 }
 async function pullNow() {   // bring in progress made on another device
@@ -503,6 +580,7 @@ async function pullNow() {   // bring in progress made on another device
   try {
     const m = await pull();
     if (cloud.pull !== pull || dirty.size || flushing) return;
+    if (mergeNbs(m)) return pullNow();
     mergeParts(m); saveLocal();
     if (!OV.open) render();
     scheduleCloud(400);
@@ -571,10 +649,11 @@ async function fsPull() {
   } while (page);
   return m;
 }
-function fsPut(id, body) {
+function fsPut(sid, body) {
   const base = partsPath();
-  return fsCall('PATCH', base + '/' + encodeURIComponent(id), {fields:{t:{integerValue:String(body.t || 0)}, d:{stringValue:JSON.stringify(body.d)}}});
+  return fsCall('PATCH', base + '/' + encodeURIComponent(sid), {fields:{t:{integerValue:String(body.t || 0)}, d:{stringValue:JSON.stringify(body.d)}}});
 }
+function fsDel(sid) { const base = partsPath(); return fsCall('DELETE', base + '/' + encodeURIComponent(sid)); }
 async function connectAccount() {
   const a = ACC;
   if (!FB || !a) return;
@@ -583,9 +662,9 @@ async function connectAccount() {
   try {
     const m = await fsPull();
     if (ACC !== a) return;   // signed out or in again meanwhile
-    if (!DOCS.some(id => m.has(id)) && !Object.keys(S.ts).length) claimGuest();   // a new account takes what was done here without one
-    else mergeParts(m);
-    cloud.pull = fsPull; cloud.put = fsPut; cloud.pulled = Date.now();
+    if (!m.size && !Object.keys(S.ts).length && !NBS.t) claimGuest();   // a new account takes everything done here without one
+    else { mergeNbs(m); mergeParts(m); }
+    cloud.pull = fsPull; cloud.put = fsPut; cloud.del = fsDel; cloud.pulled = Date.now();
     saveLocal(); setSync('account');
     if (!OV.open) render();
     scheduleCloud(400);
@@ -596,16 +675,25 @@ async function connectAccount() {
     else { cloud.err = e.code; setSync('error'); }
   }
 }
-function claimGuest() {
-  S = loadState(LS);
-  for (const id of DOCS) { S.ts[id] = S.ts[id] || Date.now(); dirty.add(id); }
-  saveLocal();
-  try { localStorage.removeItem(LS); } catch (e) {}
-  stateChanged();
+function claimGuest() {   // every notebook made here without an account moves into the new account
+  const gl = loadNbs(LS), gcur = loadCur(LS);
+  NBS = {t:Date.now(), list:gl.list}; nbDirty = true;
+  NB = gl.list.some(x => x.id === gcur) ? gcur : gl.list[0].id;
+  for (const x of gl.list) {
+    const st = loadState(nbStateKey(x.id, LS));
+    for (const id of DOCS) st.ts[id] = st.ts[id] || Date.now();
+    try { localStorage.setItem(nbStateKey(x.id), JSON.stringify(st)); localStorage.removeItem(nbStateKey(x.id, LS)); } catch (e) {}
+    if (x.id === NB) S = st;
+    else for (const id of DOCS) ops.push({nb:x.id, id});
+  }
+  DOCS.forEach(id => dirty.add(id));
+  try { localStorage.removeItem(LS + ':notebooks'); localStorage.removeItem(LS + ':notebook'); } catch (e) {}
+  saveNbs(); saveLocal(); stateChanged();
 }
 function switchTo(acc) {   // whose progress this device shows
-  clearTimeout(flushTimer); cloud.put = cloud.pull = null; cloud.err = ''; dirty.clear();
+  clearTimeout(flushTimer); cloud.put = cloud.pull = cloud.del = null; cloud.err = ''; dirty.clear(); ops.length = 0; nbDirty = false;
   ACC = acc; saveAcc();
+  NBS = loadNbs(); NB = loadCur(); if (!NBS.list.some(x => x.id === NB)) NB = NBS.list[0].id;
   S = loadState(stateKey()); stateChanged();
 }
 async function startAccount(acc) { switchTo(acc); await connectAccount(); }
@@ -745,6 +833,127 @@ function openInstallHelp() {
     step(2, null, 'In Safari on a Mac', 'Choose File, then Add to Dock.')];
   const keep = IOS ? 'Open the app from its new icon from now on. The icon keeps its own progress, separate from Safari' + (FB ? ', so sign in there to carry on with your account.' : '.') : 'Open the app from its new icon from now on.';
   put(o.body, el('div', {class:'insthelp'}, el('h2', {class:'accth'}, 'Put the app on your Home Screen'), el('ol', {class:'isteps'}, steps), el('p', {class:'tip'}, keep)));
+}
+/* light or dark background, chosen in Me and kept on this device (both apps on one site share it) */
+const THEME_KEY = 'bw-theme';
+const theme = () => (document.documentElement.classList.contains('light') ? 'light' : 'dark');
+function themeMeta() {
+  let m = document.querySelector('meta[name="theme-color"]');
+  if (!m) { m = document.createElement('meta'); m.name = 'theme-color'; document.head.appendChild(m); }
+  m.content = theme() === 'light' ? '#ffffff' : '#000000';
+}
+function setTheme(t) {
+  document.documentElement.classList.toggle('light', t === 'light');
+  try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
+  themeMeta();
+}
+function themeSeg() {
+  return el('div', {class:'seg', role:'group', 'aria-label':'Background'}, [['dark', 'Dark'], ['light', 'Light']].map(([k, l]) =>
+    el('button', {type:'button', 'aria-pressed':theme() === k ? 'true' : 'false', onclick:() => { setTheme(k); render(); }}, l)));
+}
+window.addEventListener('storage', e => { if (e.key === THEME_KEY) { document.documentElement.classList.toggle('light', e.newValue === 'light'); themeMeta(); } });
+themeMeta();
+
+/* ---------- notebooks: choosing, making, renaming, deleting ---------- */
+async function useNotebook(id) {
+  if (id === NB || !NBS.list.some(x => x.id === id)) return;
+  try { await flush(); } catch (e) {}
+  clearTimeout(flushTimer); dirty.clear();
+  NB = id; saveNbs();
+  S = loadState(stateKey()); stateChanged();
+  const pull = cloud.pull;
+  if (pull) { try { const m = await pull(); if (cloud.pull === pull && NB === id) { mergeNbs(m); mergeParts(m); saveLocal(); scheduleCloud(400); } } catch (e) {} }
+}
+function newNotebook(name) {
+  const id = 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  const st = blank(); st.set = JSON.parse(JSON.stringify(S.set)); st.ts.meta = Date.now();   // a new notebook keeps the settings of the one in use
+  try { localStorage.setItem(nbStateKey(id), JSON.stringify(st)); } catch (e) {}
+  NBS = {t:Date.now(), list:[...NBS.list, {id, name}]}; nbDirty = true; saveNbs();
+  ops.push({nb:id, id:'meta'}); scheduleCloud(300);
+  return id;
+}
+function renameNotebook(id, name) {
+  NBS = {t:Date.now(), list:NBS.list.map(x => (x.id === id ? {id, name} : x))}; nbDirty = true; saveNbs(); scheduleCloud(300);
+}
+async function deleteNotebook(id) {
+  if (NBS.list.length < 2) return;
+  if (id === NB) await useNotebook(NBS.list.find(x => x.id !== id).id);
+  NBS = {t:Date.now(), list:NBS.list.filter(x => x.id !== id)}; nbDirty = true; saveNbs();
+  try { localStorage.removeItem(nbStateKey(id)); } catch (e) {}
+  for (const part of DOCS) ops.push({del:docKey(part, id)});
+  scheduleCloud(300);
+}
+function nbProblem(name, except) {
+  if (!name) return 'Type a name for the notebook.';
+  if (name.length > 30) return 'Use 30 letters or fewer.';
+  if (NBS.list.some(x => x.id !== except && x.name.toLowerCase() === name.toLowerCase())) return 'You already have a notebook with that name.';
+  return '';
+}
+function notebookPanel() {   // Me
+  const many = NBS.list.length > 1;
+  return el('section', {class:'panel'},
+    el('p', {class:'eyebrow'}, 'Notebook'),
+    el('div', {class:'who'}, el('span', {class:'av', 'aria-hidden':'true'}, svg(ICON.book)),
+      el('div', {style:'min-width:0'}, el('b', {class:'nm'}, nbName()),
+        el('div', {class:'muted', style:'font-size:14px'}, many ? 'You have ' + NBS.list.length + ' notebooks. Each one keeps its own progress.' : 'Each notebook keeps its own progress. Make another one to practise something separately, for example review.'))),
+    el('div', {class:'row'}, el('button', {class:'btn', type:'button', onclick:openNotebooks}, many ? 'Change notebook' : 'Notebooks')));
+}
+function notebookLine() {   // Today, once there is more than one notebook
+  if (NBS.list.length < 2) return null;
+  return el('button', {class:'nbline', type:'button', onclick:openNotebooks}, svg(ICON.book), el('span', null, 'Notebook: ', el('b', null, nbName())), el('span', {class:'chev', 'aria-hidden':'true'}, '›'));
+}
+function openNotebooks() {
+  const o = openOv('Notebooks');
+  const draw = (mode, target) => {
+    const rows = NBS.list.map(x => {
+      const on = x.id === NB, cls = 'nbrow' + (on ? ' on' : '');
+      if (mode === 'rename' && target === x.id) {
+        const inp = el('input', {class:'field', type:'text', value:x.name, maxlength:'30', 'aria-label':'New name'});
+        const msg = el('p', {class:'formmsg', role:'alert', hidden:true});
+        const f = el('form', {class:'nbedit', novalidate:''}, inp, msg, el('div', {class:'row'},
+          el('button', {class:'btn', type:'button', onclick:() => draw()}, 'Cancel'),
+          el('button', {class:'btn primary', type:'submit'}, 'Save the name')));
+        f.addEventListener('submit', ev => {
+          ev.preventDefault();
+          const v = inp.value.trim(), bad = nbProblem(v, x.id);
+          if (bad) { msg.textContent = bad; msg.hidden = false; return; }
+          renameNotebook(x.id, v); draw();
+        });
+        return el('div', {class:cls}, f);
+      }
+      if (mode === 'delete' && target === x.id) return el('div', {class:cls}, el('div', {class:'confirm'},
+        el('b', null, 'Delete “' + x.name + '”?'),
+        el('span', {class:'muted'}, 'All the progress in this notebook will be deleted. Your other notebooks stay as they are. This cannot be undone.'),
+        el('div', {class:'row'},
+          el('button', {class:'btn', type:'button', onclick:() => draw()}, 'Keep it'),
+          el('button', {class:'btn primary', type:'button', onclick:async e => { e.currentTarget.disabled = true; await deleteNotebook(x.id); toast('Notebook deleted'); draw(); }}, 'Yes, delete it'))));
+      return el('div', {class:cls},
+        el('button', {class:'nbpick', type:'button', 'aria-pressed':on ? 'true' : 'false', onclick:async () => {
+          if (!on) { await useNotebook(x.id); toast('Now using ' + x.name); }
+          if (o.body.isConnected) goBack();
+        }}, el('span', {class:'tick', 'aria-hidden':'true'}, on ? '✓' : ''), el('span', {class:'nm'}, x.name), on ? el('span', {class:'tag'}, 'In use') : null),
+        el('div', {class:'nbacts'},
+          el('button', {class:'linkbtn', type:'button', onclick:() => draw('rename', x.id)}, 'Rename'),
+          NBS.list.length > 1 ? el('button', {class:'linkbtn', type:'button', onclick:() => draw('delete', x.id)}, 'Delete') : null));
+    });
+    const inp = el('input', {class:'field', id:'nb-new', type:'text', maxlength:'30', placeholder:'For example: Review'});
+    const msg = el('p', {class:'formmsg', role:'alert', hidden:true});
+    const make = el('form', {class:'nbnew', novalidate:''}, el('label', {for:'nb-new'}, 'Make a new notebook'), inp, msg, el('button', {class:'btn primary', type:'submit'}, 'Make notebook'));
+    make.addEventListener('submit', async ev => {
+      ev.preventDefault();
+      const v = inp.value.trim(), bad = nbProblem(v);
+      if (bad) { msg.textContent = bad; msg.hidden = false; return; }
+      const id = newNotebook(v);
+      await useNotebook(id);
+      toast('Now using ' + v);
+      if (o.body.isConnected) goBack();
+    });
+    put(o.body, el('div', {class:'nbwrap'},
+      el('h2', {class:'accth'}, 'Your notebooks'),
+      el('p', {class:'muted', style:'margin:0'}, 'Each notebook keeps its own progress. Tap one to use it. Resetting one does not change the others.'),
+      el('div', {class:'nblist'}, rows), make));
+  };
+  draw();
 }
 function openAccount(mode) {
   if (!FB) return;
@@ -1034,7 +1243,7 @@ let TAB = 'today';
 const WS = {lv:0};   // writing view: open level
 function ring(val, max, label) {
   const r = 46, c = 2 * Math.PI * r, f = Math.min(1, max ? val / max : 0);
-  const s = svg('<circle cx="50" cy="50" r="' + r + '" fill="none" stroke="#111a1d" stroke-width="9"/><circle cx="50" cy="50" r="' + r + '" fill="none" stroke="#ff80d5" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + (c * f) + ' ' + c + '"/>');
+  const s = svg('<circle cx="50" cy="50" r="' + r + '" fill="none" style="stroke:var(--panel-2)" stroke-width="9"/><circle cx="50" cy="50" r="' + r + '" fill="none" style="stroke:var(--word)" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + (c * f) + ' ' + c + '"/>');
   s.setAttribute('viewBox', '0 0 100 100');
   return el('div', {class:'ring', role:'img', 'aria-label':val + ' of ' + max + ' ' + label}, s, el('div', {class:'t'}, el('div', null, el('span', {class:'num'}, val), el('small', null, label))));
 }
@@ -1045,7 +1254,7 @@ function renderToday() {
   const due = dueReview().length;
   const parts = [
     homeLink(),
-    el('header', {class:'hello'}, el('p', {class:'eyebrow'}, niceDate()), el('h1', null, 'British Writing and Grammar')), accountBar(), installBar(),
+    el('header', {class:'hello'}, el('p', {class:'eyebrow'}, niceDate()), el('h1', null, 'British Writing and Grammar')), accountBar(), notebookLine(), installBar(),
     el('section', {class:'panel goal'}, ring(Math.min(p, GOAL), GOAL, 'TODAY'),
       el('div', {class:'stats'},
         el('div', {class:'stat'}, el('span', null, 'Day streak'), el('b', {class:'num'}, streak() + ' day' + (streak() === 1 ? '' : 's'))),
@@ -1677,15 +1886,16 @@ function renderMe() {
   const size = el('div', {class:'seg', role:'group', 'aria-label':'Text size'}, [['normal', 'Normal text'], ['large', 'Large text']].map(([k, l]) => el('button', {type:'button', 'aria-pressed':S.set.size === k ? 'true' : 'false', onclick:() => { S.set.size = k; applySize(); touch('meta'); renderMe(); }}, l)));
   const resetArea = el('div');
   const resetBtn = el('button', {class:'btn ghost', type:'button', onclick:() => {
-    put(resetArea, el('div', {class:'confirm'}, el('b', null, 'Delete all your progress?'), el('span', {class:'muted'}, 'Your answers, saved writing, scores and streak will be cleared. This cannot be undone.'),
+    put(resetArea, el('div', {class:'confirm'}, el('b', null, 'Delete all the progress in “' + nbName() + '”?'), el('span', {class:'muted'}, 'The answers, saved writing, scores and streak in this notebook will be cleared.' + (NBS.list.length > 1 ? ' Your other notebooks stay as they are.' : '') + ' This cannot be undone.'),
       el('div', {class:'row'}, el('button', {class:'btn', type:'button', onclick:() => put(resetArea, resetBtn)}, 'Keep my progress'),
         el('button', {class:'btn primary', type:'button', onclick:() => { const keepSet = S.set; S = blank(); S.set = keepSet; DOCS.forEach(id => touch(id)); toast('Progress cleared'); renderMe(); }}, 'Yes, delete it'))));
-  }}, 'Reset progress');
+  }}, 'Reset this notebook');
   resetArea.append(resetBtn);
   const sync = FB ? null : cloud.mode === 'cloud' ? 'Your progress and writing are saved to your Claude account, so they follow you to other devices.' : cloud.mode === 'connecting' ? 'Connecting to your saved progress…' : 'Your progress is saved in this browser only.';   // with accounts, the Account panel says where progress is kept
   put(view,
     el('header', {class:'hello'}, el('p', {class:'eyebrow'}, 'Me'), el('h1', null, 'My progress')),
     accountPanel(),
+    notebookPanel(),
     el('div', {class:'tiles'},
       el('div', {class:'tile'}, el('b', {class:'num'}, tasksDone()), el('span', null, 'of ' + TASKS.length + ' writing tasks')),
       el('div', {class:'tile'}, el('b', {class:'num'}, unitsDone()), el('span', null, 'of ' + UNITS.length + ' grammar units passed')),
@@ -1698,6 +1908,7 @@ function renderMe() {
         p.f ? el('div', {class:'claude'}, el('p', null, el('b', {style:'color:' + (p.f.ok ? 'var(--good)' : 'var(--gold)')}, p.f.ok ? 'Claude: well done!' : 'Claude suggested:')), p.f.ok ? null : el('p', {class:'fix'}, p.f.c)) : null))) : el('p', {class:'empty'}, 'Writing you save in Make your own and Write your own appears here.'));
     }}, el('span', {class:'id'}, '✎'), el('span', null, el('div', {style:'font-weight:600'}, 'My writing'), el('div', {class:'d'}, pieces.length + ' piece' + (pieces.length === 1 ? '' : 's'))), el('span', {'aria-hidden':'true'}, '›')),
     el('section', {class:'panel set'}, el('p', {class:'eyebrow'}, 'Settings'),
+      el('span', {class:'lab'}, 'Background'), themeSeg(),
       el('span', {class:'lab'}, 'Text size'), size,
       el('p', {class:'tip'}, 'The keyboard will not fix capital letters or spelling for you here, so you can practise them yourself.'),
       sync ? el('p', {class:'tip'}, sync) : null,
