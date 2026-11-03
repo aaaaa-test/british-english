@@ -1,0 +1,28 @@
+/* Keeps 5000 British Words and British Writing and Grammar working without internet.
+   Pages come from the internet when it answers quickly, so updates show up; otherwise the saved copy is used.
+   Signing in and saving progress to an account go straight to the internet and are never stored here. */
+const CACHE = 'bw-site-1';
+const FILES = ['./', 'index.html', 'words.html', 'writing.html', 'config.js', 'words.webmanifest', 'writing.webmanifest',
+  'icon-words-192.png', 'icon-words-512.png', 'icon-words-maskable.png', 'icon-writing-192.png', 'icon-writing-512.png', 'icon-writing-maskable.png'];
+
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => Promise.all(FILES.map(f => c.add(f).catch(() => null)))));
+  self.skipWaiting();
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+});
+self.addEventListener('fetch', e => {
+  const req = e.request;
+  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
+  e.respondWith((async () => {
+    const net = fetch(req).then(res => {
+      if (res && res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
+      return res;
+    });
+    const saved = await caches.match(req, {ignoreSearch: true});
+    if (!saved) return net;
+    const slow = new Promise(r => setTimeout(() => r(saved), 3000));
+    return Promise.race([net.catch(() => saved), slow]);
+  })());
+});
