@@ -288,6 +288,7 @@ mark.h{background:none;color:var(--word)}
 .tline .wt{color:var(--word);border-color:#5b2a4c}
 .wt[disabled]{visibility:hidden}
 .fb{border-radius:16px;padding:14px 16px;display:grid;gap:8px}
+.fb + .row,.fb + .btn{margin-top:12px}
 .fb.ok{background:rgba(127,224,160,.1);border:1px solid var(--good)}
 .fb.no{background:rgba(255,145,131,.1);border:1px solid var(--bad)}
 .fb h3{margin:0;font:600 19px/1.2 var(--f-ui)}
@@ -1641,6 +1642,7 @@ function startMixed(k) {
 function runSession(cfg) {
   const st = {i:0, right:0, wrong:[]};
   const {o, qs} = cfg;
+  const looks = new Map();   // the order of choices and tiles for each question, kept for Try again
   const next = () => { st.i++; if (st.i >= qs.length) return end(); draw(); };
   const end = () => {
     const score = Math.round(st.right / qs.length * 100);
@@ -1659,9 +1661,16 @@ function runSession(cfg) {
     if (q.key) { markItem(q.key, ok, cfg.mode === 'review'); logAct('g', ok); }
     else logAct('g', ok);
   };
-  function draw() {
+  function draw(prev) {   // prev: what the learner typed last time, after Try again
     const q = qs[st.i];
     o.ov.scrollTop = 0;
+    const t0 = DAY(), snap = {right:st.right, wrong:st.wrong.slice(), r:q.key && S.r[q.key] ? S.r[q.key].slice() : null, day:t0, log:S.log[t0] ? S.log[t0].slice() : null};
+    const tryAgain = given => {   // undo this answer and ask the same question again
+      st.right = snap.right; st.wrong = snap.wrong.slice();
+      if (q.key && JSON.stringify(S.r[q.key] || null) !== JSON.stringify(snap.r)) { if (snap.r) S.r[q.key] = snap.r.slice(); else delete S.r[q.key]; touch('r'); }
+      if (snap.day === DAY() && JSON.stringify(S.log[snap.day] || null) !== JSON.stringify(snap.log)) { if (snap.log) S.log[snap.day] = snap.log.slice(); else delete S.log[snap.day]; touch('meta'); }
+      draw(given);
+    };
     const bar = el('div', {class:'pbar teal'}, el('i', {style:'width:' + Math.round(st.i / qs.length * 100) + '%'}));
     const head = el('div', {class:'qhead'}, el('div', {class:'qcount'}, el('span', null, q.label || cfg.title), el('span', {class:'num'}, (st.i + 1) + ' of ' + qs.length)), bar, el('p', {class:'qinstr'}, q.instr));
     const fbBox = el('div');
@@ -1694,7 +1703,9 @@ function runSession(cfg) {
         ok && q.kind === 'choose' ? null : el('p', {class:'ans'}, ansText(q)),
         q.why ? el('p', {class:'why'}, q.why) : null,
         ask, out),
-        el('button', {class:'btn primary big', type:'button', onclick:next}, st.i + 1 >= qs.length ? 'See my score' : 'Next'));
+        el('div', {class:'row'},
+          ok ? null : el('button', {class:'btn big', type:'button', onclick:() => tryAgain(given)}, 'Try again'),
+          el('button', {class:'btn primary big', type:'button', onclick:next}, st.i + 1 >= qs.length ? 'See my score' : 'Next')));
       const nb = fbBox.querySelector('.btn.primary'); if (nb) nb.focus({preventScroll:true});
       try { fbBox.scrollIntoView({block:'nearest', behavior:'smooth'}); } catch (e) {}
     };
@@ -1702,7 +1713,8 @@ function runSession(cfg) {
     if (q.kind === 'choose') {
       const [pre, post] = q.q.split('___');
       const sent = el('p', {class:'qtext'}, pre, el('span', {class:'gap'}, '_____'), post);
-      const opts = el('div', {class:'opts'}, shuffle(q.o.map((t, i) => ({t, i}))).map(({t, i}) => el('button', {class:'opt', type:'button', onclick:e => {
+      const order = looks.get(q) || shuffle(q.o.map((t, i) => ({t, i}))); looks.set(q, order);
+      const opts = el('div', {class:'opts'}, order.map(({t, i}) => el('button', {class:'opt', type:'button', onclick:e => {
         if (answered) return;
         const ok = i === q.a;
         opts.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (+b.dataset.i === q.a) b.classList.add('right'); });
@@ -1713,7 +1725,7 @@ function runSession(cfg) {
       body = [sent, opts];
     } else if (q.kind === 'gap') {
       const [pre, post] = q.q.split('___');
-      const inp = el('input', {class:'inl', type:'text', 'aria-label':'Your answer', enterkeyhint:'done', ...noFix});
+      const inp = el('input', {class:'inl', type:'text', 'aria-label':'Your answer', enterkeyhint:'done', value:prev, ...noFix});
       const form = el('form', {onsubmit:e => { e.preventDefault(); const v = inp.value.trim(); if (!v || answered) return; inp.disabled = true; finish(gMatch(v, q.a, q.strict, q.forms), v); }},
         el('p', {class:'qtext'}, pre, inp, post),
         el('button', {class:'btn teal big', type:'submit'}, 'Check'));
@@ -1723,7 +1735,7 @@ function runSession(cfg) {
       const line = el('div', {class:'tline', 'aria-label':'Your sentence'});
       const bank = el('div', {class:'tbank'});
       const chosen = [];
-      const words = shuffle(q.w.map((w, i) => ({w, i})));
+      const words = looks.get(q) || shuffle(q.w.map((w, i) => ({w, i}))); looks.set(q, words);
       const redraw = () => {
         put(line, chosen.map((c, k) => el('button', {class:'wt', type:'button', onclick:() => { if (answered) return; chosen.splice(k, 1); redraw(); }}, c.w)));
         put(bank, words.map(c => el('button', {class:'wt', type:'button', disabled:chosen.includes(c), onclick:() => { if (answered) return; chosen.push(c); redraw(); }}, c.w)));
@@ -1734,7 +1746,7 @@ function runSession(cfg) {
       body = [line, bank, chk];
     } else {
       // write, fix, type: type a whole sentence
-      const ta = autosize(el('textarea', {class:'w', rows:'2', 'aria-label':'Your answer', ...noFix}));
+      const ta = autosize(el('textarea', {class:'w', rows:'2', 'aria-label':'Your answer', value:prev, ...noFix}));
       const prompt = el('p', {class:'qtext', html:hl(q.q)});
       const form = el('form', {onsubmit:e => { e.preventDefault(); const v = ta.value.trim(); if (!v || answered) return; ta.disabled = true; const ok = q.kind === 'type' ? q.check(v) : gMatch(v, q.a, q.strict, q.forms); finish(ok, v); }},
         ta, el('button', {class:'btn teal big', type:'submit'}, 'Check'));
@@ -1831,19 +1843,28 @@ function startTricky() {
     }
     const w = words[i];
     const head = el('div', {class:'qcount'}, el('span', null, 'Tricky words'), el('span', {class:'num'}, (i + 1) + ' of ' + words.length));
+    const write = () => {
+      const t0 = DAY(), was = {right, log:S.log[t0] ? S.log[t0].slice() : null};
+      const inp = el('input', {class:'w', type:'text', 'aria-label':'Write the word', style:'text-align:center', enterkeyhint:'done', ...noFix});
+      const fb = el('div');
+      const again = () => {   // undo this try and write the word again
+        right = was.right;
+        if (DAY() === t0 && JSON.stringify(S.log[t0] || null) !== JSON.stringify(was.log)) { if (was.log) S.log[t0] = was.log.slice(); else delete S.log[t0]; touch('meta'); }
+        write();
+      };
+      const form = el('form', {onsubmit:e => {
+        e.preventDefault(); const v = inp.value.trim(); if (!v || inp.disabled) return; inp.disabled = true;
+        const ok = Q(v) === Q(w); if (ok) right++; logAct('g', ok);
+        put(fb, el('div', {class:'fb ' + (ok ? 'ok' : 'no')}, el('h3', null, ok ? 'Right!' : 'Check it'), el('p', {class:'ans'}, w)),
+          el('div', {class:'row'},
+            ok ? null : el('button', {class:'btn big', type:'button', onclick:again}, 'Try again'),
+            el('button', {class:'btn primary big', type:'button', onclick:() => { i++; step(); }}, 'Next')));
+      }}, inp, el('button', {class:'btn teal big', type:'submit'}, 'Check'));
+      put(o.body, head, el('p', {class:'qinstr'}, 'Now write it from memory.'), el('div', {class:'cover', 'aria-hidden':'true'}), form, fb);
+      setTimeout(() => inp.focus({preventScroll:true}), 60);
+    };
     put(o.body, head, el('p', {class:'qinstr'}, 'Look at the word and say it out loud. Then cover it.'), el('p', {class:'look'}, w),
-      el('button', {class:'btn primary big', type:'button', onclick:() => {
-        const inp = el('input', {class:'w', type:'text', 'aria-label':'Write the word', style:'text-align:center', enterkeyhint:'done', ...noFix});
-        const fb = el('div');
-        const form = el('form', {onsubmit:e => {
-          e.preventDefault(); const v = inp.value.trim(); if (!v || inp.disabled) return; inp.disabled = true;
-          const ok = Q(v) === Q(w); if (ok) right++; logAct('g', ok);
-          put(fb, el('div', {class:'fb ' + (ok ? 'ok' : 'no')}, el('h3', null, ok ? 'Right!' : 'Check it'), el('p', {class:'ans'}, w)),
-            el('button', {class:'btn primary big', type:'button', onclick:() => { i++; step(); }}, 'Next'));
-        }}, inp, el('button', {class:'btn teal big', type:'submit'}, 'Check'));
-        put(o.body, head, el('p', {class:'qinstr'}, 'Now write it from memory.'), el('div', {class:'cover', 'aria-hidden':'true'}), form, fb);
-        setTimeout(() => inp.focus({preventScroll:true}), 60);
-      }}, 'Cover it'));
+      el('button', {class:'btn primary big', type:'button', onclick:write}, 'Cover it'));
   };
   step();
 }
