@@ -779,7 +779,7 @@ const BOOKS = [
   {id:'egs', sh:'Grammar', t:'English Grammar in Use', lv:'Supplementary Exercises', cefr:'B1–B2', ab:'SE', kind:'grammar', n:54},
   {id:'ielts', sh:'IELTS', t:'IELTS Preparation', lv:'Listening, Reading, Writing and Speaking', cefr:'Band 5–9', ab:'IE', kind:'ielts', n:0}
 ];
-const READY = new Set(['evu-e', 'evu-p', 'avu']);   // books whose course file is written
+const READY = new Set(['evu-e', 'evu-p', 'evu-u', 'avu']);   // books whose course file is written
 const BOOK = new Map(BOOKS.map(b => [b.id, b]));
 const shelfColour = b => (SHELVES.find(s => s.k === b.sh) || SHELVES[0]).c;
 const bookName = b => b.t + (b.lv && b.kind !== 'ielts' ? ' · ' + b.lv : '');
@@ -2456,7 +2456,7 @@ function conceptQs(c, u) {   // questions made from the unit's own explanations:
     const t = unmd(s); let m;
     const ra = /([A-Za-z][A-Za-z' -]{0,24}?)\s*→\s*([A-Za-z][A-Za-z' -]{0,24})/g;
     while ((m = ra.exec(t))) { const a = m[1].trim(), b = m[2].trim(); if (a && b && a !== b && a.split(' ').length <= 3 && b.split(' ').length <= 3) arrows.push([a, b]); }
-    const re2 = /([A-Za-z][A-Za-z.' -]{0,20}?)\s+=\s+([a-z][^,;.)]{1,40})/g;
+    const re2 = /([A-Za-z][A-Za-z.' -]{0,20}?)\s+=\s+([a-z][^,;.)]{1,58})(?![^,;.)])/g;
     while ((m = re2.exec(t))) eqs.push([m[1].trim(), m[2].trim()]);
   }
   if (arrows.length >= 4) for (const [a, b] of arrows.slice(0, 5)) add(mcQ('Complete the pattern.', a + ' → ___', b, sample(arrows.map(p => p[1]).filter(v => v !== b), 3)));   // 3. word-building patterns
