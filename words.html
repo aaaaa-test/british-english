@@ -232,6 +232,10 @@ details.more>summary{cursor:pointer;font:600 15px/1.3 var(--f-ui);color:var(--de
 details.more>summary::-webkit-details-marker{display:none}
 details.more>summary::after{content:"+";font-size:20px;color:var(--muted)}
 details.more[open]>summary::after{content:"–"}
+details.apps .appl{display:block;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);text-decoration:none}
+details.apps .appl b{display:block;font:600 16px/1.3 var(--f-ui);color:var(--word)}
+details.apps .appl span{display:block;color:var(--muted);font-size:14px;margin-top:2px}
+details.apps .appl.on{border-color:var(--good)}
 details.more>.in{display:grid;gap:10px;padding-top:10px}
 .barlabels{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
 .set{display:grid;gap:8px}
@@ -7424,7 +7428,18 @@ const fmt = n => n.toLocaleString('en-GB');
 function DAY(d = new Date()) { return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 864e5); }
 function niceDate(d = new Date()) { return d.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long'}); }
 /* a website copy can name its menu page in window.BW_HOME; Today then shows a way back to it */
-const homeLink = () => typeof window.BW_HOME === 'string' && window.BW_HOME ? el('a', {class:'back', href:window.BW_HOME}, svg(ICON.back), 'All apps') : null;
+const APPS = [['words.html', '5000 British Words', 'Ten levels of everyday British words'], ['writing.html', 'British Writing and Grammar', 'Writing tasks and grammar units'],
+  ['books.html', 'British Book Courses', 'Courses that follow the books, and IELTS']];
+const appsToggle = () => {   // Me: a toggle that opens the list of all the apps, to move to another one (only when they are installed together)
+  if (typeof window.BW_HOME !== 'string' || !window.BW_HOME) return null;
+  const here = (location.pathname.split('/').pop() || '').toLowerCase();
+  return el('details', {class:'more apps'}, el('summary', null, 'All apps'),
+    el('div', {class:'in'},
+      APPS.map(([href, t, s]) => href === here
+        ? el('div', {class:'appl on', 'aria-current':'page'}, el('b', null, t), el('span', null, 'You are here'))
+        : el('a', {class:'appl', href}, el('b', null, t), el('span', null, s))),
+      el('a', {class:'back', href:window.BW_HOME}, svg(ICON.back), 'Home page')));
+};
 function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => { t.hidden = true; }, 2600); }
 
 /* ---------- state ---------- */
@@ -8549,7 +8564,7 @@ function renderToday() {
   const lim = Math.min(W.length, frontier() + 60);
   const wod = W[(DAY() * 7919) % Math.max(1, lim)];
   const wodCard = el('section', {class:'wod'}, el('p', {class:'eyebrow', style:'margin-bottom:8px'}, 'Word of the day'), wordCard(wod), el('div', {class:'tools', style:'margin-top:10px'}, el('button', {class:'btn small', type:'button', onclick:() => openWord(wod)}, 'Open card'), starBtn(wod)));
-  const parts = [homeLink(), el('header', {class:'hello'}, el('p', {class:'eyebrow'}, niceDate()), el('h1', null, '5000 British Words')), accountBar(), notebookLine(), installBar(), goalPanel, start, choose, where, wodCard];
+  const parts = [el('header', {class:'hello'}, el('p', {class:'eyebrow'}, niceDate()), el('h1', null, '5000 British Words')), accountBar(), notebookLine(), installBar(), goalPanel, start, choose, where, wodCard];
   if (W.length < PLANNED) parts.push(el('p', {class:'tip'}, fmt(W.length) + ' words are ready so far. More levels are being added.'));
   put(view, ...parts);
 }
@@ -8663,6 +8678,7 @@ function renderMe() {
   const sync = FB ? null : cloud.mode === 'cloud' ? 'Your progress is saved to your Claude account, so it follows you to other devices.' : cloud.mode === 'connecting' ? 'Connecting to your saved progress…' : 'Your progress is saved in this browser only.';   // with accounts, the Account panel says where progress is kept
   put(view, 
     el('header', {class:'hello'}, el('p', {class:'eyebrow'}, 'Me'), el('h1', null, 'My progress')),
+    appsToggle(),
     accountPanel(),
     notebookPanel(),
     el('div', {class:'tiles'},
