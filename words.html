@@ -282,6 +282,21 @@ select{width:100%;background:var(--panel-2);color:var(--text);border:1px solid v
 button:disabled,input:disabled,textarea:disabled,select:disabled{-webkit-text-fill-color:currentColor}
 .opt:disabled{opacity:1;cursor:default}
 input:disabled,textarea:disabled{opacity:1}
+
+/* listening buttons and Korean meanings */
+.say{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--panel);display:inline-grid;place-items:center;cursor:pointer;color:var(--def);padding:0;flex:none}
+.say svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.say.on{color:var(--word);border-color:var(--word)}
+.say.sm{width:34px;height:34px}
+.say.sm svg{width:17px;height:17px}
+.card .head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.line.ko p,.ko{font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;color:var(--gold)}
+.line.ko p{margin:0;font-size:19px;line-height:1.45}
+.d.ko{margin-top:2px}
+
+.vh{display:grid;gap:4px}
+.vh ol{margin:0;padding-left:1.25em;display:grid;gap:4px;font-size:15px;line-height:1.45}
+.vh.mine b{color:var(--word)}
 </style>
 </head>
 <body>
@@ -5301,6 +5316,1508 @@ viral|adj|Something that is viral is caused by a virus. A video that goes viral 
 mosque|n|A mosque is a building where Muslims worship.|The family went to the [mosque] to pray.|🕌
 commission|n|A commission is a group of people officially asked to do a job. A commission is also money paid to someone for selling something.|The artist got a [commission] to paint a portrait of the mayor.|
 </script>
+<script type="text/plain" id="koData">
+mum|엄마
+potty|(유아용) 변기
+yes|네, 응
+water|물
+wet|젖은
+I|나, 저
+mummy|엄마 (아이 말)
+spoon|숟가락
+nap|낮잠
+daddy|아빠 (아이 말)
+dad|아빠
+grandma|할머니
+hug|껴안다, 안아 주다
+shoe|신발
+nappy|기저귀
+count|(수를) 세다
+mother|어머니
+my|나의
+no|아니, 아니요
+happy|행복한, 기쁜
+hand|손
+carrot|당근
+eat|먹다
+cry|울다
+snack|간식
+bad|나쁜
+sleep|자다
+dog|개
+jump|뛰다, 점프하다
+birthday|생일
+a|하나의 (관사)
+big|큰
+stop|멈추다
+ask|묻다, 질문하다
+bed|침대
+animal|동물
+ball|공
+up|위로
+sock|양말
+nose|코
+leg|다리
+neck|목
+bathroom|욕실, 화장실
+toy|장난감
+toe|발가락
+bib|턱받이
+door|문
+fly|날다
+see|보다
+man|남자, 어른 남자
+clothes|옷
+flower|꽃
+cartoon|만화 (영화)
+lap|무릎 (앉았을 때 허벅지 위)
+house|집
+get|얻다, 받다; 가져오다
+hair|머리카락
+soap|비누
+yellow|노란, 노란색의
+sweets|사탕, 단 과자
+cot|아기 침대
+crayon|크레용
+small|작은
+rock|바위
+towel|수건
+one|하나, 1
+nine|아홉, 9
+pants|팬티 (속옷)
+bath|욕조; 목욕
+sad|슬픈
+food|음식
+fire|불
+drop|떨어뜨리다
+arm|팔
+chicken|닭; 닭고기
+orange|오렌지
+cake|케이크
+me|나를, 나에게
+out|밖으로
+bye|안녕 (헤어질 때)
+puppy|강아지
+come|오다
+hat|모자
+chocolate|초콜릿
+toothpaste|치약
+go|가다
+car|자동차
+hot|뜨거운, 더운
+milk|우유
+sleepy|졸린
+family|가족
+sun|해, 태양
+clap|손뼉을 치다
+pyjamas|잠옷
+say|말하다
+head|머리
+bean|콩
+yummy|맛있는 (아이 말)
+him|그를, 그에게
+chair|의자
+finger|손가락
+spider|거미
+try|노력하다, 해 보다
+sorry|미안한
+foot|발
+walk|걷다
+drink|마시다
+sit|앉다
+hill|언덕
+breakfast|아침 식사
+sing|노래하다
+goodbye|안녕히 가세요/계세요
+pillow|베개
+snowman|눈사람
+please|제발, 부탁합니다
+to|~로, ~에게
+not|~아니다, ~않다
+day|하루, 날; 낮
+Christmas|크리스마스
+duck|오리
+biscuit|비스킷
+pram|유모차
+smile|미소 짓다
+people|사람들
+bird|새
+blue|파란, 파란색의
+shirt|셔츠
+toilet|변기; 화장실
+good|좋은
+mad|정신 나간, 미친 듯한
+need|필요하다
+black|검은, 검은색의
+film|영화
+speak|말하다
+bottle|병
+she|그녀
+friend|친구
+cup|컵
+tree|나무
+outside|밖에, 밖으로
+key|열쇠
+ten|열, 10
+mouth|입
+bear|곰
+bread|빵
+coat|외투, 코트
+bite|물다, 깨물다
+reindeer|순록
+do|하다
+rain|비
+lorry|트럭, 화물차
+purple|보라색의
+aeroplane|비행기
+night|밤
+lunch|점심 식사
+kiss|입 맞추다, 뽀뽀하다
+tooth|이, 치아
+blanket|담요
+brother|형, 오빠, 남동생
+fruit|과일
+cloud|구름
+hungry|배고픈
+ear|귀
+fork|포크
+kitten|새끼 고양이
+help|돕다
+fun|재미, 즐거움
+boy|소년, 남자아이
+circle|원, 동그라미
+pie|파이
+grandmother|할머니
+butterfly|나비
+splash|(물을) 첨벙거리다, 튀기다
+name|이름
+book|책
+talk|이야기하다
+red|빨간, 빨간색의
+lady|숙녀, 여자분
+sister|언니, 누나, 여동생
+cat|고양이
+kitchen|부엌
+doll|인형
+in|~안에
+his|그의
+like|좋아하다
+three|셋, 3
+tail|꼬리
+have|가지다, 있다
+old|나이 든, 늙은; 오래된
+put|놓다, 두다
+sound|소리
+rice|쌀, 밥
+clown|광대
+yoghurt|요구르트
+tummy|배 (아이 말)
+here|여기에
+fast|빠른
+dark|어두운
+face|얼굴
+eye|눈
+lie|눕다
+zoo|동물원
+hello|안녕하세요, 안녕
+more|더 많은
+son|아들
+brush|붓, 솔
+banana|바나나
+thank|감사하다
+wish|바라다, 소원을 빌다
+green|초록색의
+wall|벽
+laugh|웃다
+scared|무서워하는, 겁먹은
+bug|벌레
+bubble|거품, 비눗방울
+lip|입술
+there|거기에, 그곳에
+hear|듣다, 들리다
+pink|분홍색의
+aunt|이모, 고모, 숙모
+stairs|계단
+jumper|스웨터
+marshmallow|마시멜로
+wellies|장화
+he|그, 그는
+who|누구
+music|음악
+myself|나 자신
+off|떨어져, (옷 등을) 벗어
+dirt|흙, 먼지, 때
+yell|소리치다
+baby|아기
+boat|배, 보트
+plate|접시
+pig|돼지
+spill|엎지르다, 흘리다
+bus|버스
+farm|농장
+what|무엇
+ice|얼음
+upstairs|위층으로, 위층에
+home|집, 가정
+school|학교
+top|꼭대기, 윗부분
+story|이야기
+star|별
+clean|깨끗한
+wind|바람
+stick|막대기, 나뭇가지
+bell|종, 벨
+egg|달걀, 알
+boot|부츠, 장화
+crawl|기어가다
+worm|벌레, 지렁이
+thirsty|목마른
+lollipop|막대 사탕
+bedroom|침실
+downstairs|아래층으로, 아래층에
+number|숫자, 수
+air|공기
+grass|풀, 잔디
+cow|소, 젖소
+rabbit|토끼
+underwear|속옷
+grape|포도
+little|작은
+nice|좋은, 멋진
+cold|추운, 차가운
+plant|식물
+soft|부드러운
+sugar|설탕
+turkey|칠면조
+princess|공주
+jacket|재킷, 짧은 외투
+shorts|반바지
+bedtime|잘 시간
+pea|완두콩
+wiggle|꼼지락거리다, 흔들다
+why|왜
+the|그 (관사)
+dinner|저녁 식사
+mean|못된, 심술궂은
+girl|소녀, 여자아이
+morning|아침, 오전
+step|걸음; 계단 한 칸
+paper|종이
+train|기차
+hurt|아프다; 다치게 하다
+colour|색, 색깔
+smoke|연기
+fox|여우
+blow|(입으로) 불다
+wash|씻다
+angel|천사
+tiger|호랑이
+chips|감자튀김
+lamp|램프, 스탠드
+owl|올빼미, 부엉이
+rainy|비가 오는
+pear|배 (과일)
+crisps|감자칩
+on|~위에
+at|~에서
+look|보다
+light|빛; 불, 전등
+picture|그림, 사진
+heavy|무거운
+fish|물고기, 생선
+sick|아픈; 토하는
+dress|원피스, 드레스
+pet|애완동물
+mud|진흙
+belly|배
+haircut|이발, 머리 깎기
+chew|씹다
+stripe|줄무늬
+white|흰, 하얀색의
+welcome|환영합니다
+kick|차다
+pencil|연필
+sticky|끈적끈적한
+where|어디
+best|가장 좋은, 최고의
+pretty|예쁜
+your|너의, 당신의
+play|놀다
+children|아이들
+ham|햄
+read|읽다
+turn|돌다, 돌리다
+phone|전화(기)
+father|아버지
+square|정사각형
+draw|그리다
+television|텔레비전
+dry|마른, 건조한
+snow|눈 (날씨)
+breathe|숨 쉬다
+toss|(가볍게) 던지다
+jelly|젤리
+cupcake|컵케이크
+or|또는
+throw|던지다
+sandpit|모래 놀이터
+slow|느린
+apple|사과
+horse|말
+quiet|조용한
+knife|칼
+lamb|새끼 양
+want|원하다
+swing|그네
+sky|하늘
+feed|먹이를 주다, 밥을 먹이다
+ugly|못생긴, 보기 흉한
+silly|바보 같은, 우스꽝스러운
+swim|수영하다
+coin|동전
+costume|의상, 분장 옷
+vegetable|채소
+turtle|거북
+popcorn|팝콘
+sneeze|재채기하다
+us|우리를, 우리에게
+dig|(땅을) 파다
+every|모든, ~마다
+scream|비명을 지르다
+sweep|(빗자루로) 쓸다
+bench|벤치, 긴 의자
+monkey|원숭이
+peach|복숭아
+strawberry|딸기
+melon|멜론
+room|방
+win|이기다
+wrong|틀린, 잘못된
+stay|머무르다
+rest|쉬다
+trip|여행, 나들이
+cook|요리하다
+heaven|천국
+parent|부모
+smell|냄새를 맡다
+clothing|옷, 의류
+scare|겁주다, 놀라게 하다
+chin|턱
+straw|빨대
+alphabet|알파벳
+granny|할머니 (아이 말)
+watermelon|수박
+all|모든
+when|언제
+two|둘, 2
+long|긴
+full|가득 찬; 배부른
+forward|앞으로
+mine|나의 것
+playtime|노는 시간, 쉬는 시간
+sheep|양
+game|게임, 놀이
+change|바뀌다, 바꾸다
+tell|말하다, 알려 주다
+song|노래
+pain|통증, 아픔
+push|밀다
+taste|맛보다; ~한 맛이 나다
+cute|귀여운
+bowl|그릇, 사발
+wave|손을 흔들다
+scary|무서운
+rainbow|무지개
+bicycle|자전거
+whisper|속삭이다
+sip|홀짝이다, 조금씩 마시다
+pancake|팬케이크
+give|주다
+end|끝
+body|몸
+kid|아이 (구어)
+bag|가방, 봉지
+mess|엉망, 어질러진 상태
+behave|얌전히 굴다, 행동하다
+playground|놀이터
+bleed|피가 나다
+pavement|인도, 보도
+lettuce|양상추
+wait|기다리다
+box|상자
+lick|핥다
+glove|장갑
+ketchup|케첩
+stink|고약한 냄새가 나다
+can|~할 수 있다
+short|짧은; 키가 작은
+sign|표지판
+cough|기침하다
+frog|개구리
+shiny|반짝이는
+ant|개미
+stove|(요리용) 레인지, 스토브
+elf|요정
+smelly|냄새나는
+watch|보다, 지켜보다
+summer|여름
+cheese|치즈
+dot|점
+spaghetti|스파게티
+toothbrush|칫솔
+you|너, 당신
+our|우리의
+right|맞는, 옳은
+last|마지막의
+next|다음의
+glasses|안경
+bump|부딪치다
+tickle|간지럽히다
+take|가져가다, 데려가다
+start|시작하다
+balloon|풍선
+hamster|햄스터
+age|나이
+winter|겨울
+for|~을 위해
+first|첫 번째의
+hard|단단한; 어려운
+stand|서다
+table|탁자, 식탁
+grandfather|할아버지
+hers|그녀의 것
+it|그것
+wheel|바퀴
+juice|주스
+ladder|사다리
+keep|간직하다, 계속 가지고 있다
+bring|가져오다, 데려오다
+word|단어, 낱말
+truth|진실
+queen|여왕, 왕비
+afraid|두려워하는
+meat|고기
+silent|조용한, 아무 말 없는
+tape|테이프
+clock|시계 (벽시계 등)
+knee|무릎
+lion|사자
+thumb|엄지손가락
+sticker|스티커
+cut|자르다
+with|~와 함께
+from|~에서, ~부터
+because|~ 때문에
+everything|모든 것
+learn|배우다
+floor|바닥
+stone|돌
+hurry|서두르다
+cereal|시리얼
+policeman|경찰관
+squirrel|다람쥐
+build|짓다, 만들다
+angry|화난
+paint|(물감으로) 칠하다, 그리다
+run|달리다
+park|공원
+glass|유리; 유리잔
+roll|구르다, 굴리다
+shape|모양
+hide|숨다, 숨기다
+uncle|삼촌, 이모부, 고모부
+tongue|혀
+asleep|잠든
+sink|싱크대, 세면대
+chalk|분필
+skin|피부
+pop|펑 터지다
+twelve|열둘, 12
+twinkle|반짝반짝 빛나다
+an|하나의 (모음 앞 관사)
+know|알다
+use|사용하다
+maybe|아마, 어쩌면
+close|닫다
+friendly|친절한, 다정한
+noise|소음, 소리
+shoulder|어깨
+wolf|늑대
+rope|밧줄
+barn|헛간, 외양간
+bunny|토끼 (아이 말)
+rubbish|쓰레기
+sofa|소파
+noodles|국수, 면
+scissors|가위
+rattle|딸랑이
+goldfish|금붕어
+pushchair|유모차
+five|다섯, 5
+yours|너의 것, 당신의 것
+frown|얼굴을 찌푸리다
+let|~하게 하다, 허락하다
+die|죽다
+sweet|달콤한, 단
+ring|반지
+bull|황소
+pin|핀
+stranger|낯선 사람
+circus|서커스
+supermarket|슈퍼마켓
+trousers|바지
+sparkly|반짝반짝하는
+wag|(꼬리를) 흔들다
+loud|(소리가) 큰, 시끄러운
+of|~의
+point|가리키다
+road|도로, 길
+above|~ 위에
+teacher|선생님
+dirty|더러운
+trouble|곤란, 문제
+pretend|~인 척하다
+and|그리고, ~와
+much|많은
+high|높은
+thing|것, 물건
+must|~해야 한다
+party|파티
+third|세 번째의
+street|거리
+strong|힘센, 강한
+cool|시원한; 멋진
+yesterday|어제
+seat|자리, 좌석
+wood|나무 (재목), 목재
+monster|괴물
+sunshine|햇빛, 햇살
+fist|주먹
+kite|연
+but|그러나
+many|많은
+doctor|의사
+silence|침묵, 고요
+leaf|나뭇잎
+ours|우리의 것
+hedgehog|고슴도치
+young|어린, 젊은
+catch|잡다
+lake|호수
+treat|특별한 선물, 맛있는 것
+danger|위험
+argue|말다툼하다
+corn|옥수수
+tomato|토마토
+rug|깔개, 러그
+seesaw|시소
+move|움직이다; 이사하다
+tired|피곤한
+belt|허리띠
+mat|매트, 깔개
+dance|춤추다
+wear|입다, 착용하다
+sand|모래
+telephone|전화기
+knock|두드리다, 노크하다
+drum|북, 드럼
+polite|예의 바른
+freezer|냉동고
+spade|삽
+true|사실인, 진짜의
+indoors|실내에서
+afternoon|오후
+warm|따뜻한
+smash|박살 나다, 깨다
+striped|줄무늬가 있는
+person|사람
+hold|잡다, 들다
+ride|타다
+teach|가르치다
+pizza|피자
+awake|깨어 있는
+penny|페니 (영국 동전)
+fridge|냉장고
+grandad|할아버지
+toast|토스트
+cone|원뿔; 아이스크림 콘
+glue|풀, 접착제
+feather|깃털
+spaceship|우주선
+make|만들다
+second|두 번째의
+born|태어난
+fourth|네 번째의
+adult|어른, 성인
+gran|할머니
+bin|쓰레기통
+skip|깡충깡충 뛰다
+granddaughter|손녀
+teddy|곰 인형
+low|낮은
+middle|가운데, 중간
+shopping|쇼핑, 장보기
+claw|발톱
+fall|떨어지다, 넘어지다
+new|새로운
+side|옆, 측면
+rule|규칙
+giant|거인
+burn|데다, 타다
+shower|샤워(기)
+pan|냄비, 팬
+seed|씨앗
+shout|외치다, 소리치다
+splinter|(나무) 가시
+tonight|오늘 밤
+call|전화하다; 부르다
+meet|만나다
+sea|바다
+cross|건너다
+letter|편지; 글자
+choose|고르다, 선택하다
+window|창문
+ocean|대양, 바다
+tie|묶다
+lift|들어 올리다
+meal|식사
+pocket|주머니
+farmer|농부
+lemon|레몬
+dusty|먼지투성이의
+sandcastle|모래성
+snowball|눈뭉치
+think|생각하다
+later|나중에
+hit|치다, 때리다
+round|둥근
+ceiling|천장
+insect|곤충
+outdoors|야외에서
+tissue|화장지, 티슈
+lightning|번개
+both|둘 다
+today|오늘
+inside|안으로, 안에
+forget|잊다
+switch|스위치
+button|단추; 버튼
+witch|마녀
+elbow|팔꿈치
+pumpkin|호박
+fear|두려움, 공포
+weekend|주말
+grow|자라다
+block|블록, 덩어리
+pull|당기다
+wing|날개
+empty|비어 있는
+bike|자전거
+slide|미끄럼틀
+sandwich|샌드위치
+roar|으르렁거리다
+pudding|디저트, 후식
+zebra|얼룩말
+napkin|냅킨
+beach|해변
+mask|가면, 마스크
+elephant|코끼리
+sixteen|열여섯, 16
+vanilla|바닐라
+brownie|브라우니
+everyone|모든 사람
+human|인간, 사람
+soon|곧
+present|선물
+voice|목소리
+moon|달
+drawing|그림
+darkness|어둠
+wipe|닦다
+unicorn|유니콘
+snowy|눈이 많이 오는
+share|나누다, 함께 쓰다
+size|크기
+football|축구
+cash|현금
+begin|시작하다
+hop|한 발로 깡충 뛰다
+horn|경적
+potato|감자
+beard|턱수염
+paste|반죽, 풀
+juicy|즙이 많은
+some|약간의, 몇몇의
+sure|확신하는
+line|선; 줄
+bat|박쥐
+fluff|보풀, 솜털
+they|그들
+far|멀리
+dream|꿈
+everybody|모든 사람
+kind|친절한
+hope|바라다, 희망하다
+ground|땅, 지면
+blood|피
+piece|조각
+write|쓰다
+reach|(손을) 뻗다
+shut|닫다
+medicine|약
+bunch|송이, 다발
+mirror|거울
+wire|철사, 전선
+tear|눈물
+dish|접시, 요리
+gentle|다정한, 부드러운
+thunder|천둥
+freeze|얼다, 얼리다
+unhappy|불행한, 슬픈
+liar|거짓말쟁이
+ankle|발목
+gum|껌
+sour|신, 시큼한
+colourful|색이 다채로운
+poisonous|독이 있는
+sledge|썰매
+milkshake|밀크셰이크
+them|그들을, 그들에게
+very|매우
+behind|~ 뒤에
+huge|거대한
+river|강
+bush|덤불, 관목
+triangle|삼각형
+naughty|버릇없는, 장난이 심한
+cracker|크래커 (크리스마스 폭죽 통)
+dinosaur|공룡
+someone|누군가
+this|이, 이것
+down|아래로
+four|넷, 4
+woods|숲
+alone|혼자
+coffee|커피
+storm|폭풍
+string|끈
+mouse|생쥐
+sleeve|소매
+daylight|햇빛, 낮
+spinach|시금치
+lunchtime|점심시간
+only|오직, ~만
+place|장소
+each|각각의
+real|진짜의
+class|반, 학급
+woman|여자, 여성
+yourself|너 자신
+daughter|딸
+library|도서관
+driver|운전자
+plane|비행기
+tall|키가 큰, 높은
+cousin|사촌
+bow|나비 리본
+fold|접다
+curtain|커튼
+fireworks|불꽃놀이
+mustard|겨자
+poke|쿡 찌르다
+rinse|헹구다
+once|한 번
+its|그것의
+Mr|~씨 (남성 존칭)
+Mrs|~부인 (기혼 여성 존칭)
+could|~할 수 있었다
+open|열다
+special|특별한
+stuff|것, 물건 (구어)
+loss|잃음, 분실
+Friday|금요일
+Sunday|일요일
+Saturday|토요일
+Monday|월요일
+fix|고치다
+twenty|스물, 20
+Tuesday|화요일
+Thursday|목요일
+Wednesday|수요일
+roof|지붕
+harm|해치다
+shadow|그림자
+tag|술래잡기
+spin|빙빙 돌다
+Halloween|핼러윈
+bacon|베이컨
+Easter|부활절
+pour|붓다, 따르다
+bee|벌
+cheer|환호하다, 응원하다
+honesty|정직
+peanut|땅콩
+thirteen|열셋, 13
+sadness|슬픔
+fourteen|열넷, 14
+sunlight|햇빛
+necklace|목걸이
+swan|백조
+puppet|인형 (손·줄 인형)
+trainers|운동화
+sponge|스펀지
+wrestle|레슬링하다, 몸싸움하다
+torch|손전등
+giraffe|기린
+rectangle|직사각형
+sweatshirt|맨투맨 티셔츠
+lasagne|라자냐
+those|저것들, 그
+better|더 좋은
+we|우리
+great|훌륭한, 아주 좋은
+something|무언가
+another|또 하나의
+police|경찰
+gift|선물
+beauty|아름다움
+hole|구멍
+salt|소금
+chest|가슴
+motorbike|오토바이
+messy|지저분한
+fuzzy|보송보송한
+itch|가렵다
+doorbell|초인종
+raisin|건포도
+fill|채우다
+opposite|반대(말)
+singer|가수
+ghost|유령
+dust|먼지
+spell|철자를 말하다/쓰다
+powder|가루
+overnight|밤사이에
+cage|우리, 새장
+neighbour|이웃
+cheek|볼, 뺨
+spit|침을 뱉다
+spicy|매운
+lemonade|레모네이드, 사이다
+about|~에 대해
+never|결코 ~ 않다
+away|떨어져, 다른 곳으로
+her|그녀를; 그녀의
+careful|조심하는
+throat|목구멍
+too|~도 또한; 너무
+add|더하다, 넣다
+snake|뱀
+bride|신부
+mattress|매트리스
+daytime|낮
+be|~이다, 있다
+part|부분
+feel|느끼다
+money|돈
+week|주, 일주일
+town|마을, 소도시
+follow|따라가다
+safe|안전한
+speed|속도
+alive|살아 있는
+mix|섞다
+prize|상, 상품
+branch|나뭇가지
+anybody|누구든지, 아무도
+plastic|플라스틱
+pen|펜
+flip|뒤집다
+rat|쥐
+nest|둥지
+cheat|속이다, 부정행위를 하다
+puzzle|퍼즐, 수수께끼
+camel|낙타
+tease|놀리다
+crocodile|악어
+mop|대걸레
+muffin|머핀
+bumpy|울퉁불퉁한
+campfire|모닥불
+scoop|(아이스크림) 스쿱; 한 숟갈
+so|그래서
+child|아이
+church|교회
+address|주소
+fat|뚱뚱한
+pool|수영장; 웅덩이
+goose|거위
+mug|머그잔
+attic|다락방
+macaroni|마카로니
+time|시간
+page|쪽, 페이지
+married|결혼한
+photo|사진
+touch|만지다
+carry|나르다, 들고 가다
+ink|잉크
+tent|텐트
+skinny|깡마른
+pond|연못
+fisherman|어부
+firefighter|소방관
+itchy|가려운
+love|사랑하다
+heart|심장; 마음
+dead|죽은
+choice|선택
+radio|라디오
+deer|사슴
+fairy|요정
+burger|햄버거
+swallow|삼키다
+bark|(개가) 짖다
+flush|(변기 물을) 내리다
+dummy|공갈 젖꼭지
+tug|세게 당기다
+caterpillar|애벌레
+freckles|주근깨
+front|앞, 앞부분
+tomorrow|내일
+holiday|휴가, 방학
+joke|농담
+broccoli|브로콜리
+own|자기 자신의
+free|무료의; 자유로운
+nothing|아무것도 ~ 아님
+himself|그 자신
+birth|탄생, 출생
+corner|모서리, 모퉁이
+nut|견과
+goat|염소
+beaver|비버
+land|땅, 육지
+amazing|놀라운
+crazy|미친, 말도 안 되는
+chain|사슬
+shell|껍데기, 조개껍데기
+fur|털, 모피
+dentist|치과 의사
+glitter|반짝이 (장식 가루)
+cradle|요람
+postman|우편배달부
+year|해, 년
+stain|얼룩
+now|지금
+six|여섯, 6
+nobody|아무도 ~ 않다
+tight|꽉 끼는
+prayer|기도
+ribbon|리본
+barefoot|맨발의
+their|그들의
+still|아직, 여전히
+happen|일어나다, 생기다
+drive|운전하다
+pick|고르다; 따다
+kettle|주전자
+prince|왕자
+upset|속상한
+painting|그림 (물감으로 그린)
+quit|그만두다
+boring|지루한
+stomach|위, 배
+shake|흔들다
+garage|차고; 정비소
+helicopter|헬리콥터
+jungle|정글
+selfish|이기적인
+jeans|청바지
+teaspoon|찻숟가락
+grandchild|손주
+ballerina|발레리나
+seaside|바닷가
+slipper|실내화, 슬리퍼
+would|~할 것이다, ~하겠다
+late|늦은
+bottom|맨 아래; 엉덩이
+repeat|반복하다
+crab|게
+germs|세균
+break|깨다, 부수다
+accident|사고
+basketball|농구
+climb|오르다
+cloth|천, 옷감
+zip|지퍼
+yawn|하품하다
+back|등
+jigsaw|조각 그림 맞추기 퍼즐
+early|이른
+feeling|느낌, 감정
+somebody|누군가
+zero|영, 0
+world|세계, 세상
+super|최고의, 아주 좋은
+allow|허락하다
+gas|기체, 가스
+ticket|표, 티켓
+guitar|기타
+gate|대문
+clay|찰흙, 점토
+shy|수줍은
+needle|바늘
+hay|건초
+trolley|카트, 손수레
+beetle|딱정벌레
+rake|갈퀴
+waffle|와플
+snowflake|눈송이
+windmill|풍차
+other|다른
+ship|배, 선박
+heat|열, 더위
+garden|정원
+tiny|아주 작은
+flag|깃발
+sheet|침대 시트; 종이 한 장
+camping|캠핑
+jaw|턱
+salty|짠
+parcel|소포
+hose|호스
+noisy|시끄러운
+raspberry|산딸기
+sunscreen|자외선 차단제
+hall|현관 복도
+robot|로봇
+if|만약 ~라면
+how|어떻게
+anyone|누구든지, 아무도
+saw|톱
+seven|일곱, 7
+eight|여덟, 8
+fifth|다섯 번째의
+sixth|여섯 번째의
+mind|마음, 정신
+mittens|벙어리장갑
+death|죽음
+earth|지구; 흙
+correct|옳은, 맞는
+web|거미줄
+tool|도구, 연장
+grab|움켜쥐다
+sauce|소스
+soup|수프, 국
+disappear|사라지다
+chess|체스
+candle|양초
+drawer|서랍
+skate|스케이트를 타다
+cinnamon|계피
+magician|마술사
+cardigan|카디건
+puddle|물웅덩이
+backpack|배낭
+hallway|복도, 현관
+way|길; 방법
+job|일, 직업
+pass|지나가다
+secret|비밀
+spot|점, 반점
+jet|제트기; 분출
+laughter|웃음(소리)
+float|뜨다
+pony|조랑말
+shampoo|샴푸
+windy|바람이 부는
+listen|듣다, 귀 기울이다
+duvet|이불, 솜이불
+beginning|시작, 처음
+porch|현관 (지붕 있는 입구)
+superhero|슈퍼히어로
+tasty|맛있는
+cardboard|판지, 마분지
+handwriting|손글씨, 필체
+cub|(곰·사자 등의) 새끼
+moustache|콧수염
+by|~ 옆에; ~에 의해
+going|가는 중인 (go의 -ing형)
+along|~을 따라
+near|~ 가까이
+nowhere|아무 데도 ~ 않다
+tenth|열 번째의
+king|왕
+hairbrush|머리빗
+cover|덮다
+tip|끝; 조언
+height|키, 높이
+seal|물개, 바다표범
+nail|못; 손톱
+hammer|망치
+vitamin|비타민
+squeeze|꽉 쥐다, 짜다
+dislike|싫어하다
+whistle|호루라기
+syrup|시럽
+lipstick|립스틱
+lizard|도마뱀
+rectangular|직사각형의
+muddy|진흙투성이의
+classmate|반 친구
+beak|부리
+doughnut|도넛
+blackboard|칠판
+seagull|갈매기
+easy|쉬운
+answer|대답, 답
+neat|깔끔한
+guess|추측하다
+save|아끼다, 모으다; 구하다
+proud|자랑스러워하는
+sight|시력; 광경
+helpful|도움이 되는
+hockey|하키
+honey|꿀
+forgive|용서하다
+lunchbox|도시락
+jar|병, 단지
+obey|따르다, 복종하다
+rainfall|강우량
+stockings|스타킹
+crunchy|바삭바삭한
+than|~보다
+before|~ 전에
+half|반, 절반
+ahead|앞에, 앞으로
+sword|칼, 검
+lawn|잔디밭
+bruise|멍
+honest|정직한
+between|~ 사이에
+almost|거의
+bakery|빵집
+fight|싸우다
+deep|깊은
+funny|웃기는
+tough|튼튼한; 힘든
+surprise|놀라운 일
+tea|차, 홍차
+hundred|백, 100
+stretch|기지개를 켜다, 늘이다
+punishment|벌
+pepper|후추
+shark|상어
+leak|새는 곳, 구멍
+whale|고래
+melt|녹다
+rhyme|운이 맞는 말
+butcher|정육점 주인
+waterfall|폭포
+otter|수달
+giggle|킥킥 웃다
+lullaby|자장가
+most|가장, 대부분
+different|다른
+pay|돈을 내다
+English|영어
+quickly|빨리
+spring|봄
+smart|똑똑한; 말쑥한
+lovely|사랑스러운, 아주 좋은
+slowly|천천히
+maths|수학
+tube|관, 튜브; (런던) 지하철
+sparrow|참새
+robin|울새
+piano|피아노
+hood|(옷의) 모자, 후드
+reflection|(거울 등에 비친) 모습
+shelf|선반
+thankful|감사하는
+bake|굽다
+seventeen|열일곱, 17
+eighteen|열여덟, 18
+tractor|트랙터
+pinch|꼬집다
+fuss|호들갑, 법석
+moonlight|달빛
+nineteen|열아홉, 19
+cloudy|흐린, 구름 낀
+magpie|까치
+plum|자두
+comb|빗
+dizzy|어지러운
+broom|빗자루
+sprinkle|뿌리다
+eyebrow|눈썹
+postbox|우체통
+custard|커스터드
+magic|마법
+that|저, 그것
+check|확인하다
+ready|준비된
+hate|몹시 싫어하다
+normal|보통의, 평범한
+husband|남편
+piglet|새끼 돼지
+shoot|(공을) 차다, 슛하다
+cap|챙 모자
+bone|뼈
+chase|쫓아가다
+pine|소나무
+chick|병아리
+purse|지갑
+leap|뛰어오르다
+sickness|병, 아픔
+picnic|소풍
+cushion|쿠션
+icing|(케이크) 설탕 장식
+whine|낑낑거리다
+hospital|병원
+holy|신성한
+duckling|새끼 오리
+winner|승자, 우승자
+dear|사랑하는; ~에게 (편지)
+fifty|쉰, 50
+trophy|트로피
+kangaroo|캥거루
+howl|울부짖다
+buy|사다
+terrible|끔찍한
+desk|책상
+bend|구부리다
+happily|행복하게
+apology|사과
+sunglasses|선글라스
+scarecrow|허수아비
+over|~ 위에
+foal|망아지
+left|왼쪽의
+none|하나도 ~ 않다
+leave|떠나다
+list|목록
+double|두 배의
+gun|총
+bridge|다리
+weak|약한
+battery|건전지
+headteacher|교장 선생님
+dragon|용
+cherry|체리
+poison|독
+stir|젓다
+forehead|이마
+lolly|막대 사탕; 아이스바
+parrot|앵무새
+wasp|말벌
+dangerous|위험한
+map|지도
+uniform|교복, 제복
+frozen|얼어붙은, 냉동된
+painter|화가
+mane|갈기
+return|돌아오다, 돌아가다
+metal|금속
+weird|이상한
+everywhere|모든 곳에
+thick|두꺼운
+trail|오솔길, 산길
+smooth|매끄러운
+rucksack|배낭
+collect|모으다
+unfair|불공평한
+scratch|긁다
+salad|샐러드
+bucket|양동이
+dessert|디저트
+strap|끈
+fairness|공평함
+scrambled|휘저어 익힌 (스크램블드)
+mashed|으깬
+sharpen|깎다, 날카롭게 하다
+same|같은
+friendship|우정
+nod|고개를 끄덕이다
+bunk|2층 침대 (칸)
+tights|타이츠
+leftovers|남은 음식
+leafy|나무가 우거진
+remember|기억하다
+view|경치, 전망
+fan|선풍기
+male|남성의, 수컷의
+wake|잠이 깨다
+rocket|로켓
+pole|막대, 기둥
+classroom|교실
+mighty|강력한, 거대한
+stack|더미, 쌓아 놓은 것
+pork|돼지고기
+blink|눈을 깜박이다
+crunch|와삭와삭 씹다
+teapot|찻주전자
+wig|가발
+bead|구슬
+snowfall|강설
+lifeguard|인명 구조원
+may|~일지도 모른다; ~해도 된다
+care|신경 쓰다; 돌보다
+frightened|겁먹은
+mule|노새
+cost|(비용이) 들다
+space|우주; 공간
+wife|아내
+fair|공정한
+enter|들어가다
+promise|약속하다
+remove|없애다, 치우다
+funfair|놀이공원, 축제 장터
+adventure|모험
+beneath|~ 아래에
+apologise|사과하다
+basket|바구니
+oven|오븐
+skirt|치마
+panda|판다
+send|보내다
+flat|아파트, 플랫
+item|항목, 물품
+fed|feed의 과거형 (먹였다)
+dressing|드레싱; 붕대
+umbrella|우산
+penguin|펭귄
+scar|흉터
+pier|부두, 잔교
+bracelet|팔찌
+scarf|목도리, 스카프
+erase|지우다
+vomit|토하다
+dishonest|정직하지 못한
+mermaid|인어
+pebble|조약돌
+squishy|말랑말랑한
+slice|얇은 조각
+den|굴, 동굴 (짐승의 집)
+hairy|털이 많은
+peppermint|박하
+helmet|헬멧
+beautiful|아름다운
+meeting|회의, 모임
+netball|네트볼
+match|경기, 시합
+favourite|가장 좋아하는
+spread|펴 바르다; 펼치다
+anchor|닻
+sunrise|해돋이
+troll|트롤 (괴물)
+furry|털이 북슬북슬한
+cucumber|오이
+buzzer|버저
+tuna|참치
+large|큰
+fit|건강한, 탄탄한
+sport|운동, 스포츠
+jail|감옥
+lock|자물쇠
+hopscotch|사방치기
+grey|회색의
+bang|쾅 (큰 소리)
+beast|짐승
+warn|경고하다
+sixty|예순, 60
+crow|까마귀
+cane|지팡이
+gorilla|고릴라
+moth|나방
+robber|강도, 도둑
+clover|클로버
+picky|까다로운
+couple|부부, 커플
+enjoy|즐기다
+punch|주먹으로 치다
+sharpener|연필깎이
+addition|덧셈
+brain|뇌
+plenty|많음, 충분함
+cleaner|청소부
+starfish|불가사리
+find|찾다
+again|다시
+believe|믿다
+perfect|완벽한
+lose|잃어버리다; 지다
+shop|가게
+camp|야영지, 캠프
+mistake|실수
+newspaper|신문
+butter|버터
+blackbird|대륙검은지빠귀
+bare|맨-, 벌거벗은
+eleven|열하나, 11
+beg|간청하다, 구걸하다
+pasta|파스타
+rash|발진
+driveway|(집 앞) 진입로
+cabbage|양배추
+footprint|발자국
+fudge|퍼지 (사탕)
+celery|셀러리
+leaky|새는
+grasshopper|메뚜기
+important|중요한
+month|달, 월
+visit|방문하다
+newsagent|신문 판매점
+glad|기쁜
+channel|채널
+quarter|4분의 1
+pray|기도하다
+shine|빛나다
+pile|더미
+darling|자기, 얘야 (애칭)
+fry|튀기다, 볶다
+peek|살짝 엿보다
+snail|달팽이
+bun|작고 둥근 빵
+tuck|밀어 넣다
+listener|듣는 사람, 청취자
+leash|(개) 목줄
+ache|통증
+sheepdog|양치기 개
+stomp|쿵쿵거리며 걷다
+chore|집안일, 잡일
+growl|으르렁거리다
+hippo|하마
+ponytail|포니테일 (묶은 머리)
+clear|분명한; 맑은
+castle|성
+lonely|외로운
+spray|뿌리다
+amen|아멘
+hum|콧노래를 부르다
+breath|숨
+horrible|끔찍한
+through|~을 통과하여
+minus|빼기
+model|모형
+join|가입하다, 함께하다
+score|득점하다
+fake|가짜의
+marry|결혼하다
+liquid|액체
+craft|공예
+eagle|독수리
+sneak|살금살금 가다
+sack|자루
+vest|러닝셔츠, 조끼 (속옷)
+icy|얼음같이 찬
+lotion|로션
+jug|주전자, 물병
+cause|일으키다, 원인이 되다
+date|날짜
+</script>
 
 <script>
 (() => {
@@ -5314,6 +6831,49 @@ const W = RAW.map((line, i) => {
   return {i, w:p[0], pos:p[1], def:p[2], ex:p[3], emo:(p[4] || '').trim(), lv:Math.floor(i / 500) + 1, pk:Math.floor((i % 500) / 20) + 1};
 });
 const BY = new Map(W.map(x => [x.w, x]));
+const KO = new Map(((document.getElementById('koData') || {}).textContent || '').split('\n').map(s => s.trim()).filter(s => s.includes('|')).map(s => { const k = s.indexOf('|'); return [s.slice(0, k), s.slice(k + 1)]; }));   // Korean meanings, shown when the learner turns them on
+const koOf = x => (S.set.ko && KO.get(x.w)) || '';
+
+/* ---------- a British voice (the browser's own speech, as in the book courses) ---------- */
+const SPEECH = typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance !== 'undefined';
+let VOICES = [];
+function pickVoices() {
+  if (!SPEECH) return;
+  const gb = speechSynthesis.getVoices().filter(v => /^en[-_]GB/i.test(v.lang));
+  const pref = ['Google UK English Female', 'Google UK English Male', 'Daniel', 'Serena', 'Kate', 'Arthur', 'Martha', 'Stephanie', 'Oliver', 'Microsoft Sonia', 'Microsoft Libby', 'Microsoft Ryan', 'Microsoft Hazel', 'Microsoft George', 'Microsoft Susan'];
+  const quality = v => /premium|natural|neural/i.test(v.name) ? 0 : /enhanced|google/i.test(v.name) ? 1 : v.localService === false ? 2 : 3;
+  const rank = v => { const i = pref.findIndex(q => v.name.startsWith(q)); return i < 0 ? 99 : i; };
+  VOICES = gb.slice().sort((a, b) => quality(a) - quality(b) || rank(a) - rank(b));
+}
+if (SPEECH) { pickVoices(); try { speechSynthesis.addEventListener('voiceschanged', pickVoices); } catch (e) { speechSynthesis.onvoiceschanged = pickVoices; } }
+function say(text, btn) {
+  if (!SPEECH || !text || S.set.voice === false) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(String(text).replace(/[\[\]]/g, ''));
+  u.lang = 'en-GB'; if (VOICES[0]) u.voice = VOICES[0]; u.rate = S.set.rate || 0.95;
+  if (btn) { btn.classList.add('on'); u.onend = u.onerror = () => btn.classList.remove('on'); }
+  speechSynthesis.speak(u);
+}
+const sayBtn = (text, cls) => SPEECH && S.set.voice !== false ? el('button', {class:'say' + (cls ? ' ' + cls : ''), type:'button', 'aria-label':'Listen', title:'Listen', onclick:e => { e.stopPropagation(); say(text, e.currentTarget); }}, svg(ICON.sound)) : null;
+function voiceHelp() {   // how to add a British voice, with this device's steps first (open when no good British voice is installed)
+  const ua = navigator.userAgent || '';
+  const ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  const dev = /Android/i.test(ua) ? 'android' : ios ? 'ios' : /Macintosh/.test(ua) ? 'mac' : /Windows/.test(ua) ? 'win' : 'other';
+  const good = VOICES.some(v => /premium|enhanced|natural|neural|google/i.test(v.name));
+  const S0 = {
+    android:['갤럭시 · 안드로이드', ['Google UK English 음성을 설치해야 영국식 발음으로 들을 수 있습니다.', '설정 → 일반 → 텍스트 음성 변환(TTS)으로 갑니다. 기기에 따라 설정 → 시스템 → 언어 및 입력에 있습니다.', '기본 엔진을 "Google 음성 서비스"(Speech Services by Google)로 고릅니다. 없으면 Play 스토어에서 설치하세요.', '엔진 옆 톱니바퀴 → 음성 데이터 설치 → English (United Kingdom)을 내려받고, 마음에 드는 목소리를 고릅니다.', '크롬을 완전히 닫았다가 이 앱을 다시 엽니다.']],
+    ios:['아이폰 · 아이패드', ['설정 → 손쉬운 사용 → 읽기 및 말하기 → 음성으로 갑니다.', '영어 → 영어(영국)를 고릅니다.', 'Daniel, Kate, Serena, Arthur 중 하나의 "향상된 품질"(또는 고급) 버전을 내려받습니다.', 'Safari를 완전히 닫았다가 이 앱을 다시 엽니다.']],
+    mac:['맥', ['시스템 설정 → 손쉬운 사용 → 읽기 및 말하기 → 시스템 음성 → 음성 관리로 갑니다.', '영어(영국)에서 Daniel이나 Serena를 내려받습니다.', '크롬에는 "Google UK English" 음성이 처음부터 들어 있습니다.']],
+    win:['윈도우', ['엣지 브라우저를 쓰면 "Microsoft Sonia/Libby (Natural)" 같은 자연스러운 영국 음성을 바로 쓸 수 있습니다.', '또는 설정 → 시간 및 언어 → 음성 → 음성 추가 → 영어(영국)를 설치합니다.', '크롬에는 "Google UK English" 음성이 들어 있습니다.']]};
+  const order = [dev, ...['android', 'ios', 'mac', 'win'].filter(k => k !== dev)].filter(k => S0[k]);
+  const now = !SPEECH ? '이 브라우저는 소리 내어 읽기를 지원하지 않습니다.' : VOICES.length ? '지금 쓰는 영국 음성: ' + VOICES[0].name + (good ? '' : ' · 고품질 음성을 설치하면 더 자연스럽습니다.') : '이 기기에는 영국 음성이 없어서 다른 영어 음성(미국식 등)으로 읽습니다.';
+  return el('details', {class:'more', open:SPEECH && (!VOICES.length || (dev === 'android' && !good))},
+    el('summary', null, '영국식 음성 설치 방법 · British voice'),
+    el('div', {class:'in', lang:'ko'},
+      el('p', {class:'tip', style:'margin:0'}, now),
+      el('p', {class:'tip', style:'margin:0'}, '앱은 녹음 파일 대신 기기에 설치된 음성으로 글자를 읽습니다. 그래서 영국(UK) 음성을 설치해 두면 단어, 예문, 듣기 대본을 모두 영국식 발음으로 들을 수 있습니다.'),
+      order.map((k, i) => el('div', {class:'vh' + (i === 0 && dev === k ? ' mine' : '')}, el('b', null, S0[k][0] + (i === 0 && dev === k ? ' (지금 쓰는 기기)' : '')), el('ol', null, S0[k][1].map(s => el('li', null, s)))))));
+}
 const LEVELS = [
   {n:'First Words', age:'ages 2–4'}, {n:'Little Learner', age:'ages 4–5'}, {n:'Early Reader', age:'ages 5–6'},
   {n:'Story Time', age:'about age 6'}, {n:'Growing Reader', age:'ages 6–7'}, {n:'Bookworm', age:'ages 7–8'},
@@ -5352,7 +6912,8 @@ const ICON = {
   star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
   pen:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/>',
   next:'<path d="M9 6l6 6-6 6"/>',
-  prev:'<path d="M15 6l-6 6 6 6"/>'
+  prev:'<path d="M15 6l-6 6 6 6"/>',
+  sound:'<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>'
 };
 const rnd = n => Math.floor(Math.random() * n);
 const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -5370,7 +6931,7 @@ function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = fal
 const APP_ID = 'words';   // the account keeps each app's progress in its own folder
 const LS = 'bw5000-v1';
 const DOCS = ['meta', ...Array.from({length:10}, (_, k) => 'p' + (k + 1))];
-const blank = () => ({p:{}, stars:[], notes:{}, log:{}, set:{daily:10, pics:true}, ts:{}});
+const blank = () => ({p:{}, stars:[], notes:{}, log:{}, set:{daily:10, pics:true, voice:true, ko:false}, ts:{}});
 
 /* accounts on a website copy: config.js names a Firebase project (sign-in plus a Firestore database) */
 const FB = (() => {
@@ -6110,10 +7671,11 @@ function exampleNodes(ex) { const m = ex.match(/^(.*?)\[(.+?)\](.*)$/); return m
 function wordCard(x, opts = {}) {
   const c = el('article', {class:'card', lang:'en-GB'});
   if (S.set.pics && x.emo) c.append(el('div', {class:'emo', 'aria-hidden':'true'}, x.emo));
-  c.append(el('div', {class:'head'}, el('h2', {class:'hw' + (x.w.length > 11 ? ' sm' : '')}, x.w)));
+  c.append(el('div', {class:'head'}, el('h2', {class:'hw' + (x.w.length > 11 ? ' sm' : '')}, x.w), sayBtn(x.w)));
   c.append(el('div', {class:'meta'}, el('span', {class:'chip'}, POSN[x.pos] || x.pos), el('span', null, 'Level ' + x.lv + ' · Pack ' + x.pk), opts.showStatus ? el('span', null, '· ' + STATUS[status(x.w)]) : null));
   c.append(el('div', {class:'line def'}, el('p', null, x.def)));
-  c.append(el('div', {class:'line ex'}, el('p', null, '→ ', exampleNodes(x.ex))));
+  if (koOf(x)) c.append(el('div', {class:'line ko', lang:'ko'}, el('p', null, koOf(x))));
+  c.append(el('div', {class:'line ex'}, el('p', null, '→ ', exampleNodes(x.ex)), sayBtn(x.ex, 'sm')));
   return c;
 }
 function starBtn(x) {
@@ -6184,7 +7746,8 @@ function openWord(x, list) {
     const nav = list && list.length > 1 ? el('div', {class:'row'},
       el('button', {class:'btn', type:'button', disabled:idx <= 0, onclick:() => draw(list[idx - 1])}, svg(ICON.prev), 'Previous'),
       el('button', {class:'btn', type:'button', disabled:idx >= list.length - 1, onclick:() => draw(list[idx + 1])}, 'Next', svg(ICON.next))) : null;
-    put(o.body, wordCard(cur, {showStatus:true}), el('div', {class:'tools'}, starBtn(cur)), composer(cur), nav);
+    const koBtn = KO.size ? el('button', {class:'btn small' + (S.set.ko ? ' on' : ''), type:'button', 'aria-pressed':S.set.ko ? 'true' : 'false', onclick:() => { S.set.ko = !S.set.ko; touch('meta'); draw(cur); }}, S.set.ko ? '한국어 뜻 숨기기' : '한국어 뜻 보기') : null;
+    put(o.body, wordCard(cur, {showStatus:true}), el('div', {class:'tools'}, starBtn(cur), koBtn), composer(cur), nav);
     $('#ov').scrollTop = 0;
   };
   draw(x);
@@ -6294,7 +7857,8 @@ function answer(s, it, kind, ok) {
   s.step++;
   const fb = el('section', {class:'fb ' + (ok ? 'ok' : 'no')},
     el('h3', null, ok ? PRAISE[rnd(PRAISE.length)] : 'Not quite. The answer is ' + x.w + '.'),
-    el('div', {class:'line ex'}, el('p', null, '→ ', exampleNodes(x.ex))),
+    el('div', {class:'line ex'}, el('p', null, '→ ', exampleNodes(x.ex)), sayBtn(x.ex, 'sm')),
+    koOf(x) ? el('p', {class:'ko', lang:'ko', style:'margin:0'}, x.w + ' · ' + koOf(x)) : null,
     el('div', {class:'row'},
       ok ? null : el('button', {class:'btn big', type:'button', onclick:() => answerAgain(s)}, 'Try again'),
       el('button', {class:'btn primary big', type:'button', onclick:() => next(s)}, 'Continue')));
@@ -6492,7 +8056,7 @@ function renderToday() {
 function wordRow(x, list) {
   return el('button', {class:'item', type:'button', onclick:() => openWord(x, list)},
     el('span', {class:'e', 'aria-hidden':'true'}, S.set.pics && x.emo ? x.emo : ''),
-    el('span', {style:'min-width:0'}, el('div', {class:'w'}, x.w), el('div', {class:'d'}, x.def)),
+    el('span', {style:'min-width:0'}, el('div', {class:'w'}, x.w), el('div', {class:'d'}, x.def), koOf(x) ? el('div', {class:'d ko', lang:'ko'}, koOf(x)) : null),
     el('span', {class:'dot s' + status(x.w), title:STATUS[status(x.w)], 'aria-label':STATUS[status(x.w)]}));
 }
 function renderWords() {
@@ -6584,7 +8148,7 @@ function renderPractise() {
 function renderMe() {
   const learnt = learntCount(), mast = masteredCount(), st = streak(), acc = accuracy();
   const daily = el('div', {class:'seg', role:'group', 'aria-label':'New words a day'}, [5, 10, 15, 20, 30].map(n => el('button', {type:'button', 'aria-pressed':S.set.daily === n ? 'true' : 'false', onclick:() => { S.set.daily = n; touch('meta'); renderMe(); }}, String(n))));
-  const sw = (id, label, key) => { const i = el('input', {type:'checkbox', id, role:'switch'}); i.checked = !!S.set[key]; i.addEventListener('change', () => { S.set[key] = i.checked; touch('meta'); }); return el('div', {class:'switch'}, el('label', {for:id}, label), i); };
+  const sw = (id, label, key, dflt = false) => { const i = el('input', {type:'checkbox', id, role:'switch'}); i.checked = S.set[key] == null ? dflt : !!S.set[key]; i.addEventListener('change', () => { S.set[key] = i.checked; touch('meta'); }); return el('div', {class:'switch'}, el('label', {for:id}, label), i); };
   const lists = el('div', {class:'list'},
     listBtn('Starred words', () => S.stars.map(w => BY.get(w)).filter(Boolean)),
     listBtn('Tricky words', tricky),
@@ -6612,6 +8176,9 @@ function renderMe() {
       el('span', {class:'lab'}, 'Background'), themeSeg(),
       el('span', {class:'lab'}, 'New words a day'), daily,
       sw('pics', 'Show pictures', 'pics'),
+      sw('ko', '한국어 뜻 보기 · Show Korean meanings', 'ko'),
+      SPEECH ? sw('voice', 'Read words aloud (British voice)', 'voice', true) : null,
+      SPEECH ? voiceHelp() : null,
       sync ? el('p', {class:'tip'}, sync) : null,
       installRow(),
       resetArea));

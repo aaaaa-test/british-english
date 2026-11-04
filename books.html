@@ -726,6 +726,10 @@ input:disabled,textarea:disabled{opacity:1}
 .wstep.locked{opacity:.45}
 .wstep .inl{width:100%;box-sizing:border-box;background:var(--panel-2);border:1.5px solid var(--line);border-radius:12px;color:var(--text);font:400 19px/1.3 var(--f-read);padding:10px 12px;min-height:48px}
 .wstep textarea.w.piece{min-height:84px}
+
+.vh{display:grid;gap:4px}
+.vh ol{margin:0;padding-left:1.25em;display:grid;gap:4px;font-size:15px;line-height:1.45}
+.vh.mine b{color:var(--word)}
 </style>
 </head>
 <body>
@@ -861,6 +865,25 @@ function say(text, btn) {
 }
 const sayBtn = (text, cls) => SPEECH && S.set.voice !== false ? el('button', {class:'say' + (cls ? ' ' + cls : ''), type:'button', 'aria-label':'Listen', title:'Listen', onclick:e => { e.stopPropagation(); say(text, e.currentTarget); }}, svg(ICON.sound)) : null;
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+function voiceHelp() {   // how to add a British voice, with this device's steps first (open when no good British voice is installed)
+  const ua = navigator.userAgent || '';
+  const ios = /iPhone|iPad|iPod/i.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  const dev = /Android/i.test(ua) ? 'android' : ios ? 'ios' : /Macintosh/.test(ua) ? 'mac' : /Windows/.test(ua) ? 'win' : 'other';
+  const good = VOICES.some(v => /premium|enhanced|natural|neural|google/i.test(v.name));
+  const S0 = {
+    android:['갤럭시 · 안드로이드', ['Google UK English 음성을 설치해야 영국식 발음으로 들을 수 있습니다.', '설정 → 일반 → 텍스트 음성 변환(TTS)으로 갑니다. 기기에 따라 설정 → 시스템 → 언어 및 입력에 있습니다.', '기본 엔진을 "Google 음성 서비스"(Speech Services by Google)로 고릅니다. 없으면 Play 스토어에서 설치하세요.', '엔진 옆 톱니바퀴 → 음성 데이터 설치 → English (United Kingdom)을 내려받고, 마음에 드는 목소리를 고릅니다.', '크롬을 완전히 닫았다가 이 앱을 다시 엽니다.']],
+    ios:['아이폰 · 아이패드', ['설정 → 손쉬운 사용 → 읽기 및 말하기 → 음성으로 갑니다.', '영어 → 영어(영국)를 고릅니다.', 'Daniel, Kate, Serena, Arthur 중 하나의 "향상된 품질"(또는 고급) 버전을 내려받습니다.', 'Safari를 완전히 닫았다가 이 앱을 다시 엽니다.']],
+    mac:['맥', ['시스템 설정 → 손쉬운 사용 → 읽기 및 말하기 → 시스템 음성 → 음성 관리로 갑니다.', '영어(영국)에서 Daniel이나 Serena를 내려받습니다.', '크롬에는 "Google UK English" 음성이 처음부터 들어 있습니다.']],
+    win:['윈도우', ['엣지 브라우저를 쓰면 "Microsoft Sonia/Libby (Natural)" 같은 자연스러운 영국 음성을 바로 쓸 수 있습니다.', '또는 설정 → 시간 및 언어 → 음성 → 음성 추가 → 영어(영국)를 설치합니다.', '크롬에는 "Google UK English" 음성이 들어 있습니다.']]};
+  const order = [dev, ...['android', 'ios', 'mac', 'win'].filter(k => k !== dev)].filter(k => S0[k]);
+  const now = !SPEECH ? '이 브라우저는 소리 내어 읽기를 지원하지 않습니다.' : VOICES.length ? '지금 쓰는 영국 음성: ' + VOICES[0].name + (good ? '' : ' · 고품질 음성을 설치하면 더 자연스럽습니다.') : '이 기기에는 영국 음성이 없어서 다른 영어 음성(미국식 등)으로 읽습니다.';
+  return el('details', {class:'more', open:SPEECH && (!VOICES.length || (dev === 'android' && !good))},
+    el('summary', null, '영국식 음성 설치 방법 · British voice'),
+    el('div', {class:'in', lang:'ko'},
+      el('p', {class:'tip', style:'margin:0'}, now),
+      el('p', {class:'tip', style:'margin:0'}, '앱은 녹음 파일 대신 기기에 설치된 음성으로 글자를 읽습니다. 그래서 영국(UK) 음성을 설치해 두면 단어, 예문, 듣기 대본을 모두 영국식 발음으로 들을 수 있습니다.'),
+      order.map((k, i) => el('div', {class:'vh' + (i === 0 && dev === k ? ' mine' : '')}, el('b', null, S0[k][0] + (i === 0 && dev === k ? ' (지금 쓰는 기기)' : '')), el('ol', null, S0[k][1].map(s => el('li', null, s)))))));
+}
 
 /* ---------- state ---------- */
 const APP_ID = 'books';   // the account keeps each app's progress in its own folder
@@ -2910,6 +2933,7 @@ function renderMe() {
       sw('autoplay', 'Say new words automatically', 'autoplay', false),
       el('span', {class:'lab'}, 'Voice speed'), rate,
       el('p', {class:'tip'}, voiceTip),
+      voiceHelp(),
       sync ? el('p', {class:'tip'}, sync) : null,
       installRow(),
       resetArea));
