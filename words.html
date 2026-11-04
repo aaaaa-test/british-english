@@ -207,6 +207,32 @@ html.light .tline .wt{border-color:#f2bddf}
 .bars{display:grid;grid-template-columns:repeat(14,1fr);gap:5px;align-items:end;height:90px}
 .bars i{display:block;background:var(--def);border-radius:4px 4px 0 0;min-height:3px}
 .bars i.today{background:var(--word)}
+.bars .bar{display:block;background:var(--def);border:0;padding:0;border-radius:4px 4px 0 0;min-height:3px;cursor:pointer;width:100%}
+.bars .bar.today{background:var(--word)}
+.bars .bar:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.cal{display:grid;gap:10px}
+.cal-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cal-top b{font:600 16px/1.2 var(--f-ui)}
+.cal-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.cal-h{font:600 11px/1 var(--f-ui);color:var(--muted);text-align:center;padding:4px 0;letter-spacing:.06em}
+.cal-d{aspect-ratio:1;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);font:500 14px/1 var(--f-ui);cursor:pointer;padding:0;min-width:0}
+.cal-d.l1{background:rgba(25,181,174,.22)}
+.cal-d.l2{background:rgba(25,181,174,.45)}
+.cal-d.l3{background:rgba(25,181,174,.7);color:#001c1a}
+.cal-d.l4{background:var(--def);color:#001c1a}
+.cal-d.today{outline:2px solid var(--word);outline-offset:1px}
+.cal-d.fut{opacity:.35;cursor:default}
+.fld{display:grid;gap:6px;min-width:0}
+.fld>span{font:600 12px/1.2 var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.flds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.din{width:100%;box-sizing:border-box;min-height:44px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;color:var(--text);font:500 16px/1.2 var(--f-ui);padding:8px 10px;color-scheme:inherit}
+.mode[disabled]{opacity:.5;cursor:default}
+details.more{background:var(--panel-2);border:1px solid var(--line);border-radius:16px;padding:12px 16px}
+details.more>summary{cursor:pointer;font:600 15px/1.3 var(--f-ui);color:var(--def);list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:28px}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::after{content:"+";font-size:20px;color:var(--muted)}
+details.more[open]>summary::after{content:"–"}
+details.more>.in{display:grid;gap:10px;padding-top:10px}
 .barlabels{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
 .set{display:grid;gap:8px}
 .set label,.set .lab{font-weight:500}
@@ -251,6 +277,11 @@ select{width:100%;background:var(--panel-2);color:var(--text);border:1px solid v
 .tip{font-size:14px;color:var(--muted)}
 @media (min-width:700px){#view{padding-top:24px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* iPhone Safari paints the text of disabled buttons and inputs grey (-webkit-text-fill-color), which made answered choices look empty: keep their real colour */
+button:disabled,input:disabled,textarea:disabled,select:disabled{-webkit-text-fill-color:currentColor}
+.opt:disabled{opacity:1;cursor:default}
+input:disabled,textarea:disabled{opacity:1}
 </style>
 </head>
 <body>
@@ -5920,15 +5951,23 @@ function openAccount(mode) {
 const INT = [0, 1, 3, 7, 16, 35, 90, 180];
 const boxOf = w => (S.p[w] ? S.p[w][0] : 0);
 const isLearnt = w => boxOf(w) >= 1;
-function grade(w, ok, mode) {
+function grade(w, ok, mode) {   // a word's record: [box, due day, times seen, times wrong, last day, day learnt, days studied]
   const t = DAY();
   const r = S.p[w] ? S.p[w].slice() : [0, t, 0, 0, t];
+  const was = r[0];
   r[2]++; r[4] = t;
   if (mode === 'known') { r[0] = Math.max(r[0], 3); r[1] = t + INT[r[0]]; }
   else if (mode === 'practice') { if (!ok) r[3]++; }
   else if (ok) { r[0] = Math.min(7, r[0] + 1); r[1] = t + INT[r[0]]; }
   else { r[3]++; if (r[0] > 0) r[0] = 1; r[1] = t + 1; }
+  if (was < 1 && r[0] >= 1 && r[5] == null) r[5] = t;
+  noteDay(r, t);
   S.p[w] = r; touch(docOf(w));
+}
+function noteDay(r, t) {   // the study diary: the last 40 days on which this word was studied
+  const ds = Array.isArray(r[6]) ? r[6].slice() : [];
+  if (ds[ds.length - 1] !== t) ds.push(t);
+  r[6] = ds.length > 40 ? ds.slice(-40) : ds;
 }
 function logAct(kind, ok) {
   const t = DAY(); const L = S.log[t] || (S.log[t] = [0, 0, 0, 0]);
@@ -6274,11 +6313,131 @@ function summary(s) {
     s.mode ? null : el('button', {class:'btn primary', type:'button', disabled:!more.length, onclick:() => { closeOv(); startSession(more.map(x => ({k:'learn', x})), 'Five more words'); }}, 'Five more words')));
   put(s.o.body, ...kids);
 }
-function startToday() {
-  const due = dueWords().slice(0, 80).map(x => ({k:'review', x}));
+function startToday(only) {   // only: undefined (reviews then new words), 'review' or 'new'
+  const due = only === 'new' ? [] : dueWords().slice(0, 80).map(x => ({k:'review', x}));
   const left = Math.max(0, S.set.daily - todayLog()[0]);
-  const fresh = nextNew(left || (due.length ? 0 : 5)).map(x => ({k:'learn', x}));
-  startSession([...shuffle(due), ...fresh], "Today's words");
+  const fresh = only === 'review' ? [] : nextNew(only === 'new' ? (left || 5) : (left || (due.length ? 0 : 5))).map(x => ({k:'learn', x}));
+  if (!due.length && !fresh.length) { toast(only === 'review' ? 'No reviews are due today' : 'Nothing to learn here'); return; }
+  startSession([...shuffle(due), ...fresh], only === 'review' ? 'Reviews due today' : only === 'new' ? 'New words' : "Today's words");
+}
+function startListReview(list, title) {   // practise a chosen set of words: each word once, in a mixed order (reviews stay on their own timetable)
+  if (!list.length) { toast('There are no words in this choice'); return; }
+  const pick = shuffle(list).slice(0, 60);
+  if (list.length > 60) toast('60 of the ' + list.length + ' words, picked at random');
+  startSession(pick.map(x => ({k:'practice', x})), title, 'mixed');
+}
+
+/* ---------- the study diary: what was learnt and studied on each day ---------- */
+const studyDays = r => !r ? [] : Array.isArray(r[6]) ? r[6] : r[4] != null ? [r[4]] : [];
+function wordsOn(d0, d1 = d0, which = 'all') {   // which: 'new' (learnt then) or 'all' (learnt, reviewed or practised then)
+  return W.filter(x => {
+    const r = S.p[x.w]; if (!r) return false;
+    if (which === 'new') return r[5] != null && r[5] >= d0 && r[5] <= d1;
+    return studyDays(r).some(d => d >= d0 && d <= d1) || (r[5] != null && r[5] >= d0 && r[5] <= d1);
+  });
+}
+const dateOf = d => { const x = new Date(d * 864e5); return new Date(x.getUTCFullYear(), x.getUTCMonth(), x.getUTCDate()); };
+const dayName = (d, long) => dateOf(d).toLocaleDateString('en-GB', long ? {weekday:'long', day:'numeric', month:'long', year:'numeric'} : {day:'numeric', month:'short', year:'numeric'});
+const isoOf = d => { const x = dateOf(d); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
+const dayFromIso = s => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? DAY(new Date(+m[1], +m[2] - 1, +m[3])) : null; };
+const dayTotal = d => { const L = S.log[d]; return L ? L[0] + L[1] : 0; };
+function openDay(d) {   // everything studied on one day
+  const o = openOv(dayName(d));
+  const draw = () => {
+    const L = S.log[d] || [0, 0, 0, 0], ans = L[2] + L[3];
+    const learnt = wordsOn(d, d, 'new'), all = wordsOn(d);
+    const rest = all.filter(x => !learnt.includes(x));
+    put(o.body,
+      el('header', {class:'hello'}, el('p', {class:'eyebrow'}, d === DAY() ? 'Today' : d === DAY() - 1 ? 'Yesterday' : 'Study diary'), el('h1', null, dayName(d, true))),
+      el('div', {class:'tiles'},
+        el('div', {class:'tile'}, el('b', {class:'num'}, fmt(L[0])), el('span', null, 'new words')),
+        el('div', {class:'tile'}, el('b', {class:'num'}, fmt(L[1])), el('span', null, 'reviews')),
+        el('div', {class:'tile'}, el('b', {class:'num'}, fmt(ans)), el('span', null, 'answers')),
+        el('div', {class:'tile'}, el('b', {class:'num'}, ans ? Math.round(L[2] / ans * 100) + '%' : '–'), el('span', null, 'correct'))),
+      all.length ? el('button', {class:'btn primary big', type:'button', onclick:() => startListReview(all, 'Review · ' + dayName(d))}, 'Review these ' + all.length + ' words') : null,
+      learnt.length ? el('section', {class:'panel'}, el('p', {class:'eyebrow'}, 'Learnt this day (' + learnt.length + ')'), el('div', {class:'list'}, learnt.map(x => wordRow(x, learnt)))) : null,
+      rest.length ? el('section', {class:'panel'}, el('p', {class:'eyebrow'}, 'Reviewed or practised (' + rest.length + ')'), el('div', {class:'list'}, rest.map(x => wordRow(x, rest)))) : null,
+      !all.length ? el('p', {class:'empty'}, L[0] + L[1] + ans ? 'There is no word list for this day. The app keeps a list of words for each day from now on.' : 'Nothing was studied on this day.') : null);
+  };
+  draw(); o.onReturn(draw);
+}
+let MEV = 'days', CALM = null;   // Me tab: the last 14 days or a calendar, and the month it shows
+function studyPanel() {
+  const sec = el('section', {class:'panel'});
+  const draw = () => {
+    const t = DAY();
+    const seg = el('div', {class:'seg', role:'group', 'aria-label':'Show my study days as'}, [['days', 'Last 14 days'], ['cal', 'Calendar']].map(([k, l]) =>
+      el('button', {type:'button', 'aria-pressed':MEV === k ? 'true' : 'false', onclick:() => { MEV = k; draw(); }}, l)));
+    let body;
+    if (MEV === 'cal') {
+      const now = dateOf(t);
+      if (!CALM) CALM = [now.getFullYear(), now.getMonth()];
+      const [y, m] = CALM, first = new Date(y, m, 1), lead = (first.getDay() + 6) % 7, n = new Date(y, m + 1, 0).getDate(), d0 = DAY(first);
+      const max = Math.max(5, ...Array.from({length:n}, (_, i) => dayTotal(d0 + i)));
+      const move = k => { let mm = m + k, yy = y; if (mm < 0) { mm = 11; yy--; } if (mm > 11) { mm = 0; yy++; } CALM = [yy, mm]; draw(); };
+      body = el('div', {class:'cal'},
+        el('div', {class:'cal-top'},
+          el('button', {class:'btn small', type:'button', 'aria-label':'Previous month', onclick:() => move(-1)}, '‹'),
+          el('b', null, first.toLocaleDateString('en-GB', {month:'long', year:'numeric'})),
+          el('button', {class:'btn small', type:'button', 'aria-label':'Next month', onclick:() => move(1)}, '›')),
+        el('div', {class:'cal-g'},
+          ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(w => el('span', {class:'cal-h', 'aria-hidden':'true'}, w)),
+          Array.from({length:lead}, () => el('span')),
+          Array.from({length:n}, (_, i) => { const d = d0 + i, v = dayTotal(d), lv = v ? Math.min(4, 1 + Math.floor(v / max * 3.99)) : 0;
+            return el('button', {class:'cal-d l' + lv + (d === t ? ' today' : '') + (d > t ? ' fut' : ''), type:'button', disabled:d > t, 'aria-label':dayName(d) + ': ' + v + ' words', onclick:() => openDay(d)}, String(i + 1)); })),
+        el('p', {class:'tip'}, 'The darker the day, the more you studied. Tap a day to see its words.'));
+    } else {
+      const days = Array.from({length:14}, (_, k) => t - 13 + k), vals = days.map(dayTotal), max = Math.max(5, ...vals);
+      body = el('div', {style:'display:grid;gap:8px'},
+        el('div', {class:'bars'}, days.map((d, k) => el('button', {class:'bar' + (d === t ? ' today' : ''), type:'button', style:'height:' + Math.max(3, Math.round(vals[k] / max * 100)) + '%', 'aria-label':dayName(d) + ': ' + vals[k] + ' words', title:vals[k] + ' words', onclick:() => openDay(d)}))),
+        el('div', {class:'barlabels'}, el('span', null, 'Two weeks ago'), el('span', null, 'Today')),
+        el('p', {class:'tip'}, 'Tap a day to see the words you studied.'));
+    }
+    put(sec, el('p', {class:'eyebrow'}, 'My study days'), seg, body);
+  };
+  draw();
+  return sec;
+}
+let RV = {m:'day', d:null, a:null, b:null, which:'all', lv:1, p1:1, p2:1, only:true};   // Practise: review by date or range
+function rangePanel() {
+  const sec = el('section', {class:'panel'});
+  const draw = () => {
+    const t = DAY();
+    if (RV.d == null) RV.d = t - 1;
+    if (RV.a == null) RV.a = t - 7;
+    if (RV.b == null) RV.b = t;
+    const seg = el('div', {class:'seg', role:'group', 'aria-label':'Choose words by'}, [['day', 'One day'], ['dates', 'From – to'], ['range', 'Levels and packs']].map(([k, l]) =>
+      el('button', {type:'button', 'aria-pressed':RV.m === k ? 'true' : 'false', onclick:() => { RV.m = k; draw(); }}, l)));
+    const dateIn = (lab, key) => { const i = el('input', {type:'date', class:'din', value:isoOf(RV[key]), max:isoOf(t), 'aria-label':lab});
+      i.addEventListener('change', () => { const v = dayFromIso(i.value); if (v != null) { RV[key] = Math.min(v, t); draw(); } }); return el('label', {class:'fld'}, el('span', null, lab), i); };
+    const whichSeg = el('div', {class:'seg', role:'group', 'aria-label':'Which words'}, [['all', 'Everything I studied'], ['new', 'Only words I learnt']].map(([k, l]) =>
+      el('button', {type:'button', 'aria-pressed':RV.which === k ? 'true' : 'false', onclick:() => { RV.which = k; draw(); }}, l)));
+    let list = [], title = '', ctrls = [];
+    if (RV.m === 'day') { ctrls = [dateIn('Day', 'd'), whichSeg]; list = wordsOn(RV.d, RV.d, RV.which); title = 'Review · ' + dayName(RV.d); }
+    else if (RV.m === 'dates') {
+      const a = Math.min(RV.a, RV.b), b = Math.max(RV.a, RV.b);
+      ctrls = [el('div', {class:'flds'}, dateIn('From', 'a'), dateIn('To', 'b')), whichSeg]; list = wordsOn(a, b, RV.which); title = 'Review · ' + dayName(a) + ' – ' + dayName(b);
+    } else {
+      const lvSel = el('select', {class:'din', 'aria-label':'Level'}, LEVELS.map((L, i) => el('option', {value:i + 1, selected:RV.lv === i + 1}, 'Level ' + (i + 1) + ' · ' + L.n)));
+      lvSel.addEventListener('change', () => { RV.lv = +lvSel.value; draw(); });
+      const packs = [...new Set(W.filter(x => x.lv === RV.lv).map(x => x.pk))].sort((p, q) => p - q);
+      if (!packs.includes(RV.p1)) RV.p1 = packs[0] || 1;
+      if (!packs.includes(RV.p2)) RV.p2 = packs[0] || 1;
+      const pkSel = key => { const s = el('select', {class:'din', 'aria-label':key === 'p1' ? 'From pack' : 'To pack'}, packs.map(p => el('option', {value:p, selected:RV[key] === p}, 'Pack ' + p))); s.addEventListener('change', () => { RV[key] = +s.value; draw(); }); return s; };
+      const onlyBox = el('input', {type:'checkbox', id:'rv-only', role:'switch'}); onlyBox.checked = RV.only; onlyBox.addEventListener('change', () => { RV.only = onlyBox.checked; draw(); });
+      const p1 = Math.min(RV.p1, RV.p2), p2 = Math.max(RV.p1, RV.p2);
+      ctrls = [el('label', {class:'fld'}, el('span', null, 'Level'), lvSel), el('div', {class:'flds'}, el('label', {class:'fld'}, el('span', null, 'From'), pkSel('p1')), el('label', {class:'fld'}, el('span', null, 'To'), pkSel('p2'))),
+        el('div', {class:'switch'}, el('label', {for:'rv-only'}, 'Only words I have learnt'), onlyBox)];
+      list = W.filter(x => x.lv === RV.lv && x.pk >= p1 && x.pk <= p2 && (!RV.only || isLearnt(x.w)));
+      title = 'Review · Level ' + RV.lv + ', packs ' + p1 + (p2 > p1 ? '–' + p2 : '');
+    }
+    put(sec, el('p', {class:'eyebrow'}, 'Review by date or range'), el('p', {class:'tip'}, 'Choose one day, a stretch of days, or part of the word list, whatever the date.'), seg, ...ctrls,
+      el('p', {style:'margin:0;font-weight:600'}, list.length + ' word' + (list.length === 1 ? '' : 's')),
+      list.length ? el('details', {class:'more'}, el('summary', null, 'See the words'), el('div', {class:'in list'}, list.slice(0, 200).map(x => wordRow(x, list)))) : null,
+      el('button', {class:'btn primary big', type:'button', disabled:!list.length, onclick:() => startListReview(list, title)}, list.length ? 'Review ' + Math.min(60, list.length) + ' words' : 'No words here yet'));
+  };
+  draw();
+  return sec;
 }
 function startPractice(list, mode, title) {
   if (list.length < 1) { toast('Learn some words first'); return; }
@@ -6297,11 +6456,22 @@ function ring(val, goal) {
   return el('div', {class:'ring'}, s, el('div', {class:'t num'}, el('div', null, Math.min(val, 999) + '/' + goal, el('small', null, 'NEW TODAY'))));
 }
 function frontier() { const n = nextNew(1)[0]; return n ? n.i : W.length - 1; }
+function modeBtn(ic, title, desc, f, off) {
+  return el('button', {class:'mode', type:'button', disabled:!!off, onclick:f}, el('span', {class:'ic', 'aria-hidden':'true'}, ic), el('span', null, el('b', null, title), el('span', null, desc)));
+}
 function renderToday() {
   const L = todayLog(), goal = S.set.daily, due = dueWords().length, learnt = learntCount(), st = streak();
   const n = nextNew(1)[0];
   const doneToday = L[0] >= goal && !due;
-  const start = el('button', {class:'btn primary big', type:'button', onclick:startToday}, doneToday ? 'Learn five more words' : (L[0] + L[1] ? 'Carry on' : "Start today's words"));
+  const start = el('button', {class:'btn primary big', type:'button', onclick:() => startToday()}, doneToday ? 'Learn five more words' : (L[0] + L[1] ? 'Carry on' : "Start today's words"));
+  const yest = wordsOn(DAY() - 1);
+  const choose = el('section', {class:'panel'},
+    el('p', {class:'eyebrow'}, 'Or choose one part'),
+    el('p', {class:'tip'}, "Start today's words gives you the reviews due today, then new words. A review comes back 1, 3, 7, 16, 35, 90 and 180 days after you learn a word, so it is not only yesterday's words."),
+    el('div', {class:'modes'},
+      modeBtn('🔁', 'Reviews only', due ? fmt(due) + ' due today' : 'No reviews are due today', () => startToday('review'), !due),
+      modeBtn('🌱', 'New words only', n ? 'Learn new words without the reviews' : 'You have learnt every word', () => startToday('new'), !n),
+      modeBtn('📅', "Yesterday's words", yest.length ? yest.length + ' words you studied yesterday' : 'Nothing was studied yesterday', () => startListReview(yest, "Yesterday's words"), !yest.length)));
   const goalPanel = el('section', {class:'panel goal'}, ring(L[0], goal), el('div', {class:'stats'},
     el('div', {class:'stat'}, el('span', null, 'Reviews due'), el('b', {class:'num'}, fmt(due))),
     el('div', {class:'stat'}, el('span', null, 'Day streak'), el('b', {class:'num'}, st + (st === 1 ? ' day' : ' days'))),
@@ -6315,7 +6485,7 @@ function renderToday() {
   const lim = Math.min(W.length, frontier() + 60);
   const wod = W[(DAY() * 7919) % Math.max(1, lim)];
   const wodCard = el('section', {class:'wod'}, el('p', {class:'eyebrow', style:'margin-bottom:8px'}, 'Word of the day'), wordCard(wod), el('div', {class:'tools', style:'margin-top:10px'}, el('button', {class:'btn small', type:'button', onclick:() => openWord(wod)}, 'Open card'), starBtn(wod)));
-  const parts = [homeLink(), el('header', {class:'hello'}, el('p', {class:'eyebrow'}, niceDate()), el('h1', null, '5000 British Words')), accountBar(), notebookLine(), installBar(), goalPanel, start, where, wodCard];
+  const parts = [homeLink(), el('header', {class:'hello'}, el('p', {class:'eyebrow'}, niceDate()), el('h1', null, '5000 British Words')), accountBar(), notebookLine(), installBar(), goalPanel, start, choose, where, wodCard];
   if (W.length < PLANNED) parts.push(el('p', {class:'tip'}, fmt(W.length) + ' words are ready so far. More levels are being added.'));
   put(view, ...parts);
 }
@@ -6408,13 +6578,11 @@ function renderPractise() {
       startPractice(l, k, t);
     }}, el('span', {class:'ic', 'aria-hidden':'true'}, ic), el('span', null, el('b', null, t), el('span', null, d)))));
   put(view, el('header', {class:'hello'}, el('p', {class:'eyebrow'}, 'Practise'), el('h1', null, 'Choose your words')), seg,
-    list.length ? modes : el('p', {class:'empty'}, PS === 'starred' ? 'Tap Star on any word card to collect it here.' : PS === 'tricky' ? 'Words you get wrong will appear here.' : 'Learn some words on the Today tab first.'));
+    list.length ? modes : el('p', {class:'empty'}, PS === 'starred' ? 'Tap Star on any word card to collect it here.' : PS === 'tricky' ? 'Words you get wrong will appear here.' : 'Learn some words on the Today tab first.'),
+    rangePanel());
 }
 function renderMe() {
   const learnt = learntCount(), mast = masteredCount(), st = streak(), acc = accuracy();
-  const t = DAY(); const days = Array.from({length:14}, (_, k) => t - 13 + k);
-  const vals = days.map(d => { const L = S.log[d]; return L ? L[0] + L[1] : 0; }); const max = Math.max(5, ...vals);
-  const bars = el('div', {class:'bars', role:'img', 'aria-label':'Words studied each day for the last 14 days'}, days.map((d, k) => el('i', {class:d === t ? 'today' : '', style:'height:' + Math.max(3, Math.round(vals[k] / max * 100)) + '%', title:vals[k] + ' words'})));
   const daily = el('div', {class:'seg', role:'group', 'aria-label':'New words a day'}, [5, 10, 15, 20, 30].map(n => el('button', {type:'button', 'aria-pressed':S.set.daily === n ? 'true' : 'false', onclick:() => { S.set.daily = n; touch('meta'); renderMe(); }}, String(n))));
   const sw = (id, label, key) => { const i = el('input', {type:'checkbox', id, role:'switch'}); i.checked = !!S.set[key]; i.addEventListener('change', () => { S.set[key] = i.checked; touch('meta'); }); return el('div', {class:'switch'}, el('label', {for:id}, label), i); };
   const lists = el('div', {class:'list'},
@@ -6438,7 +6606,7 @@ function renderMe() {
       el('div', {class:'tile'}, el('b', {class:'num'}, fmt(mast)), el('span', null, 'mastered')),
       el('div', {class:'tile'}, el('b', {class:'num'}, st), el('span', null, 'day streak')),
       el('div', {class:'tile'}, el('b', {class:'num'}, acc == null ? '–' : acc + '%'), el('span', null, 'correct, last 30 days'))),
-    el('section', {class:'panel'}, el('p', {class:'eyebrow'}, 'Last 14 days'), bars, el('div', {class:'barlabels'}, el('span', null, 'Two weeks ago'), el('span', null, 'Today'))),
+    studyPanel(),
     lists,
     el('section', {class:'panel set'}, el('p', {class:'eyebrow'}, 'Settings'),
       el('span', {class:'lab'}, 'Background'), themeSeg(),

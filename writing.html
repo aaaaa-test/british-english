@@ -314,6 +314,11 @@ details.more[open]>summary::after{content:"–"}
 details.more>.in{display:grid;gap:10px;padding-top:10px}
 @media (min-width:700px){#view{padding-top:24px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* iPhone Safari paints the text of disabled buttons and inputs grey (-webkit-text-fill-color), which made answered choices look empty: keep their real colour */
+button:disabled,input:disabled,textarea:disabled,select:disabled{-webkit-text-fill-color:currentColor}
+.opt:disabled{opacity:1;cursor:default}
+input:disabled,textarea:disabled{opacity:1}
 </style>
 </head>
 <body>
