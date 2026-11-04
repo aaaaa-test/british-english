@@ -319,6 +319,26 @@ details.more>.in{display:grid;gap:10px;padding-top:10px}
 button:disabled,input:disabled,textarea:disabled,select:disabled{-webkit-text-fill-color:currentColor}
 .opt:disabled{opacity:1;cursor:default}
 input:disabled,textarea:disabled{opacity:1}
+
+/* study diary: clickable bars, the month calendar, and review by date or range */
+.bars .bar{display:block;background:var(--def);border:0;padding:0;border-radius:4px 4px 0 0;min-height:3px;cursor:pointer;width:100%}
+.bars .bar.today{background:var(--word)}
+.cal{display:grid;gap:10px}
+.cal-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cal-top b{font:600 16px/1.2 var(--f-ui)}
+.cal-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.cal-h{font:600 11px/1 var(--f-ui);color:var(--muted);text-align:center;padding:4px 0;letter-spacing:.06em}
+.cal-d{aspect-ratio:1;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);font:500 14px/1 var(--f-ui);cursor:pointer;padding:0;min-width:0}
+.cal-d.l1{background:rgba(25,181,174,.22)}
+.cal-d.l2{background:rgba(25,181,174,.45)}
+.cal-d.l3{background:rgba(25,181,174,.7);color:#001c1a}
+.cal-d.l4{background:var(--def);color:#001c1a}
+.cal-d.today{outline:2px solid var(--word);outline-offset:1px}
+.cal-d.fut{opacity:.35;cursor:default}
+.fld{display:grid;gap:6px;min-width:0}
+.fld>span{font:600 12px/1.2 var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.flds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.din{width:100%;box-sizing:border-box;min-height:44px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;color:var(--text);font:500 16px/1.2 var(--f-ui);padding:8px 10px}
 </style>
 </head>
 <body>
@@ -1283,7 +1303,8 @@ function renderToday() {
     el('div', {class:'row'},
       el('button', {class:'btn', type:'button', disabled:!due, onclick:() => startReview()}, due ? 'Grammar review (' + due + ')' : 'No reviews due'),
       el('button', {class:'btn', type:'button', onclick:() => startFix()}, 'Fix the sentence'),
-      el('button', {class:'btn', type:'button', onclick:() => startTricky()}, 'Tricky words'))));
+      el('button', {class:'btn', type:'button', onclick:() => startTricky()}, 'Tricky words'),
+      el('button', {class:'btn', type:'button', disabled:!unitsOn(DAY() - 1).length, onclick:() => quizUnits(unitsOn(DAY() - 1), "Yesterday's grammar")}, unitsOn(DAY() - 1).length ? "Yesterday's grammar (" + unitsOn(DAY() - 1).length + ')' : 'Nothing from yesterday'))));
   put(view, ...parts);
 }
 
@@ -1624,7 +1645,7 @@ function startUnitPractice(U) {   // practice is its own screen, so Back returns
   const o = openOv(U.id + ' · Practise');
   runSession({title:U.id + ' · ' + U.title, qs:unitQuestions(U), o, mode:'unit', onEnd:(score, wrong) => {
     const g = S.g[U.id] || (S.g[U.id] = {b:0, n:0});
-    g.n = (g.n || 0) + 1; g.b = Math.max(g.b || 0, score); g.l = DAY(); touch(docOfUnit(U.id));
+    g.n = (g.n || 0) + 1; g.b = Math.max(g.b || 0, score); g.l = DAY(); g.ds = noteDays(g.ds, DAY()); touch(docOfUnit(U.id));
   }, back:goBack});
 }
 function startReview() {
@@ -1874,6 +1895,118 @@ function startTricky() {
   step();
 }
 
+/* ---------- the study diary (as in 5000 British Words): what was practised and written each day ---------- */
+const noteDays = (ds, t) => { const a = Array.isArray(ds) ? ds.slice() : []; if (a[a.length - 1] !== t) a.push(t); return a.length > 40 ? a.slice(-40) : a; };
+const unitDays = g => !g ? [] : Array.isArray(g.ds) ? g.ds : g.l != null ? [g.l] : [];
+const unitsOn = (d0, d1 = d0) => UNITS.filter(U => unitDays(S.g[U.id]).some(d => d >= d0 && d <= d1));
+const tasksOn = (d0, d1 = d0) => TASKS.filter(t => { const r = S.w[t.id]; return r && ((r.done && r.done >= d0 && r.done <= d1) || (r.mine || []).some(m => m.d >= d0 && m.d <= d1)); });
+const dateOf = d => { const x = new Date(d * 864e5); return new Date(x.getUTCFullYear(), x.getUTCMonth(), x.getUTCDate()); };
+const dayLong = (d, long) => dateOf(d).toLocaleDateString('en-GB', long ? {weekday:'long', day:'numeric', month:'long', year:'numeric'} : {day:'numeric', month:'short', year:'numeric'});
+const isoOf = d => { const x = dateOf(d); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
+const dayFromIso = s => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? DAY(new Date(+m[1], +m[2] - 1, +m[3])) : null; };
+const dayPts = d => { const L = S.log[d]; return L ? points(L) : 0; };
+function quizUnits(us, title) {   // a mixed quiz from chosen grammar units
+  const pool = []; for (const U of us) pool.push(...unitQuestions(U));
+  if (!pool.length) { toast('There are no questions in this choice'); return; }
+  const o = openOv(title);
+  runSession({title, qs:shuffle(pool).slice(0, 20), o, mode:'mixed'});
+}
+function openDay(d) {   // everything practised and written on one day
+  const o = openOv(dayLong(d));
+  const draw = () => {
+    const L = S.log[d] || [0, 0, 0, 0], ans = L[2] + L[3];
+    const us = unitsOn(d), ts = tasksOn(d);
+    put(o.body,
+      el('header', {class:'hello'}, el('p', {class:'eyebrow'}, d === DAY() ? 'Today' : d === DAY() - 1 ? 'Yesterday' : 'Study diary'), el('h1', null, dayLong(d, true))),
+      el('div', {class:'tiles'},
+        el('div', {class:'tile'}, el('b', {class:'num'}, L[0]), el('span', null, 'writing checks')),
+        el('div', {class:'tile'}, el('b', {class:'num'}, L[1]), el('span', null, 'grammar answers')),
+        el('div', {class:'tile'}, el('b', {class:'num'}, ans ? Math.round(L[2] / ans * 100) + '%' : '–'), el('span', null, 'right')),
+        el('div', {class:'tile'}, el('b', {class:'num'}, points(L)), el('span', null, 'points'))),
+      us.length ? el('section', {class:'panel'}, el('p', {class:'eyebrow'}, 'Grammar units practised (' + us.length + ')'),
+        el('div', {class:'list'}, us.map(U => el('button', {class:'item', type:'button', onclick:() => openUnit(U.id)}, el('span', {class:'id'}, U.id), el('span', null, el('div', {style:'font-weight:600'}, U.title), el('div', {class:'d'}, 'Best ' + ((S.g[U.id] || {}).b || 0) + '%')), el('span', {'aria-hidden':'true'}, '›')))),
+        el('button', {class:'btn primary', type:'button', onclick:() => quizUnits(us, 'Review · ' + dayLong(d))}, 'Practise these units again')) : null,
+      ts.length ? el('section', {class:'panel'}, el('p', {class:'eyebrow'}, 'Writing (' + ts.length + ')'),
+        el('div', {class:'list'}, ts.map(t => el('button', {class:'item', type:'button', onclick:() => openTask(t.id)}, el('span', {class:'id'}, t.id), el('span', null, el('div', {style:'font-weight:600', html:md(t.title)}), el('div', {class:'d'}, 'Level ' + t.lv)), el('span', {'aria-hidden':'true'}, '›'))))) : null,
+      us.length || ts.length ? null : el('p', {class:'empty'}, L[0] + L[1] ? 'There is no list for this day. Lists are kept for each day from now on.' : 'Nothing was practised on this day.'));
+  };
+  draw(); o.onReturn(draw);
+}
+let MEV = 'days', CALM = null;   // Me: the last 14 days or a month calendar, and the month it shows
+function studyPanel() {
+  const sec = el('section', {class:'panel'});
+  const draw = () => {
+    const t = DAY();
+    const seg = el('div', {class:'seg', role:'group', 'aria-label':'Show my study days as'}, [['days', 'Last 14 days'], ['cal', 'Calendar']].map(([k, l]) =>
+      el('button', {type:'button', 'aria-pressed':MEV === k ? 'true' : 'false', onclick:() => { MEV = k; draw(); }}, l)));
+    let body;
+    if (MEV === 'cal') {
+      const now = dateOf(t);
+      if (!CALM) CALM = [now.getFullYear(), now.getMonth()];
+      const [y, m] = CALM, first = new Date(y, m, 1), lead = (first.getDay() + 6) % 7, n = new Date(y, m + 1, 0).getDate(), d0 = DAY(first);
+      const max = Math.max(GOAL, ...Array.from({length:n}, (_, i) => dayPts(d0 + i)));
+      const move = k => { let mm = m + k, yy = y; if (mm < 0) { mm = 11; yy--; } if (mm > 11) { mm = 0; yy++; } CALM = [yy, mm]; draw(); };
+      body = el('div', {class:'cal'},
+        el('div', {class:'cal-top'},
+          el('button', {class:'btn small', type:'button', 'aria-label':'Previous month', onclick:() => move(-1)}, '‹'),
+          el('b', null, first.toLocaleDateString('en-GB', {month:'long', year:'numeric'})),
+          el('button', {class:'btn small', type:'button', 'aria-label':'Next month', onclick:() => move(1)}, '›')),
+        el('div', {class:'cal-g'},
+          ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(w => el('span', {class:'cal-h', 'aria-hidden':'true'}, w)),
+          Array.from({length:lead}, () => el('span')),
+          Array.from({length:n}, (_, i) => { const d = d0 + i, v = dayPts(d), lv = v ? Math.min(4, 1 + Math.floor(v / max * 3.99)) : 0;
+            return el('button', {class:'cal-d l' + lv + (d === t ? ' today' : '') + (d > t ? ' fut' : ''), type:'button', disabled:d > t, 'aria-label':dayLong(d) + ': ' + v + ' points', onclick:() => openDay(d)}, String(i + 1)); })),
+        el('p', {class:'tip'}, 'The darker the day, the more you practised. Tap a day to see what you did.'));
+    } else {
+      const days = Array.from({length:14}, (_, k) => t - 13 + k), vals = days.map(dayPts), max = Math.max(GOAL, ...vals);
+      body = el('div', {style:'display:grid;gap:8px'},
+        el('div', {class:'bars'}, days.map((d, k) => el('button', {class:'bar' + (d === t ? ' today' : ''), type:'button', style:'height:' + Math.max(3, Math.round(vals[k] / max * 100)) + '%', 'aria-label':dayLong(d) + ': ' + vals[k] + ' points', title:vals[k] + ' points', onclick:() => openDay(d)}))),
+        el('div', {class:'barlabels'}, el('span', null, 'Two weeks ago'), el('span', null, 'Today')),
+        el('p', {class:'tip'}, 'Tap a day to see what you practised.'));
+    }
+    put(sec, el('p', {class:'eyebrow'}, 'My study days'), seg, body);
+  };
+  draw();
+  return sec;
+}
+let RV = {m:'day', d:null, a:null, b:null, k:'E', u1:null, u2:null};   // Practise: review grammar by date or range
+function rangePanel() {
+  const sec = el('section', {class:'panel'});
+  const draw = () => {
+    const t = DAY();
+    if (RV.d == null) RV.d = t - 1;
+    if (RV.a == null) RV.a = t - 7;
+    if (RV.b == null) RV.b = t;
+    const seg = el('div', {class:'seg', role:'group', 'aria-label':'Choose units by'}, [['day', 'One day'], ['dates', 'From – to'], ['units', 'Units']].map(([k, l]) =>
+      el('button', {type:'button', 'aria-pressed':RV.m === k ? 'true' : 'false', onclick:() => { RV.m = k; draw(); }}, l)));
+    const dateIn = (lab, key) => { const i = el('input', {type:'date', class:'din', value:isoOf(RV[key]), max:isoOf(t), 'aria-label':lab});
+      i.addEventListener('change', () => { const v = dayFromIso(i.value); if (v != null) { RV[key] = Math.min(v, t); draw(); } }); return el('label', {class:'fld'}, el('span', null, lab), i); };
+    let us = [], title = '', ctrls = [];
+    if (RV.m === 'day') { ctrls = [dateIn('Day', 'd')]; us = unitsOn(RV.d); title = 'Review · ' + dayLong(RV.d); }
+    else if (RV.m === 'dates') { const a = Math.min(RV.a, RV.b), b = Math.max(RV.a, RV.b); ctrls = [el('div', {class:'flds'}, dateIn('From', 'a'), dateIn('To', 'b'))]; us = unitsOn(a, b); title = 'Review · ' + dayLong(a) + ' – ' + dayLong(b); }
+    else {
+      const lvSeg = el('div', {class:'seg', role:'group', 'aria-label':'Level'}, GLV.map(g => el('button', {type:'button', 'aria-pressed':RV.k === g.k ? 'true' : 'false', onclick:() => { RV.k = g.k; RV.u1 = RV.u2 = null; draw(); }}, g.n)));
+      const ls = UNITS.filter(U => U.id[0] === RV.k);
+      if (!ls.length) { ctrls = [lvSeg]; }
+      else {
+        if (RV.u1 == null || !ls.some(U => U.id === RV.u1)) RV.u1 = ls[0].id;
+        if (RV.u2 == null || !ls.some(U => U.id === RV.u2)) RV.u2 = ls[Math.min(ls.length - 1, 4)].id;
+        const sel = key => { const s = el('select', {class:'din', 'aria-label':key === 'u1' ? 'From unit' : 'To unit'}, ls.map(U => el('option', {value:U.id, selected:U.id === RV[key]}, U.id + ' · ' + U.title)));
+          s.addEventListener('change', () => { RV[key] = s.value; draw(); }); return s; };
+        const i1 = ls.findIndex(U => U.id === RV.u1), i2 = ls.findIndex(U => U.id === RV.u2);
+        us = ls.slice(Math.min(i1, i2), Math.max(i1, i2) + 1);
+        ctrls = [lvSeg, el('label', {class:'fld'}, el('span', null, 'From'), sel('u1')), el('label', {class:'fld'}, el('span', null, 'To'), sel('u2'))];
+        title = 'Review · ' + us[0].id + (us.length > 1 ? ' – ' + us[us.length - 1].id : '');
+      }
+    }
+    put(sec, el('p', {class:'eyebrow'}, 'Review by date or range'), el('p', {class:'tip'}, 'Choose the grammar units you practised on one day or a stretch of days, or any range of units.'), seg, ...ctrls,
+      el('p', {style:'margin:0;font-weight:600'}, us.length + ' unit' + (us.length === 1 ? '' : 's') + (us.length ? ': ' + us.slice(0, 8).map(U => U.id).join(', ') + (us.length > 8 ? '…' : '') : '')),
+      el('button', {class:'btn primary big', type:'button', disabled:!us.length, onclick:() => quizUnits(us, title)}, us.length ? 'Practise these units' : 'No units here yet'));
+  };
+  draw();
+  return sec;
+}
+
 function renderPractise() {
   const due = dueReview().length;
   const M = [
@@ -1890,7 +2023,8 @@ function renderPractise() {
   put(view,
     el('header', {class:'hello'}, el('p', {class:'eyebrow'}, 'Practise'), el('h1', null, 'Keep it fresh')),
     el('div', {class:'modes'}, M.map(([ic, t, d, fn, off]) => el('button', {class:'mode', type:'button', disabled:off ? true : null, style:off ? 'opacity:.45;cursor:default' : null, onclick:() => { if (!off) fn(); }},
-      el('span', {class:'ic', 'aria-hidden':'true'}, ic), el('span', null, el('b', null, t), el('span', null, d))))));
+      el('span', {class:'ic', 'aria-hidden':'true'}, ic), el('span', null, el('b', null, t), el('span', null, d))))),
+    rangePanel());
 }
 
 /* me tab */
@@ -1905,8 +2039,6 @@ function myWriting() {
   return items.sort((a, b) => b.d - a.d);
 }
 function renderMe() {
-  const t = DAY(); const days = Array.from({length:14}, (_, k) => t - 13 + k);
-  const vals = days.map(d => { const L = S.log[d]; return L ? points(L) : 0; }); const max = Math.max(GOAL, ...vals);
   const acc = accuracy();
   const pieces = myWriting();
   const size = el('div', {class:'seg', role:'group', 'aria-label':'Text size'}, [['normal', 'Normal text'], ['large', 'Large text']].map(([k, l]) => el('button', {type:'button', 'aria-pressed':S.set.size === k ? 'true' : 'false', onclick:() => { S.set.size = k; applySize(); touch('meta'); renderMe(); }}, l)));
@@ -1927,7 +2059,7 @@ function renderMe() {
       el('div', {class:'tile'}, el('b', {class:'num'}, unitsDone()), el('span', null, 'of ' + UNITS.length + ' grammar units passed')),
       el('div', {class:'tile'}, el('b', {class:'num'}, streak()), el('span', null, 'day streak')),
       el('div', {class:'tile'}, el('b', {class:'num'}, acc == null ? '–' : acc + '%'), el('span', null, 'right, last 30 days'))),
-    el('section', {class:'panel'}, el('p', {class:'eyebrow'}, 'Last 14 days'), el('div', {class:'bars', role:'img', 'aria-label':'Practice each day for the last 14 days'}, days.map((d, k) => el('i', {class:d === t ? 'today' : '', style:'height:' + Math.max(3, Math.round(vals[k] / max * 100)) + '%', title:vals[k] + ' points'}))), el('div', {class:'barlabels'}, el('span', null, 'Two weeks ago'), el('span', null, 'Today'))),
+    studyPanel(),
     el('button', {class:'item', type:'button', onclick:() => {
       const o = openOv('My writing');
       put(o.body, pieces.length ? el('div', {class:'list'}, pieces.map(p => el('div', {class:'box'}, el('p', {class:'eyebrow'}, p.title), el('p', {class:'tip'}, p.d ? dayName(p.d) : ''), el('p', {class:'rd', style:'white-space:pre-wrap;color:var(--ex)'}, p.t),
