@@ -1784,7 +1784,7 @@ function hiddenPart(c, x) {   // the part of a phrase that the learner has to su
   const ws = x.w.split(' ');
   if (ws.length < 2) return null;
   if (c.kind === 'pv' || x.pos === 'pv') { const p = ws.slice(1).filter(w => PARTICLES.includes(w.toLowerCase())); return p.length ? p.join(' ') : null; }
-  if (c.kind === 'coll' && x.pos === 'col') return ws[0];
+  if (c.kind === 'coll' && x.pos === 'col') { const w0 = ws.find(w => !STOP.has(w.toLowerCase())); return w0 ? w0.replace(/[^A-Za-z'-]/g, '') || null : null; }
   const cand = ws.filter(w => !STOP.has(w.toLowerCase().replace(/[^a-z']/g, '')) && w.replace(/[^A-Za-z]/g, '').length > 2);
   return cand.length ? cand.sort((a, b) => b.length - a.length)[0].replace(/[^A-Za-z'-]/g, '') : null;
 }
@@ -1829,7 +1829,10 @@ function wq(c, x, kind) {   // one question about a word or phrase
     if (!re.test(x.w)) return null;
     let alts;
     if (c.kind === 'pv' || x.pos === 'pv') alts = pickText(PARTICLES.filter(p => p !== h.toLowerCase()), 3, p => p, [h]);
-    else alts = pickText(c.items.filter(y => y !== x).map(y => hiddenPart(c, y)).filter(Boolean), 3, p => p, [h]);
+    else {   // wrong answers from the same unit first: they are the words a learner might really confuse
+      alts = pickText(x.u.items.filter(y => y !== x).map(y => hiddenPart(c, y)).filter(Boolean), 3, p => p, [h]);
+      if (alts.length < 3) alts = alts.concat(pickText(c.items.filter(y => y.u !== x.u).map(y => hiddenPart(c, y)).filter(Boolean), 3 - alts.length, p => p, [h, ...alts]));
+    }
     if (alts.length < 2) return null;
     return {kind:'mc', instr:Q_LABEL.part, q:x.w.replace(re, '$1_____'), qcls:'big', sub:x.def, o:[h, ...alts], a:0, x};
   }
