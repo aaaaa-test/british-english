@@ -273,7 +273,7 @@ select{width:100%;background:var(--panel-2);color:var(--text);border:1px solid v
 .claude p{margin:0}
 .claude .fix{font:400 19px/1.4 var(--f-read);color:var(--ex)}
 .sum{text-align:center;display:grid;gap:10px;padding-top:20px}
-.sum .big{font:600 56px/1 var(--f-ui);color:var(--word)}
+.sum .big:not(.btn){font:600 56px/1 var(--f-ui);color:var(--word)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--tabh) + env(safe-area-inset-bottom,0px) + 14px);z-index:60;background:var(--panel-2);border:1px solid var(--def);color:var(--text);border-radius:14px;padding:12px 16px;font-weight:500;max-width:min(420px,calc(100% - 32px));box-sizing:border-box;text-align:center}
 .confirm{display:grid;gap:10px;border:1px solid var(--bad);border-radius:14px;padding:14px}
 .wod .hw{font-size:clamp(34px,10vw,48px)}
