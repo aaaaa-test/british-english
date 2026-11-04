@@ -687,6 +687,45 @@ textarea.w:focus,input.w:focus{border-color:var(--def);outline:none}
 button:disabled,input:disabled,textarea:disabled,select:disabled{-webkit-text-fill-color:currentColor}
 .opt:disabled{opacity:1;cursor:default}
 input:disabled,textarea:disabled{opacity:1}
+
+/* study diary: clickable bars, the month calendar, and review by date or range */
+.bars .bar{display:block;background:var(--def);border:0;padding:0;border-radius:4px 4px 0 0;min-height:3px;cursor:pointer;width:100%}
+.bars .bar.today{background:var(--word)}
+.bars .bar:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.cal{display:grid;gap:10px}
+.cal-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cal-top b{font:600 16px/1.2 var(--f-ui)}
+.cal-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.cal-h{font:600 11px/1 var(--f-ui);color:var(--muted);text-align:center;padding:4px 0;letter-spacing:.06em}
+.cal-d{aspect-ratio:1;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);font:500 14px/1 var(--f-ui);cursor:pointer;padding:0;min-width:0}
+.cal-d.l1{background:rgba(25,181,174,.22)}
+.cal-d.l2{background:rgba(25,181,174,.45)}
+.cal-d.l3{background:rgba(25,181,174,.7);color:#001c1a}
+.cal-d.l4{background:var(--def);color:#001c1a}
+.cal-d.today{outline:2px solid var(--word);outline-offset:1px}
+.cal-d.fut{opacity:.35;cursor:default}
+.fld{display:grid;gap:6px;min-width:0}
+.fld>span{font:600 12px/1.2 var(--f-ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.flds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.din{width:100%;box-sizing:border-box;min-height:44px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;color:var(--text);font:500 16px/1.2 var(--f-ui);padding:8px 10px}
+.mode[disabled]{opacity:.5;cursor:default}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:0}
+/* unit pages: goals, steps, key ideas and writing to learn */
+.goals .gl{margin:0;padding-left:1.2em;display:grid;gap:6px;font:400 calc(17px * var(--rs))/1.45 var(--f-read)}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.steps li{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:center;font:500 15px/1.35 var(--f-ui)}
+.steps .tick{width:26px;height:26px;box-sizing:border-box;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:14px;color:#001c1a}
+.steps li.done .tick{background:var(--def);border-color:var(--def)}
+.steps li.done{color:var(--muted)}
+.keys{display:grid;gap:6px}
+.keys ul{margin:0;padding-left:1.2em;display:grid;gap:6px;font:400 calc(16px * var(--rs))/1.45 var(--f-read)}
+.keys li.mis::marker{color:var(--bad)}
+.tip.okc{color:var(--good)}
+.tip.noc{color:var(--bad)}
+.wstep{gap:10px}
+.wstep.locked{opacity:.45}
+.wstep .inl{width:100%;box-sizing:border-box;background:var(--panel-2);border:1.5px solid var(--line);border-radius:12px;color:var(--text);font:400 19px/1.3 var(--f-read);padding:10px 12px;min-height:48px}
+.wstep textarea.w.piece{min-height:84px}
 </style>
 </head>
 <body>
@@ -736,7 +775,7 @@ const BOOKS = [
   {id:'egs', sh:'Grammar', t:'English Grammar in Use', lv:'Supplementary Exercises', cefr:'B1–B2', ab:'SE', kind:'grammar', n:54},
   {id:'ielts', sh:'IELTS', t:'IELTS Preparation', lv:'Listening, Reading, Writing and Speaking', cefr:'Band 5–9', ab:'IE', kind:'ielts', n:0}
 ];
-const READY = new Set(['evu-e', 'avu']);   // books whose course file is written
+const READY = new Set(['evu-e', 'evu-p', 'avu']);   // books whose course file is written
 const BOOK = new Map(BOOKS.map(b => [b.id, b]));
 const shelfColour = b => (SHELVES.find(s => s.k === b.sh) || SHELVES[0]).c;
 const bookName = b => b.t + (b.lv && b.kind !== 'ielts' ? ' · ' + b.lv : '');
@@ -802,7 +841,9 @@ function pickVoices() {
   const all = speechSynthesis.getVoices();
   const gb = all.filter(v => /^en[-_]GB/i.test(v.lang));
   const pref = ['Google UK English Female', 'Google UK English Male', 'Daniel', 'Serena', 'Kate', 'Arthur', 'Martha', 'Stephanie', 'Oliver', 'Microsoft Sonia', 'Microsoft Libby', 'Microsoft Ryan', 'Microsoft Hazel', 'Microsoft George', 'Microsoft Susan'];
-  VOICES = gb.slice().sort((a, b) => { const ia = pref.findIndex(p => a.name.startsWith(p)), ib = pref.findIndex(p => b.name.startsWith(p)); return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib); });
+  const quality = v => /premium|natural|neural/i.test(v.name) ? 0 : /enhanced|google/i.test(v.name) ? 1 : v.localService === false ? 2 : 3;   // the downloaded high-quality voices first
+  const rank = v => { const i = pref.findIndex(p => v.name.startsWith(p)); return i < 0 ? 99 : i; };
+  VOICES = gb.slice().sort((a, b) => quality(a) - quality(b) || rank(a) - rank(b));
 }
 if (SPEECH) { pickVoices(); try { speechSynthesis.addEventListener('voiceschanged', pickVoices); } catch (e) { speechSynthesis.onvoiceschanged = pickVoices; } }
 function utter(text, v) {
@@ -1456,10 +1497,13 @@ const isLearnt = (c, x) => boxOf(c, x) >= 1;
 function grade(c, x, ok, mode) {   // mode: 'check' (just learnt), 'review', 'practice'
   const B = bs(c.id), t = DAY();
   const r = B.p[x.key] ? B.p[x.key].slice() : [0, t, 0, 0, t];
+  const was = r[0];
   r[2]++; r[4] = t;
   if (mode === 'practice') { if (!ok) r[3]++; }
   else if (ok) { r[0] = Math.min(7, r[0] + 1); r[1] = t + INT[r[0]]; }
   else { r[3]++; if (r[0] > 0) r[0] = 1; r[1] = t + 1; }
+  if (was < 1 && r[0] >= 1 && r[5] == null) r[5] = t;   // the day it was learnt
+  noteDay(r, t);   // and the days it was studied
   B.p[x.key] = r; touchB(c.id);
 }
 function markItem(c, key, ok, inReview) {
@@ -1507,7 +1551,7 @@ const starKey = x => x.key;
 const starsOf = c => (S.stars[c.id] || []).map(k => c.byKey.get(k)).filter(Boolean);
 function passUnit(c, u) {   // passing a unit counts its words as learnt
   const B = bs(c.id), t = DAY();
-  for (const x of u.items) { const r = B.p[x.key]; if (!r || r[0] < 1) B.p[x.key] = [1, t + 1, (r ? r[2] : 0) + 1, r ? r[3] : 0, t]; }
+  for (const x of u.items) { const r = B.p[x.key]; if (!r || r[0] < 1) { const n = [1, t + 1, (r ? r[2] : 0) + 1, r ? r[3] : 0, t, t, r && Array.isArray(r[6]) ? r[6] : []]; noteDay(n, t); B.p[x.key] = n; } }
   touchB(c.id);
 }
 
@@ -2128,15 +2172,16 @@ function checkQ(c, x) {   // a quick question about a word just learnt or due fo
 }
 
 /* ---------- starting sessions ---------- */
-function startToday(c) {
-  const due = dueItems(c).slice(0, 80).map(x => ({k:'q', q:checkQ(c, x), mode:'review', x})).filter(s => s.q);
-  const dq = dueQs(c).slice(0, 20).map(k => itemOf(c, k)).filter(Boolean).map(q => ({k:'q', q, mode:'r'}));
+function startToday(c, only) {   // only: undefined (reviews, then new words), 'review' or 'new'
+  const due = only === 'new' ? [] : dueItems(c).slice(0, 80).map(x => ({k:'q', q:checkQ(c, x), mode:'review', x})).filter(s => s.q);
+  const dq = only === 'new' ? [] : dueQs(c).slice(0, 20).map(k => itemOf(c, k)).filter(Boolean).map(q => ({k:'q', q, mode:'r'}));
   const left = Math.max(0, S.set.daily - todayLog()[0]);
-  const fresh = nextNew(c, left || (due.length + dq.length ? 0 : 5)).map(x => ({k:'learn', x}));
+  const fresh = only === 'review' ? [] : nextNew(c, only === 'new' ? (left || 5) : (left || (due.length + dq.length ? 0 : 5))).map(x => ({k:'learn', x}));
   const steps = [...shuffle([...due, ...dq]), ...fresh];
-  if (!steps.length) { toast('Nothing to do here yet'); return; }
-  const o = openOv("Today's practice");
-  run({o, c, title:"Today's practice", steps, again:() => { closeOv(); const more = nextNew(c, 5); if (more.length) { const o2 = openOv('Five more'); run({o:o2, c, title:'Five more', steps:more.map(x => ({k:'learn', x}))}); } }, againLabel:'Learn five more'});
+  if (!steps.length) { toast(only === 'review' ? 'No reviews are due today' : 'Nothing to do here yet'); return; }
+  const title = only === 'review' ? 'Reviews due today' : only === 'new' ? 'New words' : "Today's practice";
+  const o = openOv(title);
+  run({o, c, title, steps, again:() => { closeOv(); const more = nextNew(c, 5); if (more.length) { const o2 = openOv('Five more'); run({o:o2, c, title:'Five more', steps:more.map(x => ({k:'learn', x}))}); } }, againLabel:'Learn five more'});
 }
 function startUnit(c, u, o) {
   const qs = unitQs(c, u);
@@ -2188,6 +2233,357 @@ function startTest(c) {   // the placement test: wrong answers add their units t
     passMsg:() => 'The units for the questions you got wrong are now first in Up next.'});
 }
 
+/* ---------- the study diary (as in 5000 British Words): what was learnt and studied each day ---------- */
+function noteDay(r, t) {   // a word's record keeps the last 40 days on which it was studied
+  const ds = Array.isArray(r[6]) ? r[6].slice() : [];
+  if (ds[ds.length - 1] !== t) ds.push(t);
+  r[6] = ds.length > 40 ? ds.slice(-40) : ds;
+}
+const studyDays = r => !r ? [] : Array.isArray(r[6]) ? r[6] : r[4] != null ? [r[4]] : [];
+const learntOn = (r, d0, d1) => r[5] != null && r[5] >= d0 && r[5] <= d1;
+function itemsOn(c, d0, d1 = d0, which = 'all') {   // which: 'new' (learnt then) or 'all' (learnt, reviewed or practised then)
+  const B = bs(c.id);
+  return c.items.filter(x => { const r = B.p[x.key]; if (!r) return false;
+    return which === 'new' ? learntOn(r, d0, d1) : learntOn(r, d0, d1) || studyDays(r).some(d => d >= d0 && d <= d1); });
+}
+const dateOf = d => { const x = new Date(d * 864e5); return new Date(x.getUTCFullYear(), x.getUTCMonth(), x.getUTCDate()); };
+const dayName = (d, long) => dateOf(d).toLocaleDateString('en-GB', long ? {weekday:'long', day:'numeric', month:'long', year:'numeric'} : {day:'numeric', month:'short', year:'numeric'});
+const isoOf = d => { const x = dateOf(d); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); };
+const dayFromIso = s => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || ''); return m ? DAY(new Date(+m[1], +m[2] - 1, +m[3])) : null; };
+const dayTotal = d => { const L = S.log[d]; return L ? L[0] + L[1] + L[2] + L[3] : 0; };
+function modeBtn(ic, title, desc, f, off) {
+  return el('button', {class:'mode', type:'button', disabled:!!off, onclick:f}, el('span', {class:'ic', 'aria-hidden':'true'}, ic), el('span', null, el('b', null, title), el('span', null, desc)));
+}
+function startListReview(c, list, title) {   // a chosen set of words, each once, in a mixed order (their review timetable stays as it is)
+  const xs = list.filter(x => usable(c, x));
+  if (!xs.length) { toast('There are no words in this choice'); return; }
+  if (xs.length > 60) toast('60 of the ' + xs.length + ' words, picked at random');
+  const steps = shuffle(xs).slice(0, 60).map(x => ({k:'q', q:checkQ(c, x), mode:'practice', x})).filter(s => s.q);
+  const o = openOv(title);
+  run({o, c, title, steps, again:() => { closeOv(); startListReview(c, list, title); }});
+}
+function openDay(d) {   // everything studied on one day, book by book
+  const o = openOv(dayName(d));
+  const draw = () => {
+    const L = S.log[d] || [0, 0, 0, 0], ans = L[2] + L[3];
+    const books = [];
+    for (const b of BOOKS) {
+      const B = S.b[b.id]; if (!B || !B.p) continue;
+      const fresh = [], all = [];
+      for (const [k, r] of Object.entries(B.p)) { const n = learntOn(r, d, d); if (n || studyDays(r).includes(d)) { all.push(k); if (n) fresh.push(k); } }
+      const units = Object.entries(B.u || {}).filter(([, r]) => r && r[2] === d);
+      if (!all.length && !units.length) continue;
+      const c = COURSE.get(b.id);
+      const items = ks => c ? ks.map(k => c.byKey.get(k)).filter(Boolean) : [];
+      const words = ks => c ? wordList(c, items(ks)) : el('p', {class:'chips'}, ks.slice(0, 80).map(k => el('span', {class:'chip'}, k.slice(k.indexOf(':') + 1))));
+      const rest = all.filter(k => !fresh.includes(k));
+      books.push(el('section', {class:'panel'},
+        el('p', {class:'eyebrow'}, bookName(b)),
+        el('p', {style:'margin:0'}, [fresh.length ? fresh.length + ' learnt' : null, rest.length ? rest.length + ' reviewed or practised' : null, units.length ? units.length + ' unit' + (units.length === 1 ? '' : 's') + ' opened or practised' : null].filter(Boolean).join(' · ')),
+        units.length ? el('p', {class:'tip'}, units.map(([n, r]) => (isNaN(+n) ? n : 'Unit ' + n) + (r[1] ? ' (best ' + r[0] + '%)' : '')).join(' · ')) : null,
+        fresh.length ? el('details', {class:'more', open:true}, el('summary', null, 'Learnt this day (' + fresh.length + ')'), el('div', {class:'in'}, words(fresh))) : null,
+        rest.length ? el('details', {class:'more'}, el('summary', null, 'Reviewed or practised (' + rest.length + ')'), el('div', {class:'in'}, words(rest))) : null,
+        all.length ? (c ? el('button', {class:'btn primary', type:'button', onclick:() => startListReview(c, items(all), 'Review · ' + dayName(d))}, 'Review these ' + all.length)
+          : el('button', {class:'btn', type:'button', onclick:() => { S.cur = b.id; touch('meta'); closeOv(); switchTab('practise'); }}, 'Open this book to review them')) : null));
+    }
+    put(o.body,
+      el('header', {class:'hello'}, el('p', {class:'eyebrow'}, d === DAY() ? 'Today' : d === DAY() - 1 ? 'Yesterday' : 'Study diary'), el('h1', null, dayName(d, true))),
+      el('div', {class:'tiles'},
+        el('div', {class:'tile'}, el('b', {class:'num'}, fmt(L[0])), el('span', null, 'new words and phrases')),
+        el('div', {class:'tile'}, el('b', {class:'num'}, fmt(L[1])), el('span', null, 'reviews')),
+        el('div', {class:'tile'}, el('b', {class:'num'}, fmt(ans)), el('span', null, 'answers')),
+        el('div', {class:'tile'}, el('b', {class:'num'}, ans ? Math.round(L[2] / ans * 100) + '%' : '–'), el('span', null, 'correct'))),
+      ...books,
+      books.length ? null : el('p', {class:'empty'}, ans + L[0] + L[1] ? 'There is no word list for this day. Lists are kept for each day from now on.' : 'Nothing was studied on this day.'));
+  };
+  draw(); o.onReturn(draw);
+}
+let MEV = 'days', CALM = null;   // Me: the last 14 days or a month calendar, and the month it shows
+function studyPanel() {
+  const sec = el('section', {class:'panel'});
+  const draw = () => {
+    const t = DAY();
+    const seg = el('div', {class:'seg', role:'group', 'aria-label':'Show my study days as'}, [['days', 'Last 14 days'], ['cal', 'Calendar']].map(([k, l]) =>
+      el('button', {type:'button', 'aria-pressed':MEV === k ? 'true' : 'false', onclick:() => { MEV = k; draw(); }}, l)));
+    let body;
+    if (MEV === 'cal') {
+      const now = dateOf(t);
+      if (!CALM) CALM = [now.getFullYear(), now.getMonth()];
+      const [y, m] = CALM, first = new Date(y, m, 1), lead = (first.getDay() + 6) % 7, n = new Date(y, m + 1, 0).getDate(), d0 = DAY(first);
+      const max = Math.max(5, ...Array.from({length:n}, (_, i) => dayTotal(d0 + i)));
+      const move = k => { let mm = m + k, yy = y; if (mm < 0) { mm = 11; yy--; } if (mm > 11) { mm = 0; yy++; } CALM = [yy, mm]; draw(); };
+      body = el('div', {class:'cal'},
+        el('div', {class:'cal-top'},
+          el('button', {class:'btn small', type:'button', 'aria-label':'Previous month', onclick:() => move(-1)}, svg(ICON.prev)),
+          el('b', null, first.toLocaleDateString('en-GB', {month:'long', year:'numeric'})),
+          el('button', {class:'btn small', type:'button', 'aria-label':'Next month', onclick:() => move(1)}, svg(ICON.next))),
+        el('div', {class:'cal-g'},
+          ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(w => el('span', {class:'cal-h', 'aria-hidden':'true'}, w)),
+          Array.from({length:lead}, () => el('span')),
+          Array.from({length:n}, (_, i) => { const d = d0 + i, v = dayTotal(d), lv = v ? Math.min(4, 1 + Math.floor(v / max * 3.99)) : 0;
+            return el('button', {class:'cal-d l' + lv + (d === t ? ' today' : '') + (d > t ? ' fut' : ''), type:'button', disabled:d > t, 'aria-label':dayName(d) + ': ' + v + ' answers and words', onclick:() => openDay(d)}, String(i + 1)); })),
+        el('p', {class:'tip'}, 'The darker the day, the more you studied. Tap a day to see what you did.'));
+    } else {
+      const days = Array.from({length:14}, (_, k) => t - 13 + k), vals = days.map(dayTotal), max = Math.max(5, ...vals);
+      body = el('div', {style:'display:grid;gap:8px'},
+        el('div', {class:'bars'}, days.map((d, k) => el('button', {class:'bar' + (d === t ? ' today' : ''), type:'button', style:'height:' + Math.max(3, Math.round(vals[k] / max * 100)) + '%', 'aria-label':dayName(d) + ': ' + vals[k], title:String(vals[k]), onclick:() => openDay(d)}))),
+        el('div', {class:'barlabels'}, el('span', null, 'Two weeks ago'), el('span', null, 'Today')),
+        el('p', {class:'tip'}, 'Tap a day to see what you studied.'));
+    }
+    put(sec, el('p', {class:'eyebrow'}, 'My study days'), seg, body);
+  };
+  draw();
+  return sec;
+}
+let RV = {m:'day', d:null, a:null, b:null, which:'all', u1:null, u2:null, only:true};   // Practise: review by date or range
+function rangePanel(c) {
+  const sec = el('section', {class:'panel'});
+  const draw = () => {
+    const t = DAY();
+    if (RV.d == null) RV.d = t - 1;
+    if (RV.a == null) RV.a = t - 7;
+    if (RV.b == null) RV.b = t;
+    const seg = el('div', {class:'seg', role:'group', 'aria-label':'Choose words by'}, [['day', 'One day'], ['dates', 'From – to'], ['units', 'Units']].map(([k, l]) =>
+      el('button', {type:'button', 'aria-pressed':RV.m === k ? 'true' : 'false', onclick:() => { RV.m = k; draw(); }}, l)));
+    const dateIn = (lab, key) => { const i = el('input', {type:'date', class:'din', value:isoOf(RV[key]), max:isoOf(t), 'aria-label':lab});
+      i.addEventListener('change', () => { const v = dayFromIso(i.value); if (v != null) { RV[key] = Math.min(v, t); draw(); } }); return el('label', {class:'fld'}, el('span', null, lab), i); };
+    const whichSeg = el('div', {class:'seg', role:'group', 'aria-label':'Which words'}, [['all', 'Everything I studied'], ['new', 'Only what I learnt']].map(([k, l]) =>
+      el('button', {type:'button', 'aria-pressed':RV.which === k ? 'true' : 'false', onclick:() => { RV.which = k; draw(); }}, l)));
+    let list = [], title = '', ctrls = [];
+    if (RV.m === 'day') { ctrls = [dateIn('Day', 'd'), whichSeg]; list = itemsOn(c, RV.d, RV.d, RV.which); title = 'Review · ' + dayName(RV.d); }
+    else if (RV.m === 'dates') {
+      const a = Math.min(RV.a, RV.b), b = Math.max(RV.a, RV.b);
+      ctrls = [el('div', {class:'flds'}, dateIn('From', 'a'), dateIn('To', 'b')), whichSeg]; list = itemsOn(c, a, b, RV.which); title = 'Review · ' + dayName(a) + ' – ' + dayName(b);
+    } else {
+      const us = c.study.filter(u => u.items.length);
+      if (!us.length) { put(sec, el('p', {class:'eyebrow'}, 'Review by date or range'), el('p', {class:'empty'}, 'This book has no word lists to review.')); return; }
+      if (RV.u1 == null || !us.some(u => String(u.n) === RV.u1)) RV.u1 = String(us[0].n);
+      if (RV.u2 == null || !us.some(u => String(u.n) === RV.u2)) RV.u2 = RV.u1;
+      const sel = key => { const s = el('select', {class:'din', 'aria-label':key === 'u1' ? 'From unit' : 'To unit'}, us.map(u => el('option', {value:String(u.n), selected:String(u.n) === RV[key]}, u.lab + ' · ' + u.t)));
+        s.addEventListener('change', () => { RV[key] = s.value; draw(); }); return s; };
+      const i1 = us.findIndex(u => String(u.n) === RV.u1), i2 = us.findIndex(u => String(u.n) === RV.u2);
+      const from = Math.min(i1, i2), to = Math.max(i1, i2);
+      const onlyBox = el('input', {type:'checkbox', id:'rv-only', role:'switch'}); onlyBox.checked = RV.only; onlyBox.addEventListener('change', () => { RV.only = onlyBox.checked; draw(); });
+      ctrls = [el('label', {class:'fld'}, el('span', null, 'From'), sel('u1')), el('label', {class:'fld'}, el('span', null, 'To'), sel('u2')),
+        el('div', {class:'switch'}, el('label', {for:'rv-only'}, 'Only words I have learnt'), onlyBox)];
+      list = us.slice(from, to + 1).flatMap(u => u.items).filter(x => !RV.only || isLearnt(c, x));
+      title = 'Review · ' + us[from].lab + (to > from ? ' – ' + us[to].lab : '');
+    }
+    put(sec, el('p', {class:'eyebrow'}, 'Review by date or range'), el('p', {class:'tip'}, 'Choose one day, a stretch of days, or a range of units, whatever the date.'), seg, ...ctrls,
+      el('p', {style:'margin:0;font-weight:600'}, list.length + ' word' + (list.length === 1 ? '' : 's') + ' and phrase' + (list.length === 1 ? '' : 's')),
+      list.length ? el('details', {class:'more'}, el('summary', null, 'See them'), el('div', {class:'in'}, wordList(c, list.slice(0, 200)))) : null,
+      el('button', {class:'btn primary big', type:'button', disabled:!list.length, onclick:() => startListReview(c, list, title)}, list.length ? 'Review ' + Math.min(60, list.length) + (list.length === 1 ? ' word' : ' words') : 'Nothing to review here yet'));
+  };
+  draw();
+  return sec;
+}
+
+/* ---------- every unit: learning goals, the key ideas checked, and writing to learn ---------- */
+const unmd = s => String(s || '').replace(/\*\*|\*|\[|\]/g, '').replace(/\s+/g, ' ').trim();
+const plur = p => /(s|x|sh|ch)$/.test(p) ? p + 'es' : p + 's';
+const listJoin = a => a.length <= 1 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+const capF = s => s ? s[0].toUpperCase() + s.slice(1) : s;
+const taskText = t => unmd(typeof t === 'string' ? t : (t || []).map(b => b.p || b['-'] || (b.ul || b.ol || []).join('; ') || '').join(' '));
+function unitGoals(c, u) {   // can-do statements: one for each part of the unit, then the writing task
+  if (u.goals) return u.goals;
+  const out = [];
+  const verb = c.kind === 'pron' ? 'hear and say' : c.kind === 'grammar' ? 'use' : 'understand and use';
+  const line = (name, xs) => { const ws = xs.slice(0, 3).map(x => x.w), more = xs.length - ws.length; return name + ': ' + verb + ' ' + ws.join(', ') + (more > 0 ? ' and ' + more + ' more' : ''); };
+  const gs = Object.keys(u.groups || {});
+  for (const g of gs) { const xs = u.items.filter(x => x.g === g); out.push(xs.length ? line(unmd(u.groups[g]), xs) : 'Understand ' + unmd(u.groups[g]).replace(/^./, s => s.toLowerCase())); }
+  if (!gs.length && u.items.length) out.push(line(u.t, u.items));
+  if (!gs.length && !u.items.length) for (const b of u.L || []) if (b.h != null) out.push('Understand ' + unmd(String(b.h).replace(/^[A-H]\s*[·.:–-]?\s*/, '')));
+  if (u.qn) out.push('Answer ' + u.qn + ' exercise questions on ' + u.t.replace(/^./, s => s.toLowerCase()));
+  if (u.O) out.push('Write about yourself: ' + taskText(u.O).replace(/[.?!]\s*$/, ''));
+  else if (u.task && u.task.prompt) out.push('Write a full answer to the task in the time given');
+  return out.slice(0, 8);
+}
+function mcQ(instr, q, right, wrongs, why, extra) {
+  const opts = [right, ...[...new Set(wrongs)].filter(w => w && w !== right).slice(0, 3)];
+  return Object.assign({kind:'mc', instr, q, o:opts, a:0, why, label:'Check your understanding'}, extra || {});
+}
+function conceptQs(c, u) {   // questions made from the unit's own explanations: its warnings, tables, patterns and meanings
+  if (u._cq) return u._cq;
+  const qs = [], seen = new Set();
+  const add = q => { if (!q || q.o.length < 2) return; const k = q.q + '|' + q.o.slice().sort().join('|'); if (!seen.has(k)) { seen.add(k); qs.push(q); } };
+  const texts = (u.L || []).map(b => b.x != null ? b.x : b.tip != null ? b.tip : b.p != null ? b.p : b['!'] != null ? b['!'] : null).filter(t => t != null).map(String);
+  for (const s of texts) {   // 1. the right form and the wrong one: *right* (not *wrong* or *wrong*)
+    const re = /\*([^*]{1,70})\*\s*\((?:not|NOT)\s+\*([^*]{1,70})\*(?:\s*(?:,|or)\s*\*([^*]{1,70})\*)?\)/g; let m;
+    while ((m = re.exec(s))) {
+      const right = m[1].trim(), wrongs = [m[2], m[3]].filter(Boolean).map(t => t.trim());
+      const pre = unmd(s.slice(0, m.index).replace(/^[\s\S]*[.!?:;]\s+/, ''));
+      const post = unmd((s.slice(re.lastIndex).match(/^[^.!?;]*[.!?]?/) || [''])[0]);
+      const frame = (pre + ' ___ ' + post).replace(/\s+/g, ' ').replace(/\s+([.!?,;:])/g, '$1').trim();
+      add(mcQ('Which is correct?', frame.length > 6 ? frame : 'Choose the correct English.', right, wrongs, unmd(s)));
+    }
+  }
+  for (const b of u.L || []) if (b.t && b.hd && b.t.length >= 4) {   // 2. tables: find the form in another column
+    const head = b.t[0].map(unmd), rows = b.t.slice(1).filter(r => r.length === head.length).map(r => r.map(unmd));
+    for (let j = 1; j < head.length; j++) {
+      const col = [...new Set(rows.map(r => r[j]).filter(v => v && !/^[–-]$/.test(v)))];
+      if (col.length < 3) continue;
+      for (const r of rows.slice(0, 4)) {
+        if (!r[0] || !r[j] || /^[–-]$/.test(r[j])) continue;
+        add(mcQ('Use what you learnt in the table.', (head[0] ? head[0] + ': ' : '') + r[0] + ' → ' + (head[j] || '?') + '?', r[j], sample(col.filter(v => v !== r[j]), 3)));
+      }
+    }
+  }
+  const arrows = [], eqs = [];
+  for (const s of texts) {
+    const t = unmd(s); let m;
+    const ra = /([A-Za-z][A-Za-z' -]{0,24}?)\s*→\s*([A-Za-z][A-Za-z' -]{0,24})/g;
+    while ((m = ra.exec(t))) { const a = m[1].trim(), b = m[2].trim(); if (a && b && a !== b && a.split(' ').length <= 3 && b.split(' ').length <= 3) arrows.push([a, b]); }
+    const re2 = /([A-Za-z][A-Za-z.' -]{0,20}?)\s+=\s+([a-z][^,;.)]{1,40})/g;
+    while ((m = re2.exec(t))) eqs.push([m[1].trim(), m[2].trim()]);
+  }
+  if (arrows.length >= 4) for (const [a, b] of arrows.slice(0, 5)) add(mcQ('Complete the pattern.', a + ' → ___', b, sample(arrows.map(p => p[1]).filter(v => v !== b), 3)));   // 3. word-building patterns
+  if (eqs.length >= 3) for (const [a, b] of eqs.slice(0, 5)) add(mcQ('What does it mean?', a, b, sample(eqs.map(p => p[1]).filter(v => v !== b), 3)));   // 4. meanings given with =
+  const xs = u.items.filter(x => x.def && x.ex && /\[.+?\]/.test(x.ex));   // 5. does the word mean this here?
+  if (xs.length >= 4) {
+    const n = Math.max(4, 8 - qs.length);
+    xs.slice(0, n).forEach((x, k) => {
+      const truth = k % 2 === 0, other = truth ? null : xs.find(y => y !== x && y.def !== x.def && y.g === x.g) || xs.find(y => y !== x && y.def !== x.def);
+      if (!truth && !other) return;
+      qs.push({kind:'mc', instr:'True or false? In this sentence, "' + x.w + '" means: ' + (truth ? x.def : other.def), q:'→ ' + x.ex, qcls:'ex', o:['True', 'False'], a:truth ? 0 : 1,
+        why:x.w + ': ' + x.def, label:'Check your understanding'});
+    });
+  }
+  u._cq = qs;
+  return qs;
+}
+const writeItems = u => u.items.filter(x => x.w && x.ex && /\[.+?\]/.test(x.ex));
+function unitSteps(c, u, nq) {   // the unit's steps, ticked when done
+  const B = bs(c.id), r = urec(c, u), cq = conceptQs(c, u).length, wx = writeItems(u), W = B.w || {};
+  const wn = wx.filter(x => (W[x.key] || 0) >= 2).length, kb = (B.k || {})[u.n];
+  const rows = [
+    ['Read and listen to the explanations', !!r],
+    cq ? ['Check your understanding' + (kb != null ? ' · best ' + kb + '%' : ''), kb != null && kb >= 80] : null,
+    wx.length ? ['Write to learn · ' + wn + ' of ' + wx.length + ' written', wn >= wx.length] : null,
+    nq ? ['Practise · ' + (r && r[1] ? 'best ' + r[0] + '%' : 'pass with 80%'), unitPassed(c, u)] : null,
+    u.O ? ['Over to you · write about yourself', !!(B.o[u.n] && B.o[u.n].t)] : null].filter(Boolean);
+  return el('ol', {class:'steps'}, rows.map(([t, done]) => el('li', {class:done ? 'done' : ''}, el('span', {class:'tick', 'aria-hidden':'true'}, done ? '✓' : ''), el('span', null, t + (done ? ' – done' : '')))));
+}
+function goalsPanel(c, u, nq) {
+  const goals = unitGoals(c, u), gs = Object.keys(u.groups || {}), n = u.items.length;
+  const pc = {}; for (const x of u.items) { const p = posName(c, x); if (p) pc[p] = (pc[p] || 0) + 1; }
+  const kinds = Object.entries(pc).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([p, k]) => k + ' ' + (k === 1 ? p : plur(p)));
+  const sum = n ? 'This unit has ' + n + ' words and phrases' + (gs.length > 1 ? ' in ' + gs.length + ' parts' : '') + '.' + (kinds.length && c.kind !== 'pron' ? ' ' + capF(listJoin(kinds)) + '.' : '') : null;
+  return el('section', {class:'panel goals'},
+    el('p', {class:'eyebrow', style:'color:var(--def)'}, 'Learning goals'),
+    el('p', {style:'margin:0;font-weight:600'}, 'By the end of this unit you can:'),
+    el('ul', {class:'gl'}, goals.map(g => el('li', null, g))),
+    sum ? el('p', {class:'tip'}, sum) : null,
+    el('p', {class:'eyebrow', style:'margin-top:4px'}, 'Your steps'),
+    unitSteps(c, u, nq));
+}
+function understandPanel(c, u) {
+  const n = conceptQs(c, u).length; if (!n) return null;
+  const kb = (bs(c.id).k || {})[u.n];
+  const rules = (u.L || []).filter(b => b.tip != null || b.x != null);
+  return el('section', {class:'panel'},
+    el('p', {class:'eyebrow', style:'color:var(--def)'}, 'Check your understanding'),
+    rules.length ? el('div', {class:'keys'}, el('p', {class:'tip'}, 'Remember'), el('ul', null, rules.map(b => el('li', {class:b.x != null ? 'mis' : '', html:hl(b.x != null ? b.x : b.tip)})))) : null,
+    el('p', {style:'margin:0'}, n + ' quick questions on the ideas and words in this unit.' + (kb != null ? ' Your best: ' + kb + '%.' : ' Aim for 80%.')),
+    el('button', {class:'btn teal big', type:'button', onclick:() => startConcept(c, u, openOv(u.lab + ' · Check your understanding'))}, kb != null ? 'Check again' : 'Check my understanding'));
+}
+function startConcept(c, u, o) {
+  const qs = conceptQs(c, u);
+  if (!qs.length) { toast('There are no questions here'); return; }
+  run({o, c, title:u.lab + ' · Understanding', steps:shuffle(qs).map(q => ({k:'q', q, mode:'again'})),
+    onEnd:score => { const B = bs(c.id), K = B.k || (B.k = {}); K[u.n] = Math.max(K[u.n] || 0, score); touchB(c.id); },
+    passMsg:score => (score >= 80 ? 'You have understood the main ideas of this unit.' : 'Read the explanations again, then check once more.'),
+    back:goBack, backLabel:'Back to the unit', again:() => startConcept(c, u, o)});
+}
+function writePanel(c, u) {
+  const xs = writeItems(u); if (!xs.length) return null;
+  const W = bs(c.id).w || {}, done = xs.filter(x => (W[x.key] || 0) >= 2).length;
+  return el('section', {class:'panel'},
+    el('p', {class:'eyebrow', style:'color:var(--word)'}, 'Write to learn'),
+    el('p', {style:'margin:0'}, 'Writing words yourself makes them stick. For each word: copy the example, cover it and write the word from memory, then write a sentence of your own.'),
+    el('div', {class:'pbar'}, el('i', {style:'width:' + Math.round(done / xs.length * 100) + '%'})),
+    el('p', {class:'tip'}, done + ' of ' + xs.length + ' written'),
+    el('button', {class:'btn primary big', type:'button', onclick:() => startWriting(c, u, openOv(u.lab + ' · Write to learn'))}, !done ? 'Start writing' : done >= xs.length ? 'Write them again' : 'Carry on writing'));
+}
+function hasWord(v, x) {   // does the learner's sentence use the word or phrase (in any of its forms)?
+  const t = ' ' + norm(v) + ' ';
+  if (forms(x).some(f => f && t.includes(' ' + norm(f) + ' '))) return true;
+  const parts = norm(x.w).split(' ').filter(w => w.length > 2 && !['someone', 'something', 'your', 'the'].includes(w));
+  return parts.length > 1 && parts.every(w => t.includes(' ' + w) || t.includes(w + ' '));
+}
+function startWriting(c, u, o) {
+  const xs = writeItems(u), B = bs(c.id), W = B.w || (B.w = {});
+  let i = xs.findIndex(x => (W[x.key] || 0) < 2); if (i < 0) i = 0;
+  const mark = (x, lv) => { if ((W[x.key] || 0) < lv) { W[x.key] = lv; const r = B.p[x.key]; if (r) noteDay(r, DAY()); touchB(c.id); } };
+  const draw = () => {
+    const x = xs[i];
+    const full = x.ex.replace(/[\[\]]/g, '');
+    const targets = (x.ex.match(/\[(.+?)\]/g) || []).map(s => s.slice(1, -1));
+    const gapped = x.ex.replace(/\[(.+?)\]/g, '_____');
+    const nk = c.id + '|' + x.key;
+    let stage = (W[x.key] || 0) >= 1 ? 2 : 0;
+    const msg = () => el('p', {class:'tip', role:'status'});
+    // 1 copy
+    const in1 = el('textarea', {class:'w piece', rows:'2', 'aria-label':'Copy the example sentence', ...noFix, autocapitalize:'sentences'});
+    const m1 = msg();
+    const s1 = el('section', {class:'panel wstep'}, el('p', {class:'eyebrow'}, '1 · Copy the example'),
+      el('p', {class:'exl'}, el('span', null, exNodes(x.ex)), sayBtn(full, 'sm')), in1,
+      el('button', {class:'btn teal', type:'button', onclick:() => {
+        if (gMatch(in1.value, [full], false)) { m1.textContent = '✓ Well copied.'; m1.className = 'tip okc'; if (stage < 1) { stage = 1; steps(); } }
+        else { m1.textContent = 'Not quite the same yet. Check each word and try again.'; m1.className = 'tip noc'; }
+      }}, 'Check'), m1);
+    // 2 recall
+    const in2 = el('input', {class:'inl', type:'text', 'aria-label':'The missing words', ...noFix, enterkeyhint:'done'});
+    const m2 = msg();
+    const check2 = () => {
+      const ok = gMatch(in2.value, [targets.join(' '), x.w, ...forms(x)], false);
+      if (ok) { m2.textContent = '✓ Right: ' + targets.join(' … '); m2.className = 'tip okc'; mark(x, 1); if (stage < 2) { stage = 2; steps(); } }
+      else { m2.textContent = 'Not quite. Look back at the example if you need to, then try again.'; m2.className = 'tip noc'; }
+    };
+    in2.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); check2(); } });
+    const s2 = el('section', {class:'panel wstep'}, el('p', {class:'eyebrow'}, '2 · Cover it and write the missing words'),
+      el('p', {class:'tip'}, x.def), el('p', {class:'exl'}, el('span', null, '→ ' + gapped)), in2,
+      el('button', {class:'btn teal', type:'button', onclick:check2}, 'Check'), m2);
+    // 3 your own sentence
+    const in3 = el('textarea', {class:'w piece', rows:'3', 'aria-label':'Your own sentence', ...noFix, autocapitalize:'sentences', placeholder:'Use "' + x.w + '" to say something true about you…'});
+    in3.value = (S.notes[nk] && S.notes[nk].t) || '';
+    const m3 = msg(), out = el('div', {class:'claude', hidden:true});
+    const save3 = () => {
+      const v = in3.value.trim();
+      if (wordCount(v) < 3) { m3.textContent = 'Write a whole sentence.'; m3.className = 'tip noc'; return false; }
+      if (!hasWord(v, x)) { m3.textContent = 'Use "' + x.w + '" in your sentence.'; m3.className = 'tip noc'; return false; }
+      S.notes[nk] = {t:v.slice(0, 600), d:DAY(), f:(S.notes[nk] && S.notes[nk].t === v) ? S.notes[nk].f : null}; touch('meta');
+      mark(x, 2); m3.textContent = '✓ Saved to My writing.'; m3.className = 'tip okc'; return true;
+    };
+    const ask = el('button', {class:'btn small needs-claude', type:'button', hidden:!SAMPLE}, 'Check with Claude');
+    ask.addEventListener('click', async () => {
+      if (!save3()) return;
+      ask.disabled = true; out.hidden = false; put(out, el('p', {class:'muted'}, 'Thinking…'));
+      try { const f = normFeedback(await askClaude(feedbackPrompt('The learner is practising "' + x.w + '" (' + posName(c, x) + ': ' + x.def + '). Task: write one true sentence about themselves that uses it correctly and naturally.', in3.value.trim()))); S.notes[nk].f = f; touch('meta'); showFeedback(out, f); }
+      catch (e) { claudeError(out, e); } finally { ask.disabled = false; }
+    });
+    const s3 = el('section', {class:'panel wstep'}, el('p', {class:'eyebrow'}, '3 · Write your own sentence'), in3,
+      el('div', {class:'row'}, el('button', {class:'btn teal', type:'button', onclick:save3}, 'Save'), ask), m3, out);
+    const nav = el('div', {class:'row'},
+      el('button', {class:'btn', type:'button', disabled:i <= 0, onclick:() => { i--; draw(); }}, svg(ICON.prev), 'Previous'),
+      i < xs.length - 1 ? el('button', {class:'btn primary', type:'button', onclick:() => { i++; draw(); }}, 'Next', svg(ICON.next))
+        : el('button', {class:'btn primary', type:'button', onclick:finish}, 'Finish'));
+    const steps = () => { s2.classList.toggle('locked', stage < 1); s3.classList.toggle('locked', stage < 2); in2.disabled = stage < 1; in3.disabled = stage < 2; };
+    put(o.body, el('div', {class:'qcount'}, el('span', null, 'Write to learn'), el('span', {class:'num'}, (i + 1) + ' of ' + xs.length)),
+      el('div', {class:'pbar'}, el('i', {style:'width:' + Math.round(i / xs.length * 100) + '%'})),
+      itemCard(c, x), s1, s2, s3, nav);
+    steps();
+    $('#ov').scrollTop = 0;
+  };
+  const finish = () => {
+    const done = xs.filter(x => (W[x.key] || 0) >= 2).length;
+    put(o.body, el('div', {class:'sum'}, el('p', {class:'eyebrow'}, u.lab + ' · Write to learn'), el('div', {class:'big num'}, done + '/' + xs.length),
+      el('p', {style:'margin:0'}, done >= xs.length ? 'You have written every word in this unit. Brilliant!' : 'Words with a sentence of your own: ' + done + ' of ' + xs.length + '.'),
+      el('p', {class:'muted', style:'margin:0'}, 'Your sentences are in Me → My writing.'),
+      el('button', {class:'btn primary big', type:'button', onclick:goBack}, 'Back to the unit')));
+  };
+  draw();
+}
+
 /* ---------- unit pages ---------- */
 function unitPanel(c, u) {
   const r = urec(c, u), qs = unitQs(c, u).length;
@@ -2229,10 +2625,15 @@ function drawUnit(c, u, o) {
   const list = c.open, i = list.indexOf(u);
   const sec = c.secs[u.s] || '';
   let pp = unitPanel(c, u);
+  const nq = unitQs(c, u).length;
+  let gp = goalsPanel(c, u, nq), up = understandPanel(c, u), wp = writePanel(c, u);
   const parts = [
     el('div', {class:'qhead'}, el('p', {class:'eyebrow'}, u.lab + (sec ? ' · ' + sec : '')), el('h2', {class:'ttl-big'}, u.t), u.sub ? el('p', {class:'sub'}, u.sub) : null),
+    gp,
     skillsPart(c, u),
     u.k === 'write' || u.k === 'speak' ? null : learnPage(c, u),
+    up,
+    wp,
     pp,
     u.O && u.k !== 'write' ? ownBox(c, u, u.O, v => feedbackPrompt('Unit topic: ' + u.t + (u.sub ? ' (' + u.sub + ')' : '') + '. Task: ' + plain(typeof u.O === 'string' ? u.O : u.O.map(b => b.p || b['-'] || '').join(' ')) + '\nEncourage the learner to use words and phrases from the unit.', v)) : null,
     el('div', {class:'row'},
@@ -2240,7 +2641,10 @@ function drawUnit(c, u, o) {
       el('button', {class:'btn', type:'button', disabled:i >= list.length - 1, onclick:() => drawUnit(c, list[i + 1], o)}, 'Next', svg(ICON.next)))];
   put(o.body, ...parts);
   $('#ov').scrollTop = 0;
-  o.onReturn(() => { const np = unitPanel(c, u); if (pp && np) { pp.replaceWith(np); pp = np; } });   // a fresh score after practising
+  o.onReturn(() => {   // fresh scores and ticks after practising, checking or writing
+    const swap = (a, b) => { if (a && b) a.replaceWith(b); return b || a; };
+    pp = swap(pp, unitPanel(c, u)); up = swap(up, understandPanel(c, u)); wp = swap(wp, writePanel(c, u)); gp = swap(gp, goalsPanel(c, u, nq));
+  });
 }
 
 /* ---------- skills units: listening, reading, writing, speaking ---------- */
@@ -2361,7 +2765,15 @@ function renderToday() {
     el('button', {class:'btn teal', type:'button', onclick:() => openUnit(c, nu)}, 'Open ' + nu.lab)) : el('section', {class:'panel'}, el('b', null, 'You have passed every unit in this book!'));
   const how = c.about ? el('details', {class:'more'}, el('summary', null, 'How to study with this book'), el('div', {class:'in learn'}, blocks(c, null, c.about))) : null;
   const test = c.test && !(bs(c.id).plan || []).length ? el('section', {class:'panel'}, el('p', {class:'eyebrow'}, 'Not sure where to start?'), el('p', {style:'margin:0'}, c.test.blurb || 'Take the placement test. The units you need come first in Up next.'), el('button', {class:'btn', type:'button', onclick:() => startTest(c)}, 'Take the placement test')) : null;
-  put(view, ...top, hasItems ? goalPanel : null, start, upNext, test, how,
+  const yest = hasItems ? itemsOn(c, DAY() - 1) : [];
+  const choose = hasItems || due ? el('section', {class:'panel'},
+    el('p', {class:'eyebrow'}, 'Or choose one part'),
+    el('p', {class:'tip'}, "Today's practice gives you the reviews due today, then new words. A word comes back 1, 3, 7, 16, 35, 90 and 180 days after you learn it, so reviews are not only yesterday's words."),
+    el('div', {class:'modes'},
+      modeBtn('🔁', 'Reviews only', due ? fmt(due) + ' due today' : 'No reviews are due today', () => startToday(c, 'review'), !due),
+      hasItems ? modeBtn('🌱', 'New words only', newLeft ? 'Learn new words without the reviews' : 'You have learnt every word', () => startToday(c, 'new'), !newLeft) : null,
+      hasItems ? modeBtn('📅', "Yesterday's words", yest.length ? yest.length + ' words and phrases you studied yesterday' : 'Nothing was studied yesterday', () => startListReview(c, yest, "Yesterday's words"), !yest.length) : null)) : null;
+  put(view, ...top, hasItems ? goalPanel : null, start, choose, upNext, test, how,
     el('button', {class:'btn ghost', type:'button', onclick:() => switchTab('books')}, svg(ICON.book), 'Change book'));
 }
 function unitRow(c, u) {
@@ -2437,6 +2849,7 @@ function renderPractise() {
   more.push(['mixed2', '🧪', 'Mixed unit quiz', 'Fifteen questions from the units you have tried.', () => startMixed(c)]);
   if (c.test) more.push(['test', '🧭', 'Placement test', 'Find the units you need most.', () => startTest(c)]);
   parts.push(el('h2', {class:'sechead'}, 'Units and reviews'), el('div', {class:'modes'}, more.map(([k, ic, t, d, f]) => el('button', {class:'mode', type:'button', onclick:f}, el('span', {class:'ic', 'aria-hidden':'true'}, ic), el('span', null, el('b', null, t), el('span', null, d))))));
+  if (c.items.length) parts.push(rangePanel(c));
   put(view, ...parts);
 }
 function bookProgress(b) {
@@ -2462,9 +2875,6 @@ function renderBooks() {
 function renderMe() {
   const st = streak(), acc = accuracy();
   let learnt = 0, units = 0; for (const b of BOOKS) { const p = bookProgress(b); learnt += p.learnt; units += p.units; }
-  const t = DAY(); const days = Array.from({length:14}, (_, k) => t - 13 + k);
-  const vals = days.map(d => { const L = S.log[d]; return L ? L[0] + L[1] + L[2] + L[3] : 0; }); const max = Math.max(5, ...vals);
-  const bars = el('div', {class:'bars', role:'img', 'aria-label':'Questions and new words each day for the last 14 days'}, days.map((d, k) => el('i', {class:d === t ? 'today' : '', style:'height:' + Math.max(3, Math.round(vals[k] / max * 100)) + '%', title:vals[k]})));
   const daily = el('div', {class:'seg', role:'group', 'aria-label':'New words a day'}, [5, 10, 15, 20, 30].map(n => el('button', {type:'button', 'aria-pressed':S.set.daily === n ? 'true' : 'false', onclick:() => { S.set.daily = n; touch('meta'); renderMe(); }}, String(n))));
   const size = el('div', {class:'seg', role:'group', 'aria-label':'Text size'}, [['normal', 'Normal'], ['large', 'Large']].map(([k, l]) => el('button', {type:'button', 'aria-pressed':S.set.size === k ? 'true' : 'false', onclick:() => { S.set.size = k; touch('meta'); applySize(); renderMe(); }}, l)));
   const rate = el('div', {class:'seg', role:'group', 'aria-label':'Voice speed'}, [[0.75, 'Slow'], [0.95, 'Normal'], [1.1, 'Fast']].map(([k, l]) => el('button', {type:'button', 'aria-pressed':Math.abs((S.set.rate || 0.95) - k) < 0.01 ? 'true' : 'false', onclick:() => { S.set.rate = k; touch('meta'); say('This is how fast I will speak.'); renderMe(); }}, l)));
@@ -2488,7 +2898,7 @@ function renderMe() {
       el('div', {class:'tile'}, el('b', {class:'num'}, fmt(units)), el('span', null, 'units passed')),
       el('div', {class:'tile'}, el('b', {class:'num'}, st), el('span', null, 'day streak')),
       el('div', {class:'tile'}, el('b', {class:'num'}, acc == null ? '–' : acc + '%'), el('span', null, 'correct, last 30 days'))),
-    el('section', {class:'panel'}, el('p', {class:'eyebrow'}, 'Last 14 days'), bars, el('div', {class:'barlabels'}, el('span', null, 'Two weeks ago'), el('span', null, 'Today'))),
+    studyPanel(),
     started.length ? el('section', {class:'panel'}, el('p', {class:'eyebrow'}, 'Books you have started'), el('div', {class:'list'}, started.map(b => { const p = bookProgress(b); return el('button', {class:'item', type:'button', onclick:() => { if (!READY.has(b.id)) return; S.cur = b.id; touch('meta'); switchTab('today'); }},
       el('span', {class:'spine', style:'background:' + shelfColour(b) + ';width:26px;height:36px', 'aria-hidden':'true'}, b.ab), el('span', null, el('div', {style:'font-weight:600'}, bookName(b)), el('div', {class:'d'}, p.units + ' units passed · ' + p.learnt + ' learnt')), el('span', {'aria-hidden':'true'}, '›')); }))) : null,
     el('div', {class:'list'}, myListBtn('⭐', 'Starred', () => { const c = COURSE.get(S.cur); return c ? starsOf(c) : []; }), myListBtn('🧩', 'Tricky', () => { const c = COURSE.get(S.cur); return c ? tricky(c) : []; }), myWritingBtn()),
