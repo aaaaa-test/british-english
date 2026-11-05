@@ -941,7 +941,7 @@ const nbName = (id = NB) => (NBS.list.find(x => x.id === id) || {name:'My notebo
 const stateKey = () => nbStateKey(NB);
 function loadState(key) {
   let s = blank();
-  try { const raw = localStorage.getItem(key); if (raw) { const o = JSON.parse(raw); s = Object.assign(blank(), o); s.set = Object.assign(blank().set, o.set || {}); s.b = o.b || {}; s.ts = o.ts || {}; } }
+  try { const raw = localStorage.getItem(key); if (raw) { const o = JSON.parse(raw); s = Object.assign(blank(), o); s.set = Object.assign(blank().set, o.set || {}); s.b = o.b && typeof o.b === 'object' ? o.b : {}; for (const k of Object.keys(s.b)) s.b[k] = fixB(s.b[k]); s.ts = o.ts || {}; } }
   catch (e) { /* storage unavailable: start fresh */ }
   return s;
 }
@@ -961,7 +961,7 @@ function docData(id, s = S) {   // s: a notebook's progress (the one in use unle
 function applyDoc(id, d) {
   if (!d) return;
   if (id === 'meta') { S.cur = d.cur || S.cur; S.stars = d.stars || {}; S.notes = d.notes || {}; S.log = d.log || {}; S.set = Object.assign(blank().set, d.set || {}); return; }
-  S.b[id.slice(2)] = d;
+  S.b[id.slice(2)] = fixB(d);
 }
 let nbDirty = false;
 const ops = [];   // other notebooks' parts to upload ({nb, id}) and stored parts to remove ({del})
@@ -1488,8 +1488,9 @@ function ensureCourse(id) {   // the course, or null while it loads (render is c
   if (!READY.has(id)) return null;
   if (!LOADING.has(id)) {
     LOADING.set(id, fetch('courses/' + id + '.json').then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(j => { COURSE.set(id, prep(j, id)); LOADING.delete(id); if (!OV.open) render(); })
-      .catch(() => { LOADING.set(id, 'failed'); if (!OV.open) render(); }));
+      .then(j => prep(j, id))
+      .then(c => { COURSE.set(id, c); LOADING.delete(id); }, e => { console.error('Course ' + id + ':', e); LOADING.set(id, 'failed'); })
+      .then(() => { if (!OV.open) render(); }));
   }
   return null;
 }
@@ -1520,7 +1521,14 @@ function prep(c, id) {
   return c;
 }
 const cur = () => BOOK.get(S.cur) || BOOKS[0];
-const bs = (id = S.cur) => S.b[id] || (S.b[id] = {p:{}, u:{}, r:{}, o:{}, plan:[]});
+function fixB(B) {   // a book's progress with every part present (an account stores a book that was never studied as {})
+  if (!B || typeof B !== 'object' || Array.isArray(B)) B = {};
+  for (const k of ['p', 'u', 'r', 'o']) if (!B[k] || typeof B[k] !== 'object' || Array.isArray(B[k])) B[k] = {};
+  if (!Array.isArray(B.plan)) B.plan = [];
+  return B;
+}
+const hasProgress = B => !!B && (['p', 'u', 'r', 'o'].some(k => B[k] && Object.keys(B[k]).length > 0) || (Array.isArray(B.plan) && B.plan.length > 0));
+const bs = (id = S.cur) => (S.b[id] = fixB(S.b[id]));
 const touchB = id => touch('b-' + id);
 const unitOf = (c, n) => c.U.get(String(n));
 
@@ -2917,7 +2925,7 @@ function renderMe() {
   const size = el('div', {class:'seg', role:'group', 'aria-label':'Text size'}, [['normal', 'Normal'], ['large', 'Large']].map(([k, l]) => el('button', {type:'button', 'aria-pressed':S.set.size === k ? 'true' : 'false', onclick:() => { S.set.size = k; touch('meta'); applySize(); renderMe(); }}, l)));
   const rate = el('div', {class:'seg', role:'group', 'aria-label':'Voice speed'}, [[0.75, 'Slow'], [0.95, 'Normal'], [1.1, 'Fast']].map(([k, l]) => el('button', {type:'button', 'aria-pressed':Math.abs((S.set.rate || 0.95) - k) < 0.01 ? 'true' : 'false', onclick:() => { S.set.rate = k; touch('meta'); say('This is how fast I will speak.'); renderMe(); }}, l)));
   const sw = (id, label, key, dflt) => { const i = el('input', {type:'checkbox', id, role:'switch'}); i.checked = S.set[key] == null ? dflt : !!S.set[key]; i.addEventListener('change', () => { S.set[key] = i.checked; touch('meta'); }); return el('div', {class:'switch'}, el('label', {for:id}, label), i); };
-  const started = BOOKS.filter(b => S.b[b.id]);
+  const started = BOOKS.filter(b => hasProgress(S.b[b.id]));
   const resetArea = el('div');
   const resetBtn = el('button', {class:'btn ghost', type:'button', onclick:() => {
     put(resetArea, el('div', {class:'confirm'}, el('b', null, 'Delete all the progress in “' + nbName() + '”?'), el('span', {class:'muted'}, 'Learnt words, unit scores, reviews, stars and writing in every book in this notebook will be cleared.' + (NBS.list.length > 1 ? ' Your other notebooks stay as they are.' : '') + ' This cannot be undone.'),
@@ -2984,7 +2992,13 @@ function myWritingBtn() {
 function render() {
   if (OV.open) return;
   document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-current', b.dataset.tab === TAB ? 'page' : 'false'));
-  if (TAB === 'units') renderUnits(); else if (TAB === 'practise') renderPractise(); else if (TAB === 'books') renderBooks(); else if (TAB === 'me') renderMe(); else renderToday();
+  try {
+    if (TAB === 'units') renderUnits(); else if (TAB === 'practise') renderPractise(); else if (TAB === 'books') renderBooks(); else if (TAB === 'me') renderMe(); else renderToday();
+  } catch (e) {
+    console.error(e);
+    put(view, el('section', {class:'panel'}, el('p', {class:'eyebrow'}, 'Something went wrong'), el('p', {style:'margin:0 0 12px'}, 'This page could not be shown (' + (e && e.message || e) + ').'),
+      el('button', {class:'btn', type:'button', onclick:() => location.reload()}, 'Reload the page'), ' ', el('button', {class:'btn ghost', type:'button', onclick:() => switchTab('books')}, 'Choose another book')));
+  }
 }
 function switchTab(t) { closeAllOv(); TAB = t; setHash(); render(); window.scrollTo(0, 0); }
 function fromHash() { const h = location.hash.slice(1); TAB = TABS.includes(h) ? h : 'today'; }
