@@ -784,7 +784,7 @@ const BOOKS = [
   {id:'egs', sh:'Grammar', t:'English Grammar in Use', lv:'Supplementary Exercises', cefr:'B1–B2', ab:'SE', kind:'grammar', n:54},
   {id:'ielts', sh:'IELTS', t:'IELTS Preparation', lv:'Listening, Reading, Writing and Speaking', cefr:'Band 5–9', ab:'IE', kind:'ielts', n:0}
 ];
-const READY = new Set(['evu-e', 'evu-p', 'evu-u', 'evu-a', 'avu', 'col-i', 'col-a', 'pv-i', 'pv-a']);   // books whose course file is written
+const READY = new Set(['evu-e', 'evu-p', 'evu-u', 'evu-a', 'avu', 'col-i', 'col-a', 'pv-i', 'pv-a', 'idm']);   // books whose course file is written
 const BOOK = new Map(BOOKS.map(b => [b.id, b]));
 const shelfColour = b => (SHELVES.find(s => s.k === b.sh) || SHELVES[0]).c;
 const bookName = b => b.t + (b.lv && b.kind !== 'ielts' ? ' · ' + b.lv : '');
@@ -1720,7 +1720,7 @@ function learnPage(c, u) {
 
 /* ---------- words and phrases ---------- */
 const POSN = {n:'noun', v:'verb', adj:'adjective', adv:'adverb', prep:'preposition', conj:'conjunction', pron:'pronoun', det:'determiner', num:'number',
-  excl:'exclamation', phr:'phrase', pv:'phrasal verb', idm:'idiom', col:'collocation', abbr:'abbreviation', pref:'prefix', suf:'suffix', mod:'modal verb', expr:'expression', npl:'plural noun'};
+  excl:'exclamation', phr:'phrase', pv:'phrasal verb', idm:'idiom', col:'collocation', abbr:'abbreviation', pref:'prefix', suf:'suffix', mod:'modal verb', expr:'expression', npl:'plural noun', prov:'proverb'};
 const posName = (c, x) => c.kind === 'pron' ? x.pos : (POSN[x.pos] || x.pos);
 function exNodes(ex) {   // the example with the word in pink
   const out = []; const re = /\[(.+?)\]/g; let m, last = 0;
