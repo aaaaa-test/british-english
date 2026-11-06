@@ -800,7 +800,7 @@ const BOOKS = [
   {id:'egs', sh:'Grammar', t:'English Grammar in Use', lv:'Supplementary Exercises', cefr:'B1–B2', ab:'SE', kind:'grammar', n:54},
   {id:'ielts', sh:'IELTS', t:'IELTS Preparation', lv:'Listening, Reading, Writing and Speaking', cefr:'Band 5–9', ab:'IE', kind:'ielts', n:117}
 ];
-const KO_READY = new Set(['evu-e','evu-p','evu-u','evu-a','avu','col-i','col-a','pv-i']);   // books whose Korean meanings are written (courses/ko/<id>.json)
+const KO_READY = new Set(['evu-e','evu-p','evu-u','evu-a','avu','col-i','col-a','pv-i','pv-a']);   // books whose Korean meanings are written (courses/ko/<id>.json)
 const KOC = new Map();   // Korean meanings by book, loaded only when the learner turns them on
 function koLoad(c) {
   if (!c || !S.set.ko || !KO_READY.has(c.id) || KOC.has(c.id)) return;
