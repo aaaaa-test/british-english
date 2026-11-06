@@ -27,6 +27,8 @@
 .seg.am button{padding:7px 12px;min-height:34px;font-size:13px}
 .opts.see{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
 .opts.see .opt{cursor:default;min-height:0;padding:8px 14px;border-radius:999px;border-style:dashed;background:transparent;font-size:18px;line-height:1.3;text-align:left}
+.qsave{display:grid;gap:8px}
+.qsave .btn.small.on{border-color:var(--word,#1fb5b5)}
 </style>
 <title>British Writing and Grammar</title>
 <meta name="apple-mobile-web-app-title" content="Writing">
@@ -1281,6 +1283,20 @@ document.addEventListener('click', () => { NAV.py = window.scrollY; NAV.pv = vie
 document.addEventListener('click', () => { if (viewKey() !== NAV.pv) NAV.y[NAV.pv] = NAV.py; syncNav(); });
 document.addEventListener('input', () => syncNav());
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && OV.open) goBack(); });
+document.addEventListener('keydown', e => {   // keyboard-only practice: Enter goes on to the next step, 1–9 pick a choice
+  if (!OV.open || e.altKey || e.ctrlKey || e.metaKey || e.isComposing) return;
+  const a = document.activeElement;
+  if (a && (a.isContentEditable || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT' || (a.tagName === 'INPUT' && !a.disabled && !/^(button|submit|checkbox|radio)$/.test(a.type)))) return;   // typing
+  const vis = b => !b.disabled && b.offsetParent !== null;
+  if (e.key === 'Enter') {
+    if (a && /^(BUTTON|A|SUMMARY)$/.test(a.tagName) && !a.disabled) return;   // the focused control handles Enter itself
+    const b = [...document.querySelectorAll('#ov .fb .btn.primary')].find(vis) || [...document.querySelectorAll('#ov [data-enter]')].find(vis) || [...document.querySelectorAll('#ov .btn.primary.big')].find(vis);
+    if (b) { e.preventDefault(); b.click(); }
+  } else if (/^[1-9]$/.test(e.key)) {
+    const b = [...document.querySelectorAll('#ov .opts:not(.see) button.opt')].filter(vis)[+e.key - 1];
+    if (b) { e.preventDefault(); b.click(); }
+  }
+});
 
 /* ---------- writing progress ---------- */
 const wrec = id => S.w[id] || null;

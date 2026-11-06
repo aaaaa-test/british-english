@@ -359,6 +359,8 @@ j6m8yk7Y1DnNMdoESHfdVhAsxlR/QHoo7Zc7904hNItbfmn+AhGX3GYoQJ9CRMmMxfu08ZQLsgZpw890
 .seg.am button{padding:7px 12px;min-height:34px;font-size:13px}
 .opts.see{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
 .opts.see .opt{cursor:default;min-height:0;padding:8px 14px;border-radius:999px;border-style:dashed;background:transparent;font-size:18px;line-height:1.3;text-align:left}
+.qsave{display:grid;gap:8px}
+.qsave .btn.small.on{border-color:var(--word,#1fb5b5)}
 </style>
 <title>British Book Courses</title>
 <meta name="apple-mobile-web-app-title" content="Books">
@@ -788,9 +790,9 @@ const BOOKS = [
   {id:'pr-i', sh:'Pronunciation', t:'English Pronunciation in Use', lv:'Intermediate', cefr:'B1–B2', ab:'I', kind:'pron', n:60},
   {id:'egu', sh:'Grammar', t:'English Grammar in Use', lv:'Intermediate', cefr:'B1–B2', ab:'GU', kind:'grammar', n:145},
   {id:'egs', sh:'Grammar', t:'English Grammar in Use', lv:'Supplementary Exercises', cefr:'B1–B2', ab:'SE', kind:'grammar', n:54},
-  {id:'ielts', sh:'IELTS', t:'IELTS Preparation', lv:'Listening, Reading, Writing and Speaking', cefr:'Band 5–9', ab:'IE', kind:'ielts', n:0}
+  {id:'ielts', sh:'IELTS', t:'IELTS Preparation', lv:'Listening, Reading, Writing and Speaking', cefr:'Band 5–9', ab:'IE', kind:'ielts', n:117}
 ];
-const READY = new Set(['evu-e', 'evu-p', 'evu-u', 'evu-a', 'avu', 'col-i', 'col-a', 'pv-i', 'pv-a', 'idm', 'egu', 'egs']);   // books whose course file is written
+const READY = new Set(['evu-e', 'evu-p', 'evu-u', 'evu-a', 'avu', 'col-i', 'col-a', 'pv-i', 'pv-a', 'idm', 'egu', 'egs', 'ielts']);   // books whose course file is written
 const BOOK = new Map(BOOKS.map(b => [b.id, b]));
 const shelfColour = b => (SHELVES.find(s => s.k === b.sh) || SHELVES[0]).c;
 const bookName = b => b.t + (b.lv && b.kind !== 'ielts' ? ' · ' + b.lv : '');
@@ -911,7 +913,7 @@ function voiceHelp() {   // how to add a British voice, with this device's steps
 const APP_ID = 'books';   // the account keeps each app's progress in its own folder
 const LS = 'bwbooks-v1';
 const DOCS = ['meta', ...BOOKS.map(b => 'b-' + b.id)];   // one part for the settings and the log, one for each book
-const blank = () => ({cur:'evu-e', b:{}, stars:{}, notes:{}, log:{}, set:{daily:10, voice:true, rate:0.95, size:'normal'}, ts:{}});
+const blank = () => ({cur:'evu-e', b:{}, stars:{}, trk:{}, notes:{}, log:{}, set:{daily:10, voice:true, rate:0.95, size:'normal'}, ts:{}});
 
 /* accounts on a website copy: config.js names a Firebase project (sign-in plus a Firestore database) */
 const FB = (() => {
@@ -962,12 +964,12 @@ const cloud = {mode:'connecting', put:null, pull:null, pulled:0, err:''};   // p
 function setSync(m) { cloud.mode = m; if ((TAB === 'me' || TAB === 'today') && !OV.open) render(); }
 function trimLog(log) { const keep = DAY() - 150; const o = {}; for (const [k, v] of Object.entries(log)) if (+k >= keep) o[k] = v; return o; }
 function docData(id, s = S) {   // s: a notebook's progress (the one in use unless given)
-  if (id === 'meta') return {cur:s.cur, stars:s.stars, notes:s.notes, log:trimLog(s.log), set:s.set};
+  if (id === 'meta') return {cur:s.cur, stars:s.stars, trk:s.trk, notes:s.notes, log:trimLog(s.log), set:s.set};
   return s.b[id.slice(2)] || {};
 }
 function applyDoc(id, d) {
   if (!d) return;
-  if (id === 'meta') { S.cur = d.cur || S.cur; S.stars = d.stars || {}; S.notes = d.notes || {}; S.log = d.log || {}; S.set = Object.assign(blank().set, d.set || {}); return; }
+  if (id === 'meta') { S.cur = d.cur || S.cur; S.stars = d.stars || {}; S.trk = d.trk || {}; S.notes = d.notes || {}; S.log = d.log || {}; S.set = Object.assign(blank().set, d.set || {}); return; }
   S.b[id.slice(2)] = fixB(d);
 }
 let nbDirty = false;
@@ -1599,7 +1601,10 @@ const nextUnit = c => studyOrder(c).find(u => !unitPassed(c, u)) || null;
 const dueItems = c => { const t = DAY(), B = bs(c.id); return c.items.filter(x => { const r = B.p[x.key]; return r && r[0] >= 1 && r[1] <= t; }).sort((a, b) => B.p[a.key][1] - B.p[b.key][1]); };
 const dueQs = c => { const t = DAY(); return Object.entries(bs(c.id).r).filter(([, v]) => v[1] <= t).map(([k]) => k); };
 function nextNew(c, n) { const out = []; for (const u of studyOrder(c)) for (const x of u.items) { if (!isLearnt(c, x) && usable(c, x)) { out.push(x); if (out.length >= n) return out; } } return out; }
-const tricky = c => c.items.filter(x => { const r = rec(c, x); return r && r[3] > 0 && r[0] <= 3; }).sort((a, b) => rec(c, b)[3] - rec(c, a)[3]);
+const tricky = c => {   // words marked by hand first, then the ones often got wrong
+  const man = ((S.trk || {})[c.id] || []).map(k => c.byKey.get(k)).filter(Boolean), seen = new Set(man);
+  return man.concat(c.items.filter(x => { const r = rec(c, x); return !seen.has(x) && r && r[3] > 0 && r[0] <= 3; }).sort((a, b) => rec(c, b)[3] - rec(c, a)[3]));
+};
 const starKey = x => x.key;
 const starsOf = c => (S.stars[c.id] || []).map(k => c.byKey.get(k)).filter(Boolean);
 function passUnit(c, u) {   // passing a unit counts its words as learnt
@@ -1691,6 +1696,20 @@ window.addEventListener('popstate', e => {
 });
 document.addEventListener('click', () => syncNav());
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && OV.open) goBack(); });
+document.addEventListener('keydown', e => {   // keyboard-only practice: Enter goes on to the next step, 1–9 pick a choice
+  if (!OV.open || e.altKey || e.ctrlKey || e.metaKey || e.isComposing) return;
+  const a = document.activeElement;
+  if (a && (a.isContentEditable || a.tagName === 'TEXTAREA' || a.tagName === 'SELECT' || (a.tagName === 'INPUT' && !a.disabled && !/^(button|submit|checkbox|radio)$/.test(a.type)))) return;   // typing
+  const vis = b => !b.disabled && b.offsetParent !== null;
+  if (e.key === 'Enter') {
+    if (a && /^(BUTTON|A|SUMMARY)$/.test(a.tagName) && !a.disabled) return;   // the focused control handles Enter itself
+    const b = [...document.querySelectorAll('#ov .fb .btn.primary')].find(vis) || [...document.querySelectorAll('#ov [data-enter]')].find(vis) || [...document.querySelectorAll('#ov .btn.primary.big')].find(vis);
+    if (b) { e.preventDefault(); b.click(); }
+  } else if (/^[1-9]$/.test(e.key)) {
+    const b = [...document.querySelectorAll('#ov .opts:not(.see) button.opt')].filter(vis)[+e.key - 1];
+    if (b) { e.preventDefault(); b.click(); }
+  }
+});
 
 /* ---------- the left-hand page: explanations ---------- */
 function tableBlock(head, body) {
@@ -1751,6 +1770,30 @@ function itemCard(c, x) {
   if (x.def) k.append(el('div', {class:'line def'}, el('p', null, x.def)));
   if (x.ex) k.append(el('div', {class:'line ex'}, el('p', null, '→ ', exNodes(x.ex)), sayBtn(x.ex.replace(/[\[\]]/g, ''), 'sm')));
   return k;
+}
+function trickyBtn(c, x) {   // put a word on the Tricky list by hand
+  S.trk = S.trk || {};
+  const on = (S.trk[c.id] || []).includes(starKey(x));
+  const b = el('button', {class:'btn small' + (on ? ' on' : ''), type:'button', 'aria-pressed':on ? 'true' : 'false'}, on ? '🧩 In Tricky' : '🧩 Tricky');
+  b.addEventListener('click', () => {
+    const l = S.trk[c.id] || (S.trk[c.id] = []); const i = l.indexOf(starKey(x));
+    if (i >= 0) l.splice(i, 1); else l.unshift(starKey(x));
+    touch('meta'); toast(i >= 0 ? 'Removed from Tricky' : 'Saved to Tricky'); b.replaceWith(trickyBtn(c, x));
+  });
+  return b;
+}
+function saveRow(c, x) {   // under a question's feedback: star the word, mark it tricky, or write your own sentence with it
+  const slot = el('div');
+  const sb = el('button', {class:'btn small', type:'button', 'aria-expanded':'false'}, S.notes[c.id + '|' + x.key] ? '✍️ My sentence ✓' : '✍️ My sentence');
+  sb.addEventListener('click', () => {
+    const open = !slot.firstChild; put(slot, open ? composer(c, x) : null); sb.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if (open) {
+      const ta = slot.querySelector('textarea'); if (ta) ta.focus();
+      const sv = [...slot.querySelectorAll('button')].find(z => z.textContent.trim() === 'Save');
+      if (sv) sv.addEventListener('click', () => setTimeout(() => { sb.textContent = S.notes[c.id + '|' + x.key] ? '✍️ My sentence ✓' : '✍️ My sentence'; }, 0));
+    }
+  });
+  return el('div', {class:'qsave'}, el('div', {class:'row', style:'gap:8px;flex-wrap:wrap'}, starBtn(c, x), trickyBtn(c, x), sb), slot);
 }
 function starBtn(c, x) {
   const list = S.stars[c.id] || (S.stars[c.id] = []);
@@ -1914,7 +1957,7 @@ const amStrip = s => String(s || '').toLowerCase().replace(/[‘’ʼ`´]/g, "'"
 const CHOOSE_ONLY = new Set([Q_LABEL.means, Q_LABEL.sort, Q_LABEL.hear, Q_LABEL.stress, Q_LABEL.pair, 'What does it mean?']);
 function modeFor(q) {   // how this question is answered: what the learner chose, unless typing makes no sense here
   const want = answerMode(), right = String(q.o[q.a] || '');
-  if (want === 'choose' || q.kind === 'listen') return 'choose';
+  if (want === 'choose' || q.kind === 'listen' || q.fixed) return 'choose';   // fixed sets such as TRUE / FALSE / NOT GIVEN are always chosen
   if (CHOOSE_ONLY.has(q.instr) || /^true or false/i.test(q.instr || '') || /[(…]/.test(right) || right.length > 34 || right.split(/\s+/).length > 6) return 'choose';
   if (want === 'type' && (q.instr === Q_LABEL.odd || q.instr === Q_LABEL.snd)) return 'see';   // these need the choices in view
   return want;
@@ -2002,7 +2045,8 @@ const MODES = {vocab:['meaning', 'gap', 'spell'], coll:['part', 'gap', 'meaning'
   pron:['hear', 'snd', 'dict', 'stress'], grammar:[], ielts:['meaning', 'gap', 'spell']};
 const modesOf = c => c.modes || MODES[c.kind] || MODES.vocab;
 function gq(c, u, set, s, it, i) {   // an exercise item written for the unit
-  return {kind:set.k, instr:set.i, strict:!!set.strict, forms:!!set.forms, q:it.q, w:it.w, o:it.o, a:it.a, why:it.why, key:'x|' + u.n + '|' + s + '|' + i, label:u.lab};
+  return {kind:set.k, instr:set.i, strict:!!set.strict, forms:!!set.forms, q:it.q, w:it.w, o:it.o, a:it.a, why:it.why, key:'x|' + u.n + '|' + s + '|' + i, label:u.lab, fixed:!!(set.fixed || it.fixed),
+    ctx:u.k === 'read' || u.k === 'listen' ? u.n : undefined};   // reading and listening questions keep their passage or recording at hand
 }
 function itemOf(c, key) {
   const [, n, s, i] = key.split('|'); const u = unitOf(c, n); if (!u || !u.X) return null;
@@ -2132,7 +2176,7 @@ function run(cfg) {
         q.why ? el('p', {class:'why'}, q.why) : null,
         x && x.ex && q.kind !== 'listen' ? el('div', {class:'line ex'}, el('p', {style:'font-size:18px'}, '→ ', exNodes(x.ex)), sayBtn(x.ex.replace(/[\[\]]/g, ''), 'sm')) : null,
         x && x.def && (q.kind === 'mc' && (q.qcls === 'ex' || q.qcls === 'big')) ? el('p', {class:'why', style:'color:var(--def)'}, x.w + ': ' + x.def) : null,
-        ask, out),
+        ask, out, x && x.w && x.key && c.byKey && c.byKey.get(x.key) === x ? saveRow(c, x) : null),
         el('div', {class:'row'},
           ok ? null : el('button', {class:'btn big', type:'button', onclick:() => tryAgain(given)}, 'Try again'),
           el('button', {class:'btn primary big', type:'button', onclick:next}, st.q.length ? 'Next' : 'See my score')));
@@ -2140,7 +2184,7 @@ function run(cfg) {
       try { fbBox.scrollIntoView({block:'nearest', behavior:'smooth'}); } catch (e) {}
     };
     const typed = fill => {   // type the answer, with the choices in view ('see') or hidden ('type')
-      const order = looks.get(q) || shuffle(q.o.map((t, i) => ({t, i}))); looks.set(q, order);
+      const order = looks.get(q) || (q.fixed ? q.o.map((t, i) => ({t, i})) : shuffle(q.o.map((t, i) => ({t, i})))); looks.set(q, order);
       const gapText = /_{3,}/.test(String(q.q || '')) ? String(q.q).replace(/^→\s*/, '') : '';   // the whole sentence is right too
       const chips = am === 'see' ? el('div', {class:'opts see' + (q.o.some(t => String(t).length > 26) ? ' long' : ''), 'aria-label':'The choices'}, order.map(({t, i}) => el('div', {class:'opt', lang:'en-GB', 'data-i':String(i)}, t))) : null;
       const inp = el('input', {class:'w', type:'text', 'aria-label':'Type your answer', placeholder:gapText ? 'Type what goes in the gap' : 'Type your answer', enterkeyhint:'done', lang:'en-GB', value:prev || '', ...noFix});
@@ -2166,7 +2210,7 @@ function run(cfg) {
         setTimeout(() => say(q.say, b), 250);
       } else if (q.q) prompt.push(el('p', {class:'qtext' + (q.qcls ? ' ' + q.qcls : ''), html:q.html || q.qcls === 'ex' ? hl(q.q) : null}, q.html || q.qcls === 'ex' ? null : q.q));
       if (q.sub) prompt.push(el('p', {class:'qinstr', style:'text-align:center'}, q.sub));
-      const order = looks.get(q) || shuffle(q.o.map((t, i) => ({t, i}))); looks.set(q, order);
+      const order = looks.get(q) || (q.fixed ? q.o.map((t, i) => ({t, i})) : shuffle(q.o.map((t, i) => ({t, i})))); looks.set(q, order);
       const long = q.long || q.o.some(t => String(t).length > 26);
       const opts = el('div', {class:'opts' + (long ? ' long' : '')}, order.map(({t, i}) => el('button', {class:'opt', type:'button', lang:'en-GB', 'data-i':String(i), onclick:e => {
         if (answered) return;
@@ -2190,7 +2234,7 @@ function run(cfg) {
       const [pre, post] = has ? q.q.split('___') : [q.q, ''];
       const sent = el('p', {class:'qtext'}, pre, has ? el('span', {class:'gap'}, '_____') : null, post);
       const gapPre = /^['’]/.test(String(q.o[q.a])) ? pre.replace(/\s+$/, '') : pre;   // no space before 'm, 's, 've …
-      const order = looks.get(q) || shuffle(q.o.map((t, i) => ({t, i}))); looks.set(q, order);
+      const order = looks.get(q) || (q.fixed ? q.o.map((t, i) => ({t, i})) : shuffle(q.o.map((t, i) => ({t, i})))); looks.set(q, order);
       const opts = el('div', {class:'opts' + (q.o.some(t => String(t).length > 26) ? ' long' : '')}, order.map(({t, i}) => el('button', {class:'opt', type:'button', 'data-i':String(i), onclick:e => {
         if (answered) return;
         const ok = i === q.a;
@@ -2230,7 +2274,7 @@ function run(cfg) {
       body = [el('p', {class:'qtext', html:hl(q.q)}), form];
       setTimeout(() => ta.focus({preventScroll:true}), 60);
     }
-    put(o.body, head, amRow, body, fbBox);
+    put(o.body, head, q.ctx != null ? ctxPanel(c, q.ctx) : null, amRow, body, fbBox);
   }
   function record(step, ok) {
     const q = step.q, x = step.x || null;
@@ -2796,6 +2840,14 @@ function scriptPlayer(u) {   // listening: the browser reads the script aloud, a
   stopB.addEventListener('click', () => { if (SPEECH) speechSynthesis.cancel(); playing.on = false; play.lastChild.textContent = 'Play'; });
   return el('section', {class:'panel'}, el('p', {class:'eyebrow'}, 'Listening'), status0, el('div', {class:'row'}, play, stopB),
     el('details', {class:'more', open:!SPEECH}, el('summary', null, 'Script'), el('div', {class:'in script'}, lines.map(l => el('p', null, l.who ? el('b', null, l.who + ': ') : null, el('span', {html:hl(l.t)}))))));
+}
+let CTX_OPEN = false;   // the passage or recording above reading and listening questions stays open once opened
+function ctxPanel(c, n) {
+  const u = unitOf(c, n); if (!u) return null;
+  const inner = skillsPart(c, u); if (!inner) return null;
+  const d = el('details', {class:'more ctx', open:CTX_OPEN}, el('summary', null, u.k === 'listen' ? 'The recording and its script' : 'The reading passage'), el('div', {class:'in'}, inner));
+  d.addEventListener('toggle', () => { CTX_OPEN = d.open; });
+  return d;
 }
 function skillsPart(c, u) {
   if (u.k === 'listen') return scriptPlayer(u);
