@@ -1787,13 +1787,14 @@ function runSession(cfg) {
     if (q.kind === 'choose') {
       const [pre, post] = q.q.split('___');
       const sent = el('p', {class:'qtext'}, pre, el('span', {class:'gap'}, '_____'), post);
+      const gapPre = /^['’]/.test(String(q.o[q.a])) ? pre.replace(/\s+$/, '') : pre;   // no space before 'm, 's, 've …
       const order = looks.get(q) || shuffle(q.o.map((t, i) => ({t, i}))); looks.set(q, order);
       const opts = el('div', {class:'opts'}, order.map(({t, i}) => el('button', {class:'opt', type:'button', onclick:e => {
         if (answered) return;
         const ok = i === q.a;
         opts.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (+b.dataset.i === q.a) b.classList.add('right'); });
         if (!ok) e.currentTarget.classList.add('wrong');
-        put(sent, pre, el('span', {class:'gap'}, q.o[q.a]), post);
+        put(sent, gapPre, el('span', {class:'gap'}, q.o[q.a]), post);
         finish(ok, t);
       }, 'data-i':String(i)}, t)));
       if (am !== 'choose') {   // type the answer, with the choices in view ('see') or hidden ('type')
@@ -1801,9 +1802,9 @@ function runSession(cfg) {
         const inp = el('input', {class:'w', type:'text', 'aria-label':'Type your answer', placeholder:q.q.includes('___') ? 'Type what goes in the gap' : 'Type your answer', enterkeyhint:'done', value:prev || '', ...noFix});
         const form = el('form', {onsubmit:e => {
           e.preventDefault(); const v = inp.value.trim(); if (!v || answered) return; inp.disabled = true;
-          const ok = typedRight(v, q.o[q.a]) || (q.q.includes('___') && typedRight(v, q.q.replace('___', q.o[q.a])));   // the whole sentence is right too
+          const ok = typedRight(v, q.o[q.a]) || (q.q.includes('___') && typedRight(v, fillGap(q.q, q.o[q.a])));   // the whole sentence is right too
           if (chips) chips.querySelectorAll('.opt').forEach(b => { if (+b.dataset.i === q.a) b.classList.add('right'); else if (!ok && typedRight(v, q.o[+b.dataset.i])) b.classList.add('wrong'); });
-          put(sent, pre, el('span', {class:'gap'}, q.o[q.a]), post);
+          put(sent, gapPre, el('span', {class:'gap'}, q.o[q.a]), post);
           finish(ok, v);
         }}, inp, el('button', {class:'btn teal big', type:'submit', style:'margin-top:10px'}, 'Check'));
         setTimeout(() => inp.focus({preventScroll:true}), 60);
@@ -1847,7 +1848,8 @@ function runSession(cfg) {
   draw();
 }
 const qText = q => q.kind === 'order' ? q.w.join(' / ') : q.q;
-const ansText = q => q.kind === 'choose' ? q.q.replace('___', q.o[q.a]) : q.kind === 'gap' ? q.q.replace('___', q.a[0]) : q.a[0];
+const fillGap = (s, a) => String(s).replace(/^['’]/.test(String(a)) ? /\s*_{3,}/ : /_{3,}/, () => String(a));   // "I ___" + "'m" → "I'm"
+const ansText = q => q.kind === 'choose' ? fillGap(q.q, q.o[q.a]) : q.kind === 'gap' ? fillGap(q.q, q.a[0]) : q.a[0];
 
 /* ---------- practise extras from the workbooks ---------- */
 function bookSentences(maxLv) {

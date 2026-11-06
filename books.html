@@ -2054,7 +2054,8 @@ function gMatch(user, answers, strict, forms0) {
   const u = new Set(gVars(user, strict, forms0));
   return answers.some(a => gVars(a, strict, forms0).some(v => u.has(v)));
 }
-const ansText = q => q.kind === 'choose' ? (q.q.includes('___') ? q.q.replace('___', q.o[q.a]) : q.o[q.a]) : q.kind === 'gap' ? q.q.replace('___', q.a[0]) : (q.kind === 'mc' || q.kind === 'listen') ? q.o[q.a] : q.a[0];
+const fillGap = (s, a) => String(s).replace(/^['’]/.test(String(a)) ? /\s*_{3,}/ : /_{3,}/, () => String(a));   // "I ___" + "'m" → "I'm"
+const ansText = q => q.kind === 'choose' ? (q.q.includes('___') ? fillGap(q.q, q.o[q.a]) : q.o[q.a]) : q.kind === 'gap' ? fillGap(q.q, q.a[0]) : (q.kind === 'mc' || q.kind === 'listen') ? q.o[q.a] : q.a[0];
 const qText = q => q.kind === 'order' ? q.w.join(' / ') : plain(q.q || q.say || '');
 
 /* ---------- sessions ----------
@@ -2145,7 +2146,7 @@ function run(cfg) {
       const inp = el('input', {class:'w', type:'text', 'aria-label':'Type your answer', placeholder:gapText ? 'Type what goes in the gap' : 'Type your answer', enterkeyhint:'done', lang:'en-GB', value:prev || '', ...noFix});
       const form = el('form', {onsubmit:e => {
         e.preventDefault(); const v = inp.value.trim(); if (!v || answered) return; inp.disabled = true;
-        const ok = typedRight(v, q.o[q.a]) || (!!gapText && typedRight(v, gapText.replace(/_{3,}/, q.o[q.a])));
+        const ok = typedRight(v, q.o[q.a]) || (!!gapText && typedRight(v, fillGap(gapText, q.o[q.a])));
         if (chips) chips.querySelectorAll('.opt').forEach(b => { if (+b.dataset.i === q.a) b.classList.add('right'); else if (!ok && typedRight(v, q.o[+b.dataset.i])) b.classList.add('wrong'); });
         if (fill) fill();
         finish(ok, v);
@@ -2188,16 +2189,17 @@ function run(cfg) {
       const has = String(q.q).includes('___');
       const [pre, post] = has ? q.q.split('___') : [q.q, ''];
       const sent = el('p', {class:'qtext'}, pre, has ? el('span', {class:'gap'}, '_____') : null, post);
+      const gapPre = /^['’]/.test(String(q.o[q.a])) ? pre.replace(/\s+$/, '') : pre;   // no space before 'm, 's, 've …
       const order = looks.get(q) || shuffle(q.o.map((t, i) => ({t, i}))); looks.set(q, order);
       const opts = el('div', {class:'opts' + (q.o.some(t => String(t).length > 26) ? ' long' : '')}, order.map(({t, i}) => el('button', {class:'opt', type:'button', 'data-i':String(i), onclick:e => {
         if (answered) return;
         const ok = i === q.a;
         opts.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (+b.dataset.i === q.a) b.classList.add('right'); });
         if (!ok) e.currentTarget.classList.add('wrong');
-        if (has) put(sent, pre, el('span', {class:'gap'}, q.o[q.a]), post);
+        if (has) put(sent, gapPre, el('span', {class:'gap'}, q.o[q.a]), post);
         finish(ok, t);
       }}, t)));
-      body = am && am !== 'choose' ? [sent, ...typed(has ? () => put(sent, pre, el('span', {class:'gap'}, q.o[q.a]), post) : null)] : [sent, opts];
+      body = am && am !== 'choose' ? [sent, ...typed(has ? () => put(sent, gapPre, el('span', {class:'gap'}, q.o[q.a]), post) : null)] : [sent, opts];
     } else if (q.kind === 'gap') {
       const [pre, post] = String(q.q).split('___');
       const inp = el('input', {class:'inl', type:'text', 'aria-label':'Your answer', enterkeyhint:'done', value:prev, ...noFix});
