@@ -1798,10 +1798,10 @@ function runSession(cfg) {
       }, 'data-i':String(i)}, t)));
       if (am !== 'choose') {   // type the answer, with the choices in view ('see') or hidden ('type')
         const chips = am === 'see' ? el('div', {class:'opts see', 'aria-label':'The choices'}, order.map(({t, i}) => el('div', {class:'opt', 'data-i':String(i)}, t))) : null;
-        const inp = el('input', {class:'w', type:'text', 'aria-label':'Type your answer', placeholder:'Type your answer', enterkeyhint:'done', value:prev || '', ...noFix});
+        const inp = el('input', {class:'w', type:'text', 'aria-label':'Type your answer', placeholder:q.q.includes('___') ? 'Type what goes in the gap' : 'Type your answer', enterkeyhint:'done', value:prev || '', ...noFix});
         const form = el('form', {onsubmit:e => {
           e.preventDefault(); const v = inp.value.trim(); if (!v || answered) return; inp.disabled = true;
-          const ok = typedRight(v, q.o[q.a]);
+          const ok = typedRight(v, q.o[q.a]) || (q.q.includes('___') && typedRight(v, q.q.replace('___', q.o[q.a])));   // the whole sentence is right too
           if (chips) chips.querySelectorAll('.opt').forEach(b => { if (+b.dataset.i === q.a) b.classList.add('right'); else if (!ok && typedRight(v, q.o[+b.dataset.i])) b.classList.add('wrong'); });
           put(sent, pre, el('span', {class:'gap'}, q.o[q.a]), post);
           finish(ok, v);

@@ -790,7 +790,7 @@ const BOOKS = [
   {id:'egs', sh:'Grammar', t:'English Grammar in Use', lv:'Supplementary Exercises', cefr:'B1–B2', ab:'SE', kind:'grammar', n:54},
   {id:'ielts', sh:'IELTS', t:'IELTS Preparation', lv:'Listening, Reading, Writing and Speaking', cefr:'Band 5–9', ab:'IE', kind:'ielts', n:0}
 ];
-const READY = new Set(['evu-e', 'evu-p', 'evu-u', 'evu-a', 'avu', 'col-i', 'col-a', 'pv-i', 'pv-a', 'idm']);   // books whose course file is written
+const READY = new Set(['evu-e', 'evu-p', 'evu-u', 'evu-a', 'avu', 'col-i', 'col-a', 'pv-i', 'pv-a', 'idm', 'egu']);   // books whose course file is written
 const BOOK = new Map(BOOKS.map(b => [b.id, b]));
 const shelfColour = b => (SHELVES.find(s => s.k === b.sh) || SHELVES[0]).c;
 const bookName = b => b.t + (b.lv && b.kind !== 'ielts' ? ' · ' + b.lv : '');
@@ -2140,11 +2140,12 @@ function run(cfg) {
     };
     const typed = fill => {   // type the answer, with the choices in view ('see') or hidden ('type')
       const order = looks.get(q) || shuffle(q.o.map((t, i) => ({t, i}))); looks.set(q, order);
+      const gapText = /_{3,}/.test(String(q.q || '')) ? String(q.q).replace(/^→\s*/, '') : '';   // the whole sentence is right too
       const chips = am === 'see' ? el('div', {class:'opts see' + (q.o.some(t => String(t).length > 26) ? ' long' : ''), 'aria-label':'The choices'}, order.map(({t, i}) => el('div', {class:'opt', lang:'en-GB', 'data-i':String(i)}, t))) : null;
-      const inp = el('input', {class:'w', type:'text', 'aria-label':'Type your answer', placeholder:'Type your answer', enterkeyhint:'done', lang:'en-GB', value:prev || '', ...noFix});
+      const inp = el('input', {class:'w', type:'text', 'aria-label':'Type your answer', placeholder:gapText ? 'Type what goes in the gap' : 'Type your answer', enterkeyhint:'done', lang:'en-GB', value:prev || '', ...noFix});
       const form = el('form', {onsubmit:e => {
         e.preventDefault(); const v = inp.value.trim(); if (!v || answered) return; inp.disabled = true;
-        const ok = typedRight(v, q.o[q.a]);
+        const ok = typedRight(v, q.o[q.a]) || (!!gapText && typedRight(v, gapText.replace(/_{3,}/, q.o[q.a])));
         if (chips) chips.querySelectorAll('.opt').forEach(b => { if (+b.dataset.i === q.a) b.classList.add('right'); else if (!ok && typedRight(v, q.o[+b.dataset.i])) b.classList.add('wrong'); });
         if (fill) fill();
         finish(ok, v);
