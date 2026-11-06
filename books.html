@@ -800,7 +800,7 @@ const BOOKS = [
   {id:'egs', sh:'Grammar', t:'English Grammar in Use', lv:'Supplementary Exercises', cefr:'B1–B2', ab:'SE', kind:'grammar', n:54},
   {id:'ielts', sh:'IELTS', t:'IELTS Preparation', lv:'Listening, Reading, Writing and Speaking', cefr:'Band 5–9', ab:'IE', kind:'ielts', n:117}
 ];
-const KO_READY = new Set(['evu-e','evu-p','evu-u','evu-a']);   // books whose Korean meanings are written (courses/ko/<id>.json)
+const KO_READY = new Set(['evu-e','evu-p','evu-u','evu-a','avu']);   // books whose Korean meanings are written (courses/ko/<id>.json)
 const KOC = new Map();   // Korean meanings by book, loaded only when the learner turns them on
 function koLoad(c) {
   if (!c || !S.set.ko || !KO_READY.has(c.id) || KOC.has(c.id)) return;
@@ -816,6 +816,14 @@ function koFill(c) {   // Korean that arrives after a list or a card was drawn: 
   });
 }
 const koOf = (c, x) => { if (!S.set.ko || !c || !x || !x.key) return ''; koLoad(c); return (KOC.get(c.id) || {})[x.key] || ''; };
+const koWordOf = (c, q) => {   // an exercise written for a unit: when its answer is one of the unit's words, that word (for its Korean meaning)
+  if (!S.set.ko || !c || !KO_READY.has(c.id) || !q || !q.key || !String(q.key).startsWith('x|')) return null;
+  const u = unitOf(c, String(q.key).split('|')[1]); if (!u || !u.items) return null;
+  const a = String((q.kind === 'choose' || q.kind === 'mc') && q.o ? q.o[q.a] : Array.isArray(q.a) ? q.a[0] : '').trim().toLowerCase().replace(/[.!?]$/, '');
+  if (!a) return null;
+  const base = w => [w, w + 's', w + 'es', w + 'd', w + 'ed', w + 'ing', w.replace(/e$/, '') + 'ing', w.replace(/y$/, 'ies'), w.replace(/y$/, 'ied')];
+  return u.items.find(y => y.w && y.w.toLowerCase() === a) || u.items.find(y => y.w && y.w.length > 2 && base(y.w.toLowerCase()).includes(a)) || null;
+};
 const koBtn = (c, redraw) => KO_READY.has(c.id) ? el('button', {class:'btn small' + (S.set.ko ? ' on' : ''), type:'button', 'aria-pressed':S.set.ko ? 'true' : 'false', onclick:() => { S.set.ko = !S.set.ko; touch('meta'); koLoad(c); redraw(); }}, S.set.ko ? '한국어 뜻 숨기기' : '한국어 뜻 보기') : null;
 const READY = new Set(['evu-e', 'evu-p', 'evu-u', 'evu-a', 'avu', 'col-i', 'col-a', 'pv-i', 'pv-a', 'idm', 'egu', 'egs', 'ielts', 'pr-e', 'pr-i']);   // books whose course file is written
 const BOOK = new Map(BOOKS.map(b => [b.id, b]));
@@ -2213,7 +2221,7 @@ function run(cfg) {
         q.why ? el('p', {class:'why'}, q.why) : null,
         x && x.ex && q.kind !== 'listen' ? el('div', {class:'line ex'}, el('p', {style:'font-size:18px'}, '→ ', exNodes(x.ex)), sayBtn(x.ex.replace(/[\[\]]/g, ''), 'sm')) : null,
         x && x.def && (q.kind === 'mc' && (q.qcls === 'ex' || q.qcls === 'big')) ? el('p', {class:'why', style:'color:var(--def)'}, x.w + ': ' + x.def) : null,
-        x && koOf(c, x) ? el('p', {class:'why ko', lang:'ko'}, x.w + ' · ' + koOf(c, x)) : null,
+        (() => { const kx = x || koWordOf(c, q); return kx && koOf(c, kx) ? el('p', {class:'why ko', lang:'ko'}, kx.w + ' · ' + koOf(c, kx)) : null; })(),
         ask, out, x && x.w && x.key && c.byKey && c.byKey.get(x.key) === x ? saveRow(c, x) : null),
         el('div', {class:'row'},
           ok ? null : el('button', {class:'btn big', type:'button', onclick:() => tryAgain(given)}, 'Try again'),
