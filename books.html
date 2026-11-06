@@ -227,6 +227,10 @@ html.light .tline .wt{border-color:#f2bddf}
 .sub{margin:0;color:var(--muted);font-size:15px}
 .learn{display:grid;gap:12px}
 .learn h3{margin:12px 0 0;font:600 15px/1.3 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--def)}
+.learn h3 .ipa{text-transform:none;letter-spacing:0}
+.line.ko p,.ko{font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;color:var(--gold)}
+.line.ko p{margin:0;font-size:18px;line-height:1.45}
+.d.ko{margin-top:2px}
 .learn h3:first-child{margin-top:0}
 .learn p{margin:0;font:400 calc(18px * var(--rs))/1.5 var(--f-read)}
 .learn .rule{display:grid;grid-template-columns:auto 1fr;gap:10px;font:400 calc(18px * var(--rs))/1.5 var(--f-read)}
@@ -578,6 +582,10 @@ html.light .tline .wt{border-color:#f2bddf}
 .sub{margin:0;color:var(--muted);font-size:15px}
 .learn{display:grid;gap:12px}
 .learn h3{margin:12px 0 0;font:600 15px/1.3 var(--f-ui);letter-spacing:.06em;text-transform:uppercase;color:var(--def)}
+.learn h3 .ipa{text-transform:none;letter-spacing:0}
+.line.ko p,.ko{font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;color:var(--gold)}
+.line.ko p{margin:0;font-size:18px;line-height:1.45}
+.d.ko{margin-top:2px}
 .learn h3:first-child{margin-top:0}
 .learn p{margin:0;font:400 calc(18px * var(--rs))/1.5 var(--f-read)}
 .learn .rule{display:grid;grid-template-columns:auto 1fr;gap:10px;font:400 calc(18px * var(--rs))/1.5 var(--f-read)}
@@ -792,7 +800,24 @@ const BOOKS = [
   {id:'egs', sh:'Grammar', t:'English Grammar in Use', lv:'Supplementary Exercises', cefr:'B1–B2', ab:'SE', kind:'grammar', n:54},
   {id:'ielts', sh:'IELTS', t:'IELTS Preparation', lv:'Listening, Reading, Writing and Speaking', cefr:'Band 5–9', ab:'IE', kind:'ielts', n:117}
 ];
-const READY = new Set(['evu-e', 'evu-p', 'evu-u', 'evu-a', 'avu', 'col-i', 'col-a', 'pv-i', 'pv-a', 'idm', 'egu', 'egs', 'ielts', 'pr-e']);   // books whose course file is written
+const KO_READY = new Set(['evu-e','evu-p']);   // books whose Korean meanings are written (courses/ko/<id>.json)
+const KOC = new Map();   // Korean meanings by book, loaded only when the learner turns them on
+function koLoad(c) {
+  if (!c || !S.set.ko || !KO_READY.has(c.id) || KOC.has(c.id)) return;
+  KOC.set(c.id, null);
+  fetch('courses/ko/' + c.id + '.json').then(r => r.ok ? r.json() : {}).then(j => { KOC.set(c.id, j || {}); koFill(c); if (!OV.open) render(); }, () => KOC.set(c.id, {}));
+}
+function koFill(c) {   // Korean that arrives after a list or a card was drawn: add it in place
+  const m = KOC.get(c.id) || {};
+  document.querySelectorAll('[data-k]').forEach(n => {
+    const t = m[n.dataset.k]; if (!t || n.querySelector('.ko')) return;
+    if (n.classList.contains('card')) { const d = n.querySelector('.line.def'); const k = el('div', {class:'line ko', lang:'ko'}, el('p', null, t)); if (d) d.after(k); else n.append(k); }
+    else { const d = n.querySelector('.d') || n.querySelector('button.w'); if (d) d.after(el('div', {class:'d ko', lang:'ko'}, t)); }
+  });
+}
+const koOf = (c, x) => { if (!S.set.ko || !c || !x || !x.key) return ''; koLoad(c); return (KOC.get(c.id) || {})[x.key] || ''; };
+const koBtn = (c, redraw) => KO_READY.has(c.id) ? el('button', {class:'btn small' + (S.set.ko ? ' on' : ''), type:'button', 'aria-pressed':S.set.ko ? 'true' : 'false', onclick:() => { S.set.ko = !S.set.ko; touch('meta'); koLoad(c); redraw(); }}, S.set.ko ? '한국어 뜻 숨기기' : '한국어 뜻 보기') : null;
+const READY = new Set(['evu-e', 'evu-p', 'evu-u', 'evu-a', 'avu', 'col-i', 'col-a', 'pv-i', 'pv-a', 'idm', 'egu', 'egs', 'ielts', 'pr-e', 'pr-i']);   // books whose course file is written
 const BOOK = new Map(BOOKS.map(b => [b.id, b]));
 const shelfColour = b => (SHELVES.find(s => s.k === b.sh) || SHELVES[0]).c;
 const bookName = b => b.t + (b.lv && b.kind !== 'ielts' ? ' · ' + b.lv : '');
@@ -1498,7 +1523,7 @@ function ensureCourse(id) {   // the course, or null while it loads (render is c
   if (!LOADING.has(id)) {
     LOADING.set(id, fetch('courses/' + id + '.json').then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(j => prep(j, id))
-      .then(c => { COURSE.set(id, c); LOADING.delete(id); }, e => { console.error('Course ' + id + ':', e); LOADING.set(id, 'failed'); })
+      .then(c => { COURSE.set(id, c); LOADING.delete(id); koLoad(c); }, e => { console.error('Course ' + id + ':', e); LOADING.set(id, 'failed'); })
       .then(() => { if (!OV.open) render(); }));
   }
   return null;
@@ -1722,7 +1747,7 @@ function tableBlock(head, body) {
 function blocks(c, u, bs0) {
   const out = [];
   for (const b of bs0 || []) {
-    if (b.h != null) out.push(el('h3', null, String(b.h).replace(/^([A-H])\s*[·.:–-]?\s*/, '$1 · ')));
+    if (b.h != null) out.push(el('h3', null, String(b.h).replace(/^([A-H])(?:\s*[·.:–-]\s*|\s+)/, '$1 · ').split(/(\/[^\/\s][^\/]*\/)/).map((t, i) => i % 2 ? el('span', {class:'ipa'}, t) : t)));   // sound symbols keep their shape: capitals would turn /ɪ/ into /I/
     else if (b.p != null) out.push(el('p', {html:hl(b.p)}));
     else if (b['-'] != null) out.push(el('div', {class:'rule'}, el('span', {html:hl(b['-'])})));
     else if (b.e != null) out.push(el('p', {class:'exl'}, el('span', {html:hl(b.e)}), sayBtn(b.e, 'sm')));
@@ -1754,20 +1779,22 @@ function exNodes(ex) {   // the example with the word in pink
   return out;
 }
 function wordList(c, xs) {
-  return el('div', {class:'wl'}, xs.map(x => el('div', {class:'wrow', lang:'en-GB'},
+  return el('div', {class:'wl'}, xs.map(x => el('div', {class:'wrow', lang:'en-GB', 'data-k':x.key},
     el('span', {class:'dot s' + status(c, x), title:STATUS[status(c, x)], 'aria-label':STATUS[status(c, x)]}),
     el('div', {style:'min-width:0'},
       el('button', {class:'w', type:'button', onclick:() => openItem(c, x, xs)}, x.w, x.pos ? el('span', {class:'pos'}, posName(c, x)) : null),
       x.def ? el('div', {class:'d'}, x.def) : null,
+      koOf(c, x) ? el('div', {class:'d ko', lang:'ko'}, koOf(c, x)) : null,
       x.ex ? el('div', {class:'x2'}, exNodes(x.ex)) : null,
       x.note && !(c.kind === 'pron' && /^[oO]+$/.test(x.note)) ? el('div', {class:'nt'}, x.note) : null),
     sayBtn(x.w, 'sm'))));
 }
 function itemCard(c, x) {
-  const k = el('article', {class:'card', lang:'en-GB'});
+  const k = el('article', {class:'card', lang:'en-GB', 'data-k':x.key});
   k.append(el('div', {class:'head'}, el('h2', {class:'hw' + (x.w.length > 14 ? ' sm' : '')}, x.w), sayBtn(x.w)));
   k.append(el('div', {class:'meta'}, x.pos ? el('span', {class:'chip'}, posName(c, x)) : null, x.note ? el('span', {class:'chip note'}, x.note) : null, el('span', null, x.u.lab + ' · ' + x.u.t)));
   if (x.def) k.append(el('div', {class:'line def'}, el('p', null, x.def)));
+  if (koOf(c, x)) k.append(el('div', {class:'line ko', lang:'ko'}, el('p', null, koOf(c, x))));
   if (x.ex) k.append(el('div', {class:'line ex'}, el('p', null, '→ ', exNodes(x.ex)), sayBtn(x.ex.replace(/[\[\]]/g, ''), 'sm')));
   return k;
 }
@@ -1886,7 +1913,7 @@ function openItem(c, x, list) {
     const nav = list && list.length > 1 ? el('div', {class:'row'},
       el('button', {class:'btn', type:'button', disabled:idx <= 0, onclick:() => draw(list[idx - 1])}, svg(ICON.prev), 'Previous'),
       el('button', {class:'btn', type:'button', disabled:idx >= list.length - 1, onclick:() => draw(list[idx + 1])}, 'Next', svg(ICON.next))) : null;
-    put(o.body, itemCard(c, cur0), el('div', {class:'tools'}, starBtn(c, cur0)), c.kind === 'pron' ? sayIt(cur0) : null, el('p', {class:'tip'}, 'Status: ' + STATUS[status(c, cur0)]), composer(c, cur0), nav);
+    put(o.body, itemCard(c, cur0), el('div', {class:'tools'}, starBtn(c, cur0), koBtn(c, () => draw(cur0))), c.kind === 'pron' ? sayIt(cur0) : null, el('p', {class:'tip'}, 'Status: ' + STATUS[status(c, cur0)]), composer(c, cur0), nav);
     $('#ov').scrollTop = 0;
   };
   draw(x);
@@ -2186,6 +2213,7 @@ function run(cfg) {
         q.why ? el('p', {class:'why'}, q.why) : null,
         x && x.ex && q.kind !== 'listen' ? el('div', {class:'line ex'}, el('p', {style:'font-size:18px'}, '→ ', exNodes(x.ex)), sayBtn(x.ex.replace(/[\[\]]/g, ''), 'sm')) : null,
         x && x.def && (q.kind === 'mc' && (q.qcls === 'ex' || q.qcls === 'big')) ? el('p', {class:'why', style:'color:var(--def)'}, x.w + ': ' + x.def) : null,
+        x && koOf(c, x) ? el('p', {class:'why ko', lang:'ko'}, x.w + ' · ' + koOf(c, x)) : null,
         ask, out, x && x.w && x.key && c.byKey && c.byKey.get(x.key) === x ? saveRow(c, x) : null),
         el('div', {class:'row'},
           ok ? null : el('button', {class:'btn big', type:'button', onclick:() => tryAgain(given)}, 'Try again'),
@@ -2548,7 +2576,7 @@ function unitGoals(c, u) {   // can-do statements: one for each part of the unit
   const gs = Object.keys(u.groups || {});
   for (const g of gs) { const xs = u.items.filter(x => x.g === g); out.push(xs.length ? line(unmd(u.groups[g]), xs) : 'Understand ' + unmd(u.groups[g]).replace(/^./, s => s.toLowerCase())); }
   if (!gs.length && u.items.length) out.push(line(u.t, u.items));
-  if (!gs.length && !u.items.length) for (const b of u.L || []) if (b.h != null) out.push('Understand ' + unmd(String(b.h).replace(/^[A-H]\s*[·.:–-]?\s*/, '')));
+  if (!gs.length && !u.items.length) for (const b of u.L || []) if (b.h != null) out.push('Understand ' + unmd(String(b.h).replace(/^[A-H](?:\s*[·.:–-]\s*|\s+)/, '')));
   if (u.qn) out.push('Answer ' + u.qn + ' exercise questions on ' + u.t.replace(/^./, s => s.toLowerCase()));
   if (u.O) { const t = taskText(u.O).replace(/[.?!]\s*$/, ''); out.push(/^(write|describe|tell)\b/i.test(t) ? t : 'Write about yourself: ' + t); }   // a task that already says what to write stands on its own
   else if (u.task && u.task.prompt) out.push('Write a full answer to the task in the time given');
@@ -3101,6 +3129,8 @@ function renderMe() {
       el('span', {class:'lab'}, 'New words a day'), daily,
       sw('voice', 'Read words aloud', 'voice', true),
       sw('autoplay', 'Say new words automatically', 'autoplay', false),
+      KO_READY.size ? (() => { const r = sw('ko', '한국어 뜻 보기 · Show Korean meanings', 'ko', false); r.querySelector('input').addEventListener('change', () => koLoad(COURSE.get(S.cur))); return r; })() : null,
+      KO_READY.size ? el('p', {class:'tip'}, '한국어 뜻이 준비된 책: ' + BOOKS.filter(b => KO_READY.has(b.id)).map(b => bookName(b)).join(', ') + '.') : null,
       el('span', {class:'lab'}, 'Voice speed'), rate,
       el('p', {class:'tip'}, voiceTip),
       voiceHelp(),
