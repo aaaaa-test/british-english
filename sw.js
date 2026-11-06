@@ -1,7 +1,7 @@
 /* Keeps 5000 British Words, British Writing and Grammar and British Book Courses working without internet.
    Pages come from the internet when it answers quickly, so updates show up at once; otherwise the saved copy is used.
    Signing in and saving progress to an account go straight to the internet and are never stored here. */
-const CACHE = 'bw-site-8';
+const CACHE = 'bw-site-9';
 const FILES = ['./', 'index.html', 'words.html', 'writing.html', 'books.html', 'config.js', 'words.webmanifest', 'writing.webmanifest', 'books.webmanifest',
   'icon-words-192.png', 'icon-words-512.png', 'icon-words-maskable.png', 'icon-writing-192.png', 'icon-writing-512.png', 'icon-writing-maskable.png',
   'icon-books-192.png', 'icon-books-512.png', 'icon-books-maskable.png'];   // course files (courses/*.json) are kept the first time a book is opened
