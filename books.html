@@ -792,7 +792,7 @@ const BOOKS = [
   {id:'egs', sh:'Grammar', t:'English Grammar in Use', lv:'Supplementary Exercises', cefr:'B1–B2', ab:'SE', kind:'grammar', n:54},
   {id:'ielts', sh:'IELTS', t:'IELTS Preparation', lv:'Listening, Reading, Writing and Speaking', cefr:'Band 5–9', ab:'IE', kind:'ielts', n:117}
 ];
-const READY = new Set(['evu-e', 'evu-p', 'evu-u', 'evu-a', 'avu', 'col-i', 'col-a', 'pv-i', 'pv-a', 'idm', 'egu', 'egs', 'ielts']);   // books whose course file is written
+const READY = new Set(['evu-e', 'evu-p', 'evu-u', 'evu-a', 'avu', 'col-i', 'col-a', 'pv-i', 'pv-a', 'idm', 'egu', 'egs', 'ielts', 'pr-e']);   // books whose course file is written
 const BOOK = new Map(BOOKS.map(b => [b.id, b]));
 const shelfColour = b => (SHELVES.find(s => s.k === b.sh) || SHELVES[0]).c;
 const bookName = b => b.t + (b.lv && b.kind !== 'ielts' ? ' · ' + b.lv : '');
@@ -1959,7 +1959,9 @@ function modeFor(q) {   // how this question is answered: what the learner chose
   const want = answerMode(), right = String(q.o[q.a] || '');
   if (want === 'choose' || q.kind === 'listen' || q.fixed) return 'choose';   // fixed sets such as TRUE / FALSE / NOT GIVEN are always chosen
   if (CHOOSE_ONLY.has(q.instr) || /^true or false/i.test(q.instr || '') || /[(…]/.test(right) || right.length > 34 || right.split(/\s+/).length > 6) return 'choose';
-  if (want === 'type' && (q.instr === Q_LABEL.odd || q.instr === Q_LABEL.snd)) return 'see';   // these need the choices in view
+  if (q.o.some(t => /\/.+\/|[ːəɪʊʌɒɔæɜθðʃʒŋˈ↗↘]/.test(String(t)) || /^[oO]{2,5}$/.test(String(t)))) return 'choose';   // sound symbols and stress patterns are not typed
+  if (new Set(q.o.map(t => amStrip(t))).size < q.o.length) return 'choose';   // choices that differ only in capitals (BEDroom, bedROOM) or punctuation
+  if (want === 'type' && (q.instr === Q_LABEL.odd || q.wk === 'snd' || q.see || !String(q.q || '').trim())) return 'see';   // these need the choices in view
   return want;
 }
 function typedRight(v, right) {   // forgiving about capitals, punctuation, short forms and a leading a/an/the/to
@@ -1967,15 +1969,18 @@ function typedRight(v, right) {   // forgiving about capitals, punctuation, shor
   return !!amStrip(right) && amStrip(v) === amStrip(right);
 }
 function wq(c, x, kind) {   // one question about a word or phrase
+  if (x.u.M && !x.u.M.includes(kind)) return null;   // a unit can limit the kinds of word question that suit it
+  const QL = k => (x.u.Q && x.u.Q[k]) || Q_LABEL[k];   // … and word them in its own way
   const groups = Object.keys(x.u.groups).filter(g => x.u.items.some(y => y.g === g));
+  const dg = c.kind === 'pron' && x.g && x.u.items.some(y => y.g && y.g !== x.g) ? (y => y.g !== x.g) : undefined;   // pronunciation phrases: wrong answers from another group, so near-synonyms never compete
   if (kind === 'meaning') {
     if (!x.def) return null;
-    const o = othersFor(c, x, 3, y => y.w); if (o.length < 2) return null;
+    const o = othersFor(c, x, 3, y => y.w, dg); if (o.length < 2) return null;
     return {kind:'mc', instr:Q_LABEL.meaning, q:mask(x.def, x), qcls:'def', o:[x.w, ...o.map(y => y.w)], a:0, x};
   }
   if (kind === 'gap') {
     if (!/\[.+?\]/.test(x.ex)) return null;
-    const o = othersFor(c, x, 3, y => y.w); if (o.length < 2) return null;
+    const o = othersFor(c, x, 3, y => y.w, dg); if (o.length < 2) return null;
     return {kind:'mc', instr:Q_LABEL.gap, q:'→ ' + x.ex.replace(/\[(.+?)\]/, '_____').replace(/\[(.+?)\]/g, '$1'), qcls:'ex', o:[x.w, ...o.map(y => y.w)], a:0, x};
   }
   if (kind === 'spell') {
@@ -2018,19 +2023,19 @@ function wq(c, x, kind) {   // one question about a word or phrase
   if (kind === 'hear') {   // pronunciation: which sound?
     if (groups.length < 2 || !groups.includes(x.g) || !SPEECH) return null;
     const gs = groups.length > 4 ? [x.g, ...sample(groups.filter(g => g !== x.g), 3)] : groups;
-    return {kind:'listen', instr:Q_LABEL.hear, say:x.w, o:gs.map(g => x.u.groups[g]), a:gs.indexOf(x.g), long:true, x, reveal:x.w + (x.pos ? '  ' + x.pos : '')};
+    return {kind:'listen', instr:QL('hear'), say:x.w, o:gs.map(g => x.u.groups[g]), a:gs.indexOf(x.g), long:true, x, reveal:x.w + (x.pos ? '  ' + x.pos : '')};
   }
   if (kind === 'snd') {
     if (groups.length < 2 || !groups.includes(x.g)) return null;
     const o = pickText(x.u.items.filter(y => y.g && y.g !== x.g), 3, y => y.w, [x.w]); if (o.length < 2) return null;
-    return {kind:'mc', instr:Q_LABEL.snd, q:x.u.groups[x.g], qcls:'def', o:[x.w, ...o.map(y => y.w)], a:0, x};
+    return {kind:'mc', instr:QL('snd'), wk:'snd', q:x.u.groups[x.g], qcls:'def', o:[x.w, ...o.map(y => y.w)], a:0, x};
   }
   if (kind === 'dict') {
     if (!SPEECH || x.w.length > 24) return null;
-    return {kind:'type', instr:Q_LABEL.dict, say:x.w, q:'', a:[x.w], x};
+    return {kind:'type', instr:QL('dict'), say:x.w, q:'', a:[x.w], x};
   }
   if (kind === 'stress') {
-    const pat = /^[oO]{2,5}$/.test(x.note) ? x.note : null; if (!pat) return null;
+    const pat = /^[oO]{2,4}$/.test(x.note) && (x.note.match(/O/g) || []).length === 1 ? x.note : null; if (!pat) return null;
     const all = ['Oo', 'oO', 'Ooo', 'oOo', 'ooO', 'Oooo', 'oOoo', 'ooOo', 'oooO'].filter(p => p.length === pat.length);
     const o = [pat, ...sample(all.filter(p => p !== pat), 3)];
     return {kind:'mc', instr:Q_LABEL.stress, q:x.w, qcls:'big', say:x.w, o, a:0, x, why:'O is the stressed syllable, o is unstressed.'};
@@ -2045,7 +2050,7 @@ const MODES = {vocab:['meaning', 'gap', 'spell'], coll:['part', 'gap', 'meaning'
   pron:['hear', 'snd', 'dict', 'stress'], grammar:[], ielts:['meaning', 'gap', 'spell']};
 const modesOf = c => c.modes || MODES[c.kind] || MODES.vocab;
 function gq(c, u, set, s, it, i) {   // an exercise item written for the unit
-  return {kind:set.k, instr:set.i, strict:!!set.strict, forms:!!set.forms, q:it.q, w:it.w, o:it.o, a:it.a, why:it.why, key:'x|' + u.n + '|' + s + '|' + i, label:u.lab, fixed:!!(set.fixed || it.fixed),
+  return {kind:set.k, instr:set.i, strict:!!set.strict, forms:!!set.forms, q:it.q, w:it.w, o:it.o, a:it.a, why:it.why, key:'x|' + u.n + '|' + s + '|' + i, label:u.lab, fixed:!!(set.fixed || it.fixed), see:!!set.see,
     ctx:u.k === 'read' || u.k === 'listen' ? u.n : undefined};   // reading and listening questions keep their passage or recording at hand
 }
 function itemOf(c, key) {
@@ -2065,7 +2070,7 @@ function unitQs(c, u) {
   (u.X || []).forEach((set, s) => set.items.forEach((it, i) => qs.push(gq(c, u, set, s, it, i))));
   const xs = u.items.filter(x => usable(c, x));
   if (xs.length) {
-    const kinds = modesOf(c);
+    const kinds = u.M || modesOf(c);
     qs.push(...autoQs(c, xs, kinds));
     const extra = [];
     if (c.kind !== 'pron') { for (const x of sample(xs, 3)) { const q = wq(c, x, 'sort'); if (q) extra.push(q); } for (const x of sample(xs, 2)) { const q = wq(c, x, 'odd'); if (q) extra.push(q); } }
@@ -2113,7 +2118,11 @@ function run(cfg) {
   const snapOf = x => ({p:x ? (bs(c.id).p[x.key] || null) : null});
   function next() {
     if (st.pending.length && (st.pending.length >= 5 || !st.q.length || st.q[0].k !== 'learn')) {   // new words are checked after every five
-      const checks = shuffle(st.pending.splice(0)).map(x => ({k:'q', q:checkQ(c, x), mode:'check', x})).filter(s => s.q);
+      const checks = shuffle(st.pending.splice(0)).map(x => {
+        const q = checkQ(c, x);
+        if (!q && !isLearnt(c, x)) { grade(c, x, true, 'check'); logAct('new', true); st.learnt++; }   // nothing to ask about it here (no voice on this device): seeing the card counts
+        return {k:'q', q, mode:'check', x};
+      }).filter(s => s.q);
       st.q.unshift(...checks); st.total += checks.length;
     }
     const step = st.q.shift();
@@ -2313,7 +2322,7 @@ function run(cfg) {
   next();
 }
 function checkQ(c, x) {   // a quick question about a word just learnt or due for review
-  const kinds = shuffle(modesOf(c)).concat(['meaning', 'gap']);
+  const kinds = shuffle(x.u.M || modesOf(c)).concat(['meaning', 'gap']);
   for (const k of kinds) { const q = wq(c, x, k); if (q) return q; }
   return null;
 }
@@ -2541,7 +2550,7 @@ function unitGoals(c, u) {   // can-do statements: one for each part of the unit
   if (!gs.length && u.items.length) out.push(line(u.t, u.items));
   if (!gs.length && !u.items.length) for (const b of u.L || []) if (b.h != null) out.push('Understand ' + unmd(String(b.h).replace(/^[A-H]\s*[·.:–-]?\s*/, '')));
   if (u.qn) out.push('Answer ' + u.qn + ' exercise questions on ' + u.t.replace(/^./, s => s.toLowerCase()));
-  if (u.O) out.push('Write about yourself: ' + taskText(u.O).replace(/[.?!]\s*$/, ''));
+  if (u.O) { const t = taskText(u.O).replace(/[.?!]\s*$/, ''); out.push(/^(write|describe|tell)\b/i.test(t) ? t : 'Write about yourself: ' + t); }   // a task that already says what to write stands on its own
   else if (u.task && u.task.prompt) out.push('Write a full answer to the task in the time given');
   return out.slice(0, 8);
 }
