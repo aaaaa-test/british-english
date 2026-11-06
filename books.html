@@ -2126,6 +2126,7 @@ function run(cfg) {
   function learnCard(step) {
     const x = step.x, first = step.k === 'learn';
     put(o.body, bar(), el('p', {class:'eyebrow', style:'text-align:center'}, first ? 'New ' + (x.w.includes(' ') ? 'phrase' : 'word') : 'Have another look'), itemCard(c, x),
+      x.key && c.byKey && c.byKey.get(x.key) === x ? saveRow(c, x) : null,
       el('button', {class:'btn primary big', type:'button', onclick:() => { if (first) st.pending.push(x); next(); }}, first ? 'Got it' : 'Next'));
     if (S.set.autoplay) say(x.w);
   }

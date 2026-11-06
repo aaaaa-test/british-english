@@ -8387,7 +8387,7 @@ function learnCard(s, it) {
   const x = it.x;
   const first = it.k === 'learn';   // every new word is learnt and then checked: there is no way to skip it
   const go = el('button', {class:'btn primary', type:'button', 'data-enter':'', onclick:() => { s.step++; if (first) s.pending.push(x); next(s); }}, first ? 'Got it' : 'Next');
-  put(s.o.body, sessBar(s), el('p', {class:'qlabel'}, first ? 'New word' : 'Have another look'), wordCard(x), el('div', {class:'row'}, prevBtn(s), go));
+  put(s.o.body, sessBar(s), el('p', {class:'qlabel'}, first ? 'New word' : 'Have another look'), wordCard(x), saveRow(x), el('div', {class:'row'}, prevBtn(s), go));
   setTimeout(() => { if (go.isConnected) go.focus({preventScroll:true}); }, 30);   // Enter goes on
 }
 /* ---------- how to answer: tap a choice, type with the choices in view, or type from memory ----------
