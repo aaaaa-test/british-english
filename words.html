@@ -8482,9 +8482,12 @@ function summary(s) {
     el('p', null, [d.n ? d.n + ' new word' + (d.n === 1 ? '' : 's') + ' learnt' : null, d.r ? d.r + ' reviewed' : null].filter(Boolean).join(' · ') || 'Nice practice!'),
     el('p', {class:'muted'}, streak() > 0 ? streak() + '-day streak. Keep it going tomorrow!' : 'Come back tomorrow to keep your words fresh.'))];
   const more = nextNew(5);
-  kids.push(el('div', {class:'row'}, el('button', {class:'btn', type:'button', onclick:closeOv}, 'Finish'),
-    s.mode ? null : el('button', {class:'btn primary', type:'button', disabled:!more.length, onclick:() => { closeOv(); startSession(more.map(x => ({k:'learn', x})), 'Five more words'); }}, 'Five more words')));
+  const fin = el('button', {class:'btn', type:'button', onclick:closeOv}, 'Finish');
+  const more5 = s.mode ? null : el('button', {class:'btn primary', type:'button', 'data-enter':'', disabled:!more.length, onclick:() => { closeOv(); startSession(more.map(x => ({k:'learn', x})), 'Five more words'); }}, 'Five more words');
+  kids.push(el('div', {class:'row'}, fin, more5));
   put(s.o.body, ...kids);
+  const go = more5 && !more5.disabled ? more5 : fin;
+  setTimeout(() => { if (go.isConnected) go.focus({preventScroll:true}); }, 30);   // Enter: five more words (or Finish when there are none)
 }
 function startToday(only) {   // only: undefined (today's words, in the order chosen in Me), 'review' or 'new'
   const due = only === 'new' ? [] : dueWords().slice(0, S.set.revMax || 80).map(x => ({k:'review', x}));
