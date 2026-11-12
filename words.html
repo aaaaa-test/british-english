@@ -10459,7 +10459,7 @@ function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = fal
 const APP_ID = 'words';   // the account keeps each app's progress in its own folder
 const LS = 'bw5000-v1';
 const DOCS = ['meta', ...Array.from({length:10}, (_, k) => 'p' + (k + 1))];
-const blank = () => ({p:{}, stars:[], trk:[], notes:{}, log:{}, set:{daily:10, pics:true, voice:true, ko:false, order:'reviews', revMax:80}, ts:{}});
+const blank = () => ({p:{}, stars:[], trk:[], notes:{}, log:{}, set:{daily:10, pics:true, voice:true, ko:false, order:'reviews', revMax:80, revFrom:'all'}, ts:{}});
 
 /* accounts on a website copy: config.js names a Firebase project (sign-in plus a Firestore database) */
 const FB = (() => {
@@ -11075,6 +11075,22 @@ const tricky = () => {   // words marked by hand first, then the ones often got 
   const man = (S.trk || []).map(w => BY.get(w)).filter(Boolean), seen = new Set(man);
   return man.concat(W.filter(x => { const r = S.p[x.w]; return !seen.has(x) && r && r[3] > 0 && r[0] <= 3; }).sort((a, b) => S.p[b.w][3] - S.p[a.w][3]));
 };
+/* Which words the reviews come from (Me → Reviews come from). 'all': every word that is due today.
+   'star' / 'trk': only the Starred or the Tricky words, as often as the learner likes. Those due today count as reviews;
+   the others are practised without changing their review days. */
+const revFrom = () => (S.set.revFrom === 'star' || S.set.revFrom === 'trk' ? S.set.revFrom : 'all');
+const isDue = x => { const r = S.p[x.w]; return !!r && r[0] >= 1 && r[1] <= DAY(); };
+const starred = () => S.stars.map(w => BY.get(w)).filter(Boolean);
+function reviewPool() {   // the words to bring back, the most urgent first
+  const from = revFrom();
+  if (from === 'all') return dueWords();
+  const list = from === 'star' ? starred() : tricky();
+  const last = x => { const r = S.p[x.w]; return r ? r[4] : -1; };
+  const due = list.filter(isDue).sort((a, b) => S.p[a.w][1] - S.p[b.w][1]);
+  const rest = shuffle(list.filter(x => !isDue(x))).sort((a, b) => last(a) - last(b));   // then the ones studied longest ago
+  return [...due, ...rest];
+}
+const REV_NAME = {star:'Starred', trk:'Tricky'};
 function streak() {
   const has = d => { const L = S.log[d]; return L && (L[0] + L[1]) > 0; };
   let t = DAY(), s = 0; if (!has(t)) t--;
@@ -11452,7 +11468,8 @@ function question(s, it) {
 }
 function answer(s, it, kind, ok) {
   const x = it.x;
-  if (it.k === 'review') { grade(x.w, ok, 'review'); logAct('review', ok); s.done.r++; if (!ok) { s.q.splice(Math.min(2, s.q.length), 0, {k:'relearn', x}); s.q.push({k:'again', x}); s.total += 2; } }
+  // free: a starred or tricky word that is not due, so its review days stay as they are
+  if (it.k === 'review') { grade(x.w, ok, it.free ? 'practice' : 'review'); logAct('review', ok); s.done.r++; if (!ok) { s.q.splice(Math.min(2, s.q.length), 0, {k:'relearn', x}); s.q.push({k:'again', x}); s.total += 2; } }
   else if (it.k === 'check') {
     if (ok) { if (!isLearnt(x.w)) { grade(x.w, true, 'check'); logAct('new', true); s.done.n++; } else logAct(null, true); }
     else { if (!S.p[x.w]) { S.p[x.w] = [0, DAY(), 1, 1, DAY()]; touch(docOf(x.w)); } logAct(null, false); const n = (s.tries.get(x.w) || 0) + 1; s.tries.set(x.w, n); if (n < 3) { s.q.push({k:'check', x}); s.total++; } }
@@ -11490,13 +11507,14 @@ function summary(s) {
   setTimeout(() => { if (go.isConnected) go.focus({preventScroll:true}); }, 30);   // Enter: five more words (or Finish when there are none)
 }
 function startToday(only) {   // only: undefined (today's words, in the order chosen in Me), 'review' or 'new'
-  const due = only === 'new' ? [] : dueWords().slice(0, S.set.revMax || 80).map(x => ({k:'review', x}));
+  const from = revFrom();
+  const due = only === 'new' ? [] : reviewPool().slice(0, S.set.revMax || 80).map(x => ({k:'review', x, free:!isDue(x)}));
   const left = Math.max(0, S.set.daily - todayLog()[0]);
   const fresh = only === 'review' ? [] : nextNew(only === 'new' ? (left || 5) : (left || (due.length ? 0 : 5))).map(x => ({k:'learn', x}));
-  if (!due.length && !fresh.length) { toast(only === 'review' ? 'No reviews are due today' : 'Nothing to learn here'); return; }
+  if (!due.length && !fresh.length) { toast(only === 'review' ? (from === 'all' ? 'No reviews are due today' : 'There are no ' + REV_NAME[from].toLowerCase() + ' words yet') : 'Nothing to learn here'); return; }
   const revs = shuffle(due), order = S.set.order || 'reviews';
   const items = order === 'new' ? [...fresh, ...revs] : order === 'mixed' ? mixIn(revs, fresh) : [...revs, ...fresh];
-  startSession(items, only === 'review' ? 'Reviews due today' : only === 'new' ? 'New words' : "Today's words");
+  startSession(items, only === 'review' ? (from === 'all' ? 'Reviews due today' : REV_NAME[from] + ' words') : only === 'new' ? 'New words' : "Today's words");
 }
 function mixIn(revs, fresh) {   // 'Mix them': five new words (learnt, then checked), then a share of the reviews, and so on
   const groups = []; for (let i = 0; i < fresh.length; i += 5) groups.push(fresh.slice(i, i + 5));
@@ -11648,14 +11666,18 @@ function modeBtn(ic, title, desc, f, off) {
 function renderToday() {
   const L = todayLog(), goal = S.set.daily, due = dueWords().length, learnt = learntCount(), st = streak();
   const n = nextNew(1)[0];
-  const doneToday = L[0] >= goal && !due;
+  const from = revFrom(), pool = from === 'all' ? due : reviewPool().length;   // how many words the reviews can bring back now
+  const doneToday = L[0] >= goal && !pool;
   const start = el('button', {class:'btn primary big', type:'button', onclick:() => startToday()}, doneToday ? 'Learn five more words' : (L[0] + L[1] ? 'Carry on' : "Start today's words"));
   const yest = wordsOn(DAY() - 1);
+  const revDesc = from === 'all' ? (due ? fmt(due) + ' due today' : 'No reviews are due today')
+    : pool ? REV_NAME[from] + ' words only · ' + fmt(pool) + (pool === 1 ? ' word' : ' words') : 'No ' + REV_NAME[from].toLowerCase() + ' words yet';
   const choose = el('section', {class:'panel'},
     el('p', {class:'eyebrow'}, 'Or choose one part'),
     el('p', {class:'tip'}, (ORDER_TIP[S.set.order] || ORDER_TIP.reviews) + " You can change this in Me. A review comes back 1, 3, 7, 16, 35, 90 and 180 days after you learn a word, so it is not only yesterday's words."),
+    from === 'all' ? null : el('p', {class:'tip', style:'color:var(--gold)'}, 'Reviews now come only from your ' + REV_NAME[from] + ' words, as often as you like. Change this in Me → Reviews come from.'),
     el('div', {class:'modes'},
-      modeBtn('🔁', 'Reviews only', due ? fmt(due) + ' due today' : 'No reviews are due today', () => startToday('review'), !due),
+      modeBtn('🔁', 'Reviews only', revDesc, () => startToday('review'), !pool),
       modeBtn('🌱', 'New words only', n ? 'Learn new words without the reviews' : 'You have learnt every word', () => startToday('new'), !n),
       modeBtn('📅', "Yesterday's words", yest.length ? yest.length + ' words you studied yesterday' : 'Nothing was studied yesterday', () => startListReview(yest, "Yesterday's words"), !yest.length)));
   const goalPanel = el('section', {class:'panel goal'}, ring(L[0], goal), el('div', {class:'stats'},
@@ -11799,7 +11821,11 @@ function renderMe() {
   const daily = el('div', {class:'seg', role:'group', 'aria-label':'New words a day'}, [5, 10, 15, 20, 30].map(n => el('button', {type:'button', 'aria-pressed':S.set.daily === n ? 'true' : 'false', onclick:() => { S.set.daily = n; touch('meta'); renderMe(); }}, String(n))));
   const pick = (label, key, opts) => el('div', {class:'seg', role:'group', 'aria-label':label}, opts.map(([v, t]) => el('button', {type:'button', 'aria-pressed':(S.set[key] ?? blank().set[key]) === v ? 'true' : 'false', onclick:() => { S.set[key] = v; touch('meta'); renderMe(); }}, t)));
   const order = pick("Today's words start with", 'order', [['reviews', 'Reviews'], ['new', 'New words'], ['mixed', 'Mix them']]);
-  const revMax = pick('Most reviews at a time', 'revMax', [10, 20, 30, 50, 80].map(n => [n, String(n)]));
+  const revMax = pick('Most reviews at a time', 'revMax', [5, 10, 20, 30, 50, 80].map(n => [n, String(n)]));
+  const revFromSeg = pick('Reviews come from', 'revFrom', [['all', 'All words'], ['star', 'Starred (' + starred().length + ')'], ['trk', 'Tricky (' + tricky().length + ')']]);
+  const revFromTip = {all:"Reviews only and Start today's words bring back every word that is due today.",
+    star:"Reviews only and Start today's words now bring back only your Starred words, as often as you like. Words that are not due today keep their own review days.",
+    trk:"Reviews only and Start today's words now bring back only your Tricky words (the ones you marked and the ones you often get wrong), as often as you like. Words that are not due today keep their own review days."}[revFrom()];
   const sw = (id, label, key, dflt = false) => { const i = el('input', {type:'checkbox', id, role:'switch'}); i.checked = S.set[key] == null ? dflt : !!S.set[key]; i.addEventListener('change', () => { S.set[key] = i.checked; touch('meta'); }); return el('div', {class:'switch'}, el('label', {for:id}, label), i); };
   const lists = el('div', {class:'list'},
     listBtn('Starred words', () => S.stars.map(w => BY.get(w)).filter(Boolean)),
@@ -11830,6 +11856,7 @@ function renderMe() {
       el('span', {class:'lab'}, 'New words a day'), daily,
       el('span', {class:'lab'}, "Today's words start with"), order,
       el('span', {class:'lab'}, 'Most reviews at a time'), revMax,
+      el('span', {class:'lab'}, 'Reviews come from'), revFromSeg, el('p', {class:'tip'}, revFromTip),
       el('span', {class:'lab'}, 'How to answer questions'), answerSeg(), el('p', {class:'tip'}, ANSWER_TIP),
       sw('pics', 'Show pictures', 'pics'),
       sw('ko', '한국어 뜻 보기 · Show Korean meanings', 'ko'),
