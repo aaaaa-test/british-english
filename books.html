@@ -751,6 +751,29 @@ input:disabled,textarea:disabled{opacity:1}
 .vh{display:grid;gap:4px}
 .vh ol{margin:0;padding-left:1.25em;display:grid;gap:4px;font-size:15px;line-height:1.45}
 .vh.mine b{color:var(--word)}
+/* concept links (Concept Vocabulary): how a word connects to what a Korean learner already knows */
+.k1{--cxc:#19b5ae}.k2{--cxc:#b69cff}.k3{--cxc:#ff8b8b}.k4{--cxc:#ffd36e}.k5{--cxc:#6cc9ff}
+html.light .k1{--cxc:#0a7c76}html.light .k2{--cxc:#6a4bd1}html.light .k3{--cxc:#c0392b}html.light .k4{--cxc:#8a6400}html.light .k5{--cxc:#1668a8}
+.cx,.cxt,.cxl{font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif}
+.cx{border:1px solid var(--line);border-left:4px solid var(--cxc,var(--gold));border-radius:12px;padding:10px 12px;display:grid;gap:8px;min-width:0;background:var(--panel);text-align:left}
+.cxh{margin:0}
+.cxt{display:inline-block;font-weight:700;font-size:12.5px;line-height:1.2;color:var(--cxc,var(--gold));border:1px solid var(--cxc,var(--gold));border-radius:999px;padding:3px 9px;white-space:nowrap}
+.cx dl{margin:0;display:grid;gap:8px}
+.cx dt{font-weight:700;font-size:12.5px;color:var(--muted)}
+.cx dd{margin:2px 0 0;font-size:calc(16px * var(--rs));line-height:1.55;color:var(--text);overflow-wrap:anywhere}
+.cx ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.cx li{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.cx .ct{display:flex;gap:2px 10px;align-items:baseline;flex-wrap:wrap;min-width:0}
+.cx .en,.cx mark.h,.cxl mark.h{font-family:var(--f-read)}
+.cx .en{color:var(--word);font-size:calc(17px * var(--rs))}
+details.cx>summary{cursor:pointer;list-style:none;display:grid;gap:6px;justify-items:start}
+details.cx>summary::-webkit-details-marker{display:none}
+.cxl{font-size:calc(15.5px * var(--rs));line-height:1.5;color:var(--text)}
+.cxm{font-size:12.5px;font-weight:600;color:var(--def)}
+details.cx[open] .cxm{display:none}
+.wrow .cx{margin-top:8px}
+p.cxf{margin:0;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.box p.cxl{font-family:"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;font-size:calc(16.5px * var(--rs));line-height:1.6}
 </style>
 </head>
 <body>
@@ -789,6 +812,7 @@ const BOOKS = [
   {id:'evu-u', sh:'Vocabulary', t:'English Vocabulary in Use', lv:'Upper-intermediate', cefr:'B2', ab:'UI', kind:'vocab', n:101},
   {id:'evu-a', sh:'Vocabulary', t:'English Vocabulary in Use', lv:'Advanced', cefr:'C1–C2', ab:'A', kind:'vocab', n:101},
   {id:'avu', sh:'Vocabulary', t:'Academic Vocabulary in Use', lv:'Academic English', cefr:'B2–C1', ab:'AC', kind:'vocab', n:56},
+  {id:'cv', sh:'Vocabulary', t:'Concept Vocabulary', lv:'Big ideas, linked to Korean', cefr:'C1–C2', ab:'CV', kind:'vocab', n:21},   // this app's own course, not a book
   {id:'col-i', sh:'Collocations', t:'English Collocations in Use', lv:'Intermediate', cefr:'B1–B2', ab:'I', kind:'coll', n:62},
   {id:'col-a', sh:'Collocations', t:'English Collocations in Use', lv:'Advanced', cefr:'C1–C2', ab:'A', kind:'coll', n:60},
   {id:'pv-i', sh:'Phrasal verbs', t:'English Phrasal Verbs in Use', lv:'Intermediate', cefr:'B1–B2', ab:'I', kind:'pv', n:70},
@@ -800,7 +824,7 @@ const BOOKS = [
   {id:'egs', sh:'Grammar', t:'English Grammar in Use', lv:'Supplementary Exercises', cefr:'B1–B2', ab:'SE', kind:'grammar', n:54},
   {id:'ielts', sh:'IELTS', t:'IELTS Preparation', lv:'Listening, Reading, Writing and Speaking', cefr:'Band 5–9', ab:'IE', kind:'ielts', n:117}
 ];
-const KO_READY = new Set(['evu-e','evu-p','evu-u','evu-a','avu','col-i','col-a','pv-i','pv-a','idm','ielts','pr-e','pr-i']);   // books whose Korean meanings are written (courses/ko/<id>.json)
+const KO_READY = new Set(['evu-e','evu-p','evu-u','evu-a','avu','cv','col-i','col-a','pv-i','pv-a','idm','ielts','pr-e','pr-i']);   // books whose Korean meanings are written (courses/ko/<id>.json)
 const KOC = new Map();   // Korean meanings by book, loaded only when the learner turns them on
 function koLoad(c) {
   if (!c || !S.set.ko || !KO_READY.has(c.id) || KOC.has(c.id)) return;
@@ -816,8 +840,9 @@ function koFill(c) {   // Korean that arrives after a list or a card was drawn: 
   });
 }
 const koOf = (c, x) => { if (!S.set.ko || !c || !x || !x.key) return ''; koLoad(c); return (KOC.get(c.id) || {})[x.key] || ''; };
-const koWordOf = (c, q) => {   // an exercise written for a unit: when its answer is one of the unit's words, that word (for its Korean meaning)
-  if (!S.set.ko || !c || !KO_READY.has(c.id) || !q || !q.key || !String(q.key).startsWith('x|')) return null;
+const koWordOf = (c, q) => (S.set.ko && c && KO_READY.has(c.id) ? qWord(c, q) : null);   // … for its Korean meaning
+const qWord = (c, q) => {   // an exercise written for a unit: when its answer is one of the unit's words, that word
+  if (!c || !q || !q.key || !String(q.key).startsWith('x|')) return null;
   const u = unitOf(c, String(q.key).split('|')[1]); if (!u || !u.items) return null;
   const a = String((q.kind === 'choose' || q.kind === 'mc') && q.o ? q.o[q.a] : Array.isArray(q.a) ? q.a[0] : '').trim().toLowerCase().replace(/[.!?]$/, '');
   if (!a) return null;
@@ -825,7 +850,7 @@ const koWordOf = (c, q) => {   // an exercise written for a unit: when its answe
   return u.items.find(y => y.w && y.w.toLowerCase() === a) || u.items.find(y => y.w && y.w.length > 2 && base(y.w.toLowerCase()).includes(a)) || null;
 };
 const koBtn = (c, redraw) => KO_READY.has(c.id) ? el('button', {class:'btn small' + (S.set.ko ? ' on' : ''), type:'button', 'aria-pressed':S.set.ko ? 'true' : 'false', onclick:() => { S.set.ko = !S.set.ko; touch('meta'); koLoad(c); redraw(); }}, S.set.ko ? '한국어 뜻 숨기기' : '한국어 뜻 보기') : null;
-const READY = new Set(['evu-e', 'evu-p', 'evu-u', 'evu-a', 'avu', 'col-i', 'col-a', 'pv-i', 'pv-a', 'idm', 'egu', 'egs', 'ielts', 'pr-e', 'pr-i']);   // books whose course file is written
+const READY = new Set(['evu-e', 'evu-p', 'evu-u', 'evu-a', 'avu', 'cv', 'col-i', 'col-a', 'pv-i', 'pv-a', 'idm', 'egu', 'egs', 'ielts', 'pr-e', 'pr-i']);   // books whose course file is written
 const BOOK = new Map(BOOKS.map(b => [b.id, b]));
 const shelfColour = b => (SHELVES.find(s => s.k === b.sh) || SHELVES[0]).c;
 const bookName = b => b.t + (b.lv && b.kind !== 'ielts' ? ' · ' + b.lv : '');
@@ -1552,6 +1577,7 @@ function prep(c, id) {
       const it = {u, k, raw, w:raw.replace(/[{}]/g, ''), hide:(raw.match(/\{(.+?)\}/) || [])[1] || null,
         pos:(p[1] || '').trim(), def:(p[2] || '').trim(), ex:(p[3] || '').trim(), g:(p[4] || '').trim(), note:(p[5] || '').trim()};
       it.key = u.n + ':' + it.w;
+      it.cx = (u.C && u.C[it.w]) || null;   // how the word connects to what a Korean learner already knows (Concept Vocabulary)
       return it;
     });
     for (const x of u.items) { if (!c.byKey.has(x.key)) { c.items.push(x); c.byKey.set(x.key, x); } }
@@ -1778,6 +1804,7 @@ function blocks(c, u, bs0) {
     else if (b['!'] != null) out.push(el('div', {class:'box gb'}, el('p', {class:'eyebrow'}, 'British English'), el('p', {html:hl(b['!'])})));
     else if (b.tip != null) out.push(el('div', {class:'box'}, el('p', {class:'eyebrow'}, 'Tip'), el('p', {html:hl(b.tip)})));
     else if (b.x != null) out.push(el('div', {class:'box mis'}, el('p', {class:'eyebrow'}, 'Common mistake'), el('p', {html:hl(b.x)})));
+    else if (b.kr != null) out.push(el('div', {class:'box gb', lang:'ko'}, el('p', {class:'eyebrow'}, '한국어와 영어'), el('p', {class:'cxl', html:hl(b.kr)})));   // how Korean and English meet in this unit
     else if (b.t) { const head = b.hd ? b.t[0] : null; out.push(tableBlock(head, b.hd ? b.t.slice(1) : b.t)); }
     else if (b.ul) out.push(el('ul', {class:'learnul', style:'margin:0;padding-left:1.2em;display:grid;gap:4px;font:400 calc(18px * var(--rs))/1.5 var(--f-read)'}, b.ul.map(t => el('li', {html:hl(t)}))));
     else if (b.g != null && u) { const xs = u.items.filter(x => String(b.g).split('').includes(x.g)); if (xs.length) out.push(wordList(c, xs)); }
@@ -1801,6 +1828,19 @@ function exNodes(ex) {   // the example with the word in pink
   out.push(ex.slice(last));
   return out;
 }
+/* Concept links. A unit's C gives, for a headword: t (the kind of link, 1–5), i (the picture behind the word),
+   l (the link to Korean), r (root and word family), c (chunks: [English, Korean]), n (neighbours it is confused with).
+   The notes are written in Korean, with *English words* marked. */
+const LINK = [null, ['같은 그림', 'Same picture'], ['다른 그림', 'Different picture'], ['느낌이 달라요', 'Different feel'], ['영미권 배경', 'Background'], ['한국 개념', 'Korean concept']];
+const linkBadge = x => el('span', {class:'cxt k' + x.cx.t, lang:'ko', title:LINK[x.cx.t][1]}, '①②③④⑤'[x.cx.t - 1] + ' ' + LINK[x.cx.t][0]);
+function linkCard(x, fold) {   // fold: in a word list the link to Korean shows, and a tap opens the rest
+  const k = x.cx; if (!k) return null;
+  const row = (label, body) => !body ? null : [el('dt', null, label), typeof body === 'string' ? el('dd', {html:hl(body)}) : el('dd', null, body)];
+  const chunks = k.c && k.c.length ? el('ul', null, k.c.map(([en, ko]) => el('li', null, el('span', {class:'ct'}, el('span', {class:'en', lang:'en-GB'}, en), ko ? el('span', null, ko) : null), fold ? null : sayBtn(en, 'sm')))) : null;
+  const rest = el('dl', null, row('핵심 그림', k.i), fold ? null : row('한국어 접점', k.l), row('뿌리와 가족', k.r), row('덩어리 표현', chunks), row('이웃 단어', k.n));
+  if (!fold) return el('section', {class:'cx k' + k.t, lang:'ko', 'aria-label':'연결'}, el('p', {class:'cxh'}, linkBadge(x)), rest);
+  return el('details', {class:'cx k' + k.t, lang:'ko'}, el('summary', null, linkBadge(x), k.l ? el('span', {class:'cxl', html:hl(k.l)}) : null, el('span', {class:'cxm'}, '연결 더 보기 +')), rest);
+}
 function wordList(c, xs) {
   return el('div', {class:'wl'}, xs.map(x => el('div', {class:'wrow', lang:'en-GB', 'data-k':x.key},
     el('span', {class:'dot s' + status(c, x), title:STATUS[status(c, x)], 'aria-label':STATUS[status(c, x)]}),
@@ -1809,7 +1849,8 @@ function wordList(c, xs) {
       x.def ? el('div', {class:'d'}, x.def) : null,
       koOf(c, x) ? el('div', {class:'d ko', lang:'ko'}, koOf(c, x)) : null,
       x.ex ? el('div', {class:'x2'}, exNodes(x.ex)) : null,
-      x.note && !(c.kind === 'pron' && /^[oO]+$/.test(x.note)) ? el('div', {class:'nt'}, x.note) : null),
+      x.note && !(c.kind === 'pron' && /^[oO]+$/.test(x.note)) ? el('div', {class:'nt'}, x.note) : null,
+      linkCard(x, true)),
     sayBtn(x.w, 'sm'))));
 }
 function itemCard(c, x) {
@@ -1819,6 +1860,7 @@ function itemCard(c, x) {
   if (x.def) k.append(el('div', {class:'line def'}, el('p', null, x.def)));
   if (koOf(c, x)) k.append(el('div', {class:'line ko', lang:'ko'}, el('p', null, koOf(c, x))));
   if (x.ex) k.append(el('div', {class:'line ex'}, el('p', null, '→ ', exNodes(x.ex)), sayBtn(x.ex.replace(/[\[\]]/g, ''), 'sm')));
+  if (x.cx) k.append(linkCard(x));
   return k;
 }
 function trickyBtn(c, x) {   // put a word on the Tricky list by hand
@@ -2237,6 +2279,7 @@ function run(cfg) {
         x && x.ex && q.kind !== 'listen' ? el('div', {class:'line ex'}, el('p', {style:'font-size:18px'}, '→ ', exNodes(x.ex)), sayBtn(x.ex.replace(/[\[\]]/g, ''), 'sm')) : null,
         x && x.def && (q.kind === 'mc' && (q.qcls === 'ex' || q.qcls === 'big')) ? el('p', {class:'why', style:'color:var(--def)'}, x.w + ': ' + x.def) : null,
         (() => { const kx = x || koWordOf(c, q); return kx && koOf(c, kx) ? el('p', {class:'why ko', lang:'ko'}, kx.w + ' · ' + koOf(c, kx)) : null; })(),
+        (() => { const lx = x || qWord(c, q); return lx && lx.cx && lx.cx.l ? el('p', {class:'cxf', lang:'ko'}, linkBadge(lx), el('span', {class:'cxl', html:hl(lx.cx.l)})) : null; })(),
         ask, out, x && x.w && x.key && c.byKey && c.byKey.get(x.key) === x ? saveRow(c, x) : null),
         el('div', {class:'row'},
           ok ? null : el('button', {class:'btn big', type:'button', onclick:() => tryAgain(given)}, 'Try again'),
@@ -3089,7 +3132,7 @@ function renderBooks() {
         el('span', {class:'n num'}, ready ? (b.id === S.cur ? 'Studying' : pr.units ? pr.units + '/' + n : '') : 'Soon'));
     })));
   }
-  parts.push(el('p', {class:'tip'}, 'The explanations, meanings, examples and exercises here are written for this app, following the order and the topics of each book. IELTS practice material is adapted from learning-zone/ielts-materials (MIT License).'));
+  parts.push(el('p', {class:'tip'}, 'The explanations, meanings, examples and exercises here are written for this app, following the order and the topics of each book. Concept Vocabulary is this app\'s own course: it follows no book. IELTS practice material is adapted from learning-zone/ielts-materials (MIT License).'));
   put(view, ...parts);
 }
 /* ---------- my mindset: a sentence to keep in front of you. It is kept on this device for every app on the site
