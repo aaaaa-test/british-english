@@ -838,6 +838,12 @@ p.cxf{margin:0;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
 .cx-x{border:1px solid var(--line);background:none;color:var(--muted);border-radius:8px;min-width:36px;min-height:36px;cursor:pointer;font:600 15px/1 var(--f-ui)}
 .cond label.not{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .cond .top .row{flex-wrap:nowrap;align-items:center}
+.old{color:var(--muted)}
+.vs p.old,.verse.old{font-family:var(--f-read)}
+.chg{color:var(--word);font-weight:600}
+.vs .pair{display:grid;gap:0;border-radius:10px;padding:2px 0}
+.vs .pair p.old{padding-top:0;font-size:.92em}
+.vs .pair.star{box-shadow:inset 3px 0 0 var(--gold)}
 
 </style>
 </head>
@@ -952,6 +958,32 @@ function oldForm(x) {   // an explanation of old verb endings
   return null;
 }
 const modern3 = b => /(s|x|z|ch|sh|o)$/.test(b) ? b + 'es' : /[^aeiou]y$/.test(b) ? b.slice(0, -1) + 'ies' : b === 'have' ? 'has' : b + 's';
+/* ---------- the 1611 first edition ----------
+   kjv/bible1611.json has the same books, chapters and verses as the main text. WD.o[form] = [times spelled the same,
+   1611 spelling, count, ...]. */
+let OLD = null, OLDP = null, REV = null;
+function loadOld() { if (OLD) return Promise.resolve(OLD); if (!OLDP) OLDP = fetch('kjv/bible1611.json').then(r => r.json()).then(j => { OLD = j.b; return OLD; }); return OLDP; }
+const oldV = i => { const r = V[i]; return (OLD && OLD[r[0]][r[1]][r[2]]) || ''; };
+const OTOK = /[A-Za-zþōēāū]+(?:['’][A-Za-z]+)*/g;
+const EXP = {'þ':'th', 'ō':'on', 'ē':'en', 'ā':'an', 'ū':'un'};
+const norm1611 = w => { w = w.toLowerCase().replace(/’/g, "'"); if (w === 'þ') w = 'the'; w = w.replace(/[þōēāū]/g, c => EXP[c]).replace(/v/g, 'u').replace(/j/g, 'i').replace(/y/g, 'i').replace(/'s$/, '').replace(/(.)\1+/g, '$1').replace(/e$/, ''); return w; };
+const oldSp = x => (WD.o && WD.o[x.k]) || null;
+const spelledDiff = x => { const o = oldSp(x); if (!o || o.length < 2) return false; let n = 0; for (let j = 2; j < o.length; j += 2) n += o[j]; return n > o[0]; };   // usually printed differently in 1611
+function revMap() {   // a 1611 spelling -> the main-text word it stands for most often
+  if (REV) return REV; REV = new Map(); const best = new Map();
+  for (const [k, o] of Object.entries(WD.o || {})) { if (o[0] && (best.get(k) || 0) < o[0]) { best.set(k, o[0]); REV.set(k, k); } for (let j = 1; j < o.length; j += 2) if ((best.get(o[j]) || 0) < o[j + 1]) { best.set(o[j], o[j + 1]); REV.set(o[j], k); } }
+  return REV;
+}
+function oldNodes(i) {   // the 1611 verse: words tappable (to the word they stand for); wording that differs from the main text marked
+  const mw = plainV(i).match(TOK) || [], mainSet = new Set(mw.map(norm1611)), mainKeys = new Set(mw.map(keyOf)), t = oldV(i), out = [], R = revMap(); let last = 0, m;
+  OTOK.lastIndex = 0;
+  while ((m = OTOK.exec(t))) {
+    out.push(t.slice(last, m.index)); last = OTOK.lastIndex;
+    const k = R.get(m[0].toLowerCase().replace(/’/g, "'").replace(/'s$/, '')), chg = !mainSet.has(norm1611(m[0])) && !(k && mainKeys.has(k));
+    out.push(el('span', {class:(k ? 'kw' : '') + (chg ? ' chg' : ''), 'data-w':k || null, title:k && k !== m[0].toLowerCase() ? 'today: ' + k : null}, m[0]));
+  }
+  out.push(t.slice(last)); return out;
+}
 function versesOf(x) { const a = IDX.get(x.k); return a ? Array.from(a) : []; }
 function plainV(i) { return V[i][3].replace(/[\[\]]/g, ''); }
 function vNodes(i, mark) {   // a verse as nodes: words tappable, italic supplied words, the word being studied marked
@@ -1000,6 +1032,7 @@ const CONDS = {
   status:{label:'My progress', make:() => ({t:'status', v:['new']})},
   meaning:{label:'Has a meaning written', make:() => ({t:'meaning', v:true})},
   len:{label:'Word length', make:() => ({t:'len', min:4, max:30})},
+  ed:{label:'Spelled differently in 1611', make:() => ({t:'ed', v:true})},
   text:{label:'Spelling', make:() => ({t:'text', how:'starts', s:'' })}};
 const chRange = c => { const a = chIndex(c.b1, Math.min(c.c1, B[c.b1][3].length - 1)), z = chIndex(c.b2, Math.min(c.c2, B[c.b2][3].length - 1)); const lo = CH[Math.min(a, z)][2], hiCh = CH[Math.max(a, z)]; return [lo, hiCh[2] + B[hiCh[0]][3][hiCh[1]].length - 1]; };
 function test(c, x) {
@@ -1011,6 +1044,7 @@ function test(c, x) {
     case 'first': { const [lo, hi] = c._r || (c._r = chRange(c)); return x.first >= lo && x.first <= hi; }
     case 'status': { const s = status(x); return c.v.some(v => v === 'new' ? s === 0 : v === 'learning' ? s === 1 || s === 2 : v === 'mastered' ? s === 3 : v === 'starred' ? S.stars.includes(x.k) : v === 'tricky' ? (S.trk.includes(x.k) || (rec(x) && rec(x)[3] > 0)) : v === 'due' ? isDue(x) : false); }
     case 'meaning': return !!meaningOf(x) === !!c.v;
+    case 'ed': return spelledDiff(x) === !!c.v;
     case 'len': return x.k.length >= (+c.min || 0) && x.k.length <= (+c.max || 99);
     case 'text': { const s = String(c.s || '').toLowerCase().trim(); if (!s) return true; return c.how === 'starts' ? x.k.startsWith(s) : c.how === 'ends' ? x.k.endsWith(s) : x.k.includes(s); }
   }
@@ -1030,6 +1064,7 @@ const PRESETS = [
   ['In Bible order: Genesis', 'every word the first time it appears', {mode:'and', sort:'bible', c:[{t:'first', b1:0, c1:0, b2:0, c2:49}, {t:'kind', v:['c', 'a', 'b']}]}],
   ['New Testament words', 'words that first appear in Matthew–Revelation', {mode:'and', sort:'bible', c:[{t:'first', b1:39, c1:0, b2:65, c2:21}, {t:'kind', v:['c', 'a', 'b']}]}],
   ['Names', 'people and places', {mode:'and', sort:'freq', c:[{t:'kind', v:['n']}]}],
+  ['Spelled differently in 1611', 'vnto, haue, sonne, citie …', {mode:'and', sort:'freq', c:[{t:'ed', v:true}, {t:'kind', v:['c', 'a', 'b']}]}],
   ['Old English OR Bible words used 50+ times', 'an OR filter example', {mode:'or', sort:'freq', c:[{t:'kind', v:['a']}, {t:'freq', min:50, max:100000}]}]];
 const defaultSet = () => ({mode:'and', sort:'bible', c:[{t:'kind', v:['c', 'a', 'b']}, {t:'level', v:[3, 4, 5, 6]}], name:'Bible order, levels 3–6'});
 const curSet = () => S.set.wordset || defaultSet();
@@ -1098,6 +1133,9 @@ function openWord(x, list) {
         el('p', {class:'tip'}, fmt(x.n) + ' times in ' + fmt(x.nv) + ' verses · first in ', el('button', {class:'linkbtn', type:'button', onclick:() => openChapter(V[x.first][0], V[x.first][1], x.first)}, refLong(x.first)), ' · status: ' + STATUS[status(x)])),
       el('div', {class:'row', style:'flex-wrap:wrap;gap:8px'}, star, trk, el('button', {class:'btn small', type:'button', onclick:() => startQuiz([x], 'This word', {kinds:['cloze', 'meaning'], n:4})}, 'Practise it')),
       forms.length ? el('section', {class:'panel'}, el('p', {class:'eyebrow'}, 'Other forms in the KJV'), el('div', {class:'chk'}, forms.map(y => el('button', {class:'btn small', type:'button', onclick:() => draw(y)}, y.k + ' · ' + y.n)))) : null,
+      oldSp(x) ? el('section', {class:'panel'}, el('p', {class:'eyebrow'}, 'In the 1611 first edition'), (() => { const o = oldSp(x), parts = []; for (let j = 1; j < o.length; j += 2) parts.push(el('b', {style:'font-family:var(--f-read);font-weight:400;font-size:19px;color:var(--word)'}, o[j]), ' ' + fmt(o[j + 1]) + '×  '); return el('p', {style:'margin:0'}, parts.length ? ['Printed as ', parts, o[0] ? '· as today ' + fmt(o[0]) + '×' : ''] : 'Spelled as today (' + fmt(o[0]) + '×).'); })(),
+        spelledDiff(x) ? el('p', {class:'tip'}, 'In 1611 English spelling was not yet fixed. The 1769 revision made the spelling regular, as it is today.') : null,
+        el('button', {class:'btn small', type:'button', onclick:e => { const btn = e.currentTarget; btn.disabled = true; loadOld().then(() => { const i = x.first; btn.replaceWith(el('div', {class:'vrow'}, el('span', {class:'ref'}, refLong(i) + ' · 1769'), el('p', {class:'verse noword'}, vNodes(i, x.k)), el('span', {class:'ref'}, '1611'), el('p', {class:'verse old noword'}, oldNodes(i)))); }); }}, 'Compare its first verse with 1611')) : null,
       el('section', {class:'panel'}, el('p', {class:'eyebrow'}, 'Where it appears'), bookBars(x)),
       el('section', {class:'panel'}, el('p', {class:'eyebrow'}, 'Verses (' + fmt(vs.length) + ')'),
         el('div', {style:'display:grid;gap:8px'}, vs.slice(0, more).map(i => el('div', {class:'vrow'}, el('span', {class:'ref'}, refLong(i)), el('p', {class:'verse noword'}, vNodes(i, x.k)), el('div', {class:'row', style:'gap:6px'}, el('button', {class:'btn small', type:'button', onclick:() => openChapter(V[i][0], V[i][1], i)}, 'Open the chapter'), sayBtn(plainV(i), 'sm'))))),
@@ -1139,6 +1177,11 @@ function makeQ(x, kind) {
     const pool = WL.filter(y => y !== x && y.kind === 'a' && meaningOf(y) && !meaningOf(y).via && meaningOf(y).def !== m.def);
     const opts = [m.def, ...sample(pool, 6).map(y => meaningOf(y).def)].filter((v, i, a) => a.indexOf(v) === i).slice(0, 4);
     return {k:'mc', x, vi:goodVerse(x), instr:'In modern English, "' + x.k + '" means …', o:opts, a:0, long:true};
+  }
+  if (kind === 'sp1611') {
+    const o = oldSp(x); if (!o || o.length < 2) return null;
+    const ds = distractors(x, 3); if (ds.length < 2) return null;
+    return {k:'mc', x, vi:x.first, sp:o[1], instr:'In 1611 this word was printed "' + o[1] + '". How is it spelled today?', o:[x.k, ...ds.map(y => y.k)], a:0};
   }
   if (kind === 'cloze') {
     const vi = goodVerse(x); if (vi == null) return null;
@@ -1187,7 +1230,7 @@ function runSession(o, title, steps, opt) {
   function ask(q) {
     const am = q.k === 'cloze' ? answerMode() : 'choose';
     const fb = el('div'); let answered = false;
-    const prompt = q.k === 'cloze' ? el('p', {class:'qtext ex', lang:'en-GB'}, clozeNodes(q.vi, q.x.k)) : el('div', null, el('p', {class:'qtext big', lang:'en-GB'}, q.x.k), q.vi != null ? el('p', {class:'verse noword', style:'text-align:center'}, vNodes(q.vi, q.x.k)) : null);
+    const prompt = q.k === 'cloze' ? el('p', {class:'qtext ex', lang:'en-GB'}, clozeNodes(q.vi, q.x.k)) : q.sp ? el('p', {class:'qtext big', lang:'en-GB', style:'text-align:center'}, q.sp) : el('div', null, el('p', {class:'qtext big', lang:'en-GB'}, q.x.k), q.vi != null ? el('p', {class:'verse noword', style:'text-align:center'}, vNodes(q.vi, q.x.k)) : null);
     const finish = (ok, given) => {
       if (answered) return; answered = true;
       st.done++; if (ok) st.right++; else st.wrong.push(q);
@@ -1282,12 +1325,19 @@ function openChapter(b, c, focus) {
     const words = new Map(); vis.forEach(i => { for (const m of plainV(i).matchAll(TOK)) { const x = WM.get(keyOf(m[0])); if (x) words.set(x.k, x); } });
     const study = [...words.values()].filter(x => x.kind !== 'n' && x.lv >= 3 && !isLearnt(x)).sort((a, b) => a.ord - b.ord);
     const firstHere = [...words.values()].filter(x => x.first >= start && x.first < start + n && x.kind !== 'n');
+    const ed = S.set.ed || 'main';
+    if (ed !== 'main' && !OLD) { put(o.body, el('p', {class:'loading'}, 'Opening the 1611 edition…')); loadOld().then(() => draw(b, c, focus), () => { S.set.ed = 'main'; draw(b, c, focus); toast('The 1611 text could not be loaded'); }); return; }
+    const edSeg = el('div', {class:'seg am', role:'group', 'aria-label':'Edition'}, [['main', '1769'], ['1611', '1611'], ['both', 'Both']].map(([k, l]) => el('button', {type:'button', 'aria-pressed':ed === k ? 'true' : 'false', onclick:() => { S.set.ed = k; save(); draw(b, c, focus); }}, l)));
     const hlSeg = el('div', {class:'seg am', role:'group', 'aria-label':'Mark words'}, [['a', 'Old English'], ['b', 'Bible words'], ['4', 'Level 4+'], ['n', 'Names'], ['off', 'None']].map(([k, l]) => el('button', {type:'button', 'aria-pressed':S.set.hl === k ? 'true' : 'false', onclick:() => { S.set.hl = k; save(); draw(b, c); }}, l)));
-    const vlist = el('div', {class:'vs ' + hlc, lang:'en-GB'}, vis.map((i, k) => el('p', {id:'v' + i, class:(S.vstars.includes(i) ? 'star' : '')}, el('span', {class:'vn', role:'button', tabindex:'0', onclick:() => verseMenu(i, () => draw(b, c, i))}, k + 1), vNodes(i))));
+    const vn = (i, k) => el('span', {class:'vn', role:'button', tabindex:'0', onclick:() => verseMenu(i, () => draw(b, c, i))}, k + 1);
+    const vlist = el('div', {class:'vs ' + hlc, lang:'en-GB'}, vis.map((i, k) => ed === '1611' ? el('p', {id:'v' + i, class:'old' + (S.vstars.includes(i) ? ' star' : '')}, vn(i, k), oldNodes(i))
+      : ed === 'both' ? el('div', {id:'v' + i, class:'pair' + (S.vstars.includes(i) ? ' star' : '')}, el('p', null, vn(i, k), vNodes(i)), el('p', {class:'old'}, el('span', {class:'vn'}, '1611'), oldNodes(i)))
+      : el('p', {id:'v' + i, class:(S.vstars.includes(i) ? 'star' : '')}, vn(i, k), vNodes(i))));
     const done = !!S.read[key];
     put(o.body,
       el('header', {class:'hello'}, el('p', {class:'eyebrow'}, B[b][0] + (S.set.ko ? ' · ' + B[b][2] : '') + ' · chapter ' + (c + 1) + ' of ' + B[b][3].length), el('h1', null, B[b][0] + ' ' + (c + 1))),
       el('p', {class:'tip'}, 'Tap a word for its meaning and verses. Tap a verse number to star it, write a note or practise it. Words in italics were added by the translators.'),
+      el('div', null, el('span', {class:'lab'}, 'Edition: '), edSeg), ed !== 'main' ? el('p', {class:'tip'}, 'The 1611 first edition, as printed: u and v, i and j, and many spellings were not yet fixed. Words in pink differ in wording from the 1769 text. Tap a word to see it today.') : null,
       el('div', null, el('span', {class:'lab'}, 'Mark: '), hlSeg),
       vlist,
       el('section', {class:'panel'}, el('p', {class:'eyebrow'}, 'Study this chapter'),
@@ -1422,7 +1472,7 @@ function condUI(c, i, redraw) {
     case 'freq': body = el('div', {class:'row', style:'gap:10px;flex-wrap:wrap'}, num('min', 'at least'), num('max', 'at most'), el('span', {class:'not'}, 'times')); break;
     case 'range': case 'first': body = el('div', {style:'display:grid;gap:6px'}, el('div', {class:'row', style:'gap:6px;flex-wrap:wrap'}, el('span', {class:'not'}, 'from'), bookSel('b1'), chSel('b1', 'c1')), el('div', {class:'row', style:'gap:6px;flex-wrap:wrap'}, el('span', {class:'not'}, 'to'), bookSel('b2'), chSel('b2', 'c2'))); break;
     case 'status': body = checks([['new', 'Not started'], ['learning', 'Learning'], ['mastered', 'Mastered'], ['due', 'Due today'], ['starred', 'Starred'], ['tricky', 'Tricky']]); break;
-    case 'meaning': body = el('div', {class:'seg am'}, [[true, 'Yes'], [false, 'No']].map(([v, l]) => el('button', {type:'button', 'aria-pressed':c.v === v ? 'true' : 'false', onclick:() => { c.v = v; redraw(); }}, l))); break;
+    case 'ed': case 'meaning': body = el('div', {class:'seg am'}, [[true, 'Yes'], [false, 'No']].map(([v, l]) => el('button', {type:'button', 'aria-pressed':c.v === v ? 'true' : 'false', onclick:() => { c.v = v; redraw(); }}, l))); break;
     case 'len': body = el('div', {class:'row', style:'gap:10px;flex-wrap:wrap'}, num('min', 'from'), num('max', 'to'), el('span', {class:'not'}, 'letters')); break;
     case 'text': body = el('div', {class:'row', style:'gap:6px;flex-wrap:wrap'}, el('select', {onchange:e => { c.how = e.target.value; redraw(); }}, [['starts', 'starts with'], ['ends', 'ends with'], ['has', 'contains']].map(([v, l]) => el('option', {value:v, selected:c.how === v}, l))), el('input', {type:'text', value:c.s || '', placeholder:'e.g. eth', autocapitalize:'off', onchange:e => { c.s = e.target.value; redraw(); }})); break;
   }
@@ -1462,7 +1512,7 @@ function renderBible() {
   };
   const inp = el('input', {class:'field', type:'search', placeholder:'Search the Bible (3+ letters)', value:BQ, 'aria-label':'Search the Bible', autocapitalize:'off', oninput:e => { BQ = e.target.value; clearTimeout(inp.t); inp.t = setTimeout(search, 250); }});
   const last = S.last && V[S.last] ? S.last : null;
-  put(view, homeLink(), el('header', {class:'hello'}, el('p', {class:'eyebrow'}, 'Bible'), el('h1', null, 'The King James Bible'), el('p', {class:'lv'}, '66 books · 1,189 chapters · 31,102 verses')),
+  put(view, homeLink(), el('header', {class:'hello'}, el('p', {class:'eyebrow'}, 'Bible'), el('h1', null, 'The King James Bible'), el('p', {class:'lv'}, '66 books · 1,189 chapters · 31,102 verses · 1769 text with the 1611 first edition')),
     last != null ? el('button', {class:'btn teal', type:'button', onclick:() => openChapter(V[last][0], V[last][1], last)}, 'Carry on reading: ' + refLong(last)) : null,
     inp, res, booksPanel(openBook));
   search();
@@ -1513,6 +1563,7 @@ function renderStudy() {
         : el('button', {class:'btn primary', type:'button', onclick:() => { S.set.planStart = DAY(); save(); renderStudy(); }}, 'Start today')),
     el('section', {class:'panel'}, el('p', {class:'eyebrow'}, 'KJV English'), el('p', {style:'margin:0'}, 'The KJV was translated in 1611. Learn how its English works before you read.'), el('div', {class:'modes'},
       LESSONS.map(([t, d, body]) => modeBtn('📜', t, d, () => { const o = openOv(t); put(o.body, el('div', {class:'lesson'}, body())); })),
+      modeBtn('🔤', 'Quiz: 1611 spelling', 'vnto, haue, sonne … how are they spelled today?', () => startQuiz(WL.filter(x => spelledDiff(x) && x.kind !== 'n' && x.n >= 10), '1611 spelling', {kinds:['sp1611'], n:15})),
       modeBtn('🎯', 'Quiz: old words in modern English', 'thou, hath, wherefore, peradventure …', () => startQuiz(WL.filter(x => x.kind === 'a' && meaningOf(x) && !meaningOf(x).via && x.n >= 3), 'Old KJV English', {kinds:['modern', 'cloze'], n:15})))),
     el('section', {class:'panel'}, el('p', {class:'eyebrow'}, 'My notes'), Object.keys(S.notes).length ? el('div', {style:'display:grid;gap:6px'}, Object.entries(S.notes).map(([vi, t]) => el('button', {class:'vrow', type:'button', onclick:() => verseMenu(+vi, renderStudy)}, el('span', {class:'ref'}, refLong(+vi)), el('span', null, t)))) : el('p', {class:'tip'}, 'Notes you write on verses appear here.')));
 }
@@ -1525,6 +1576,19 @@ const LESSONS = [
   ['Old little words', 'unto, wherefore, lest, behold …', () => [el('p', null, 'These small words appear thousands of times.'), glossRows(['unto', 'behold', 'lo', 'yea', 'nay', 'verily', 'wherefore', 'whither', 'whence', 'thither', 'hither', 'thence', 'thereof', 'wherein', 'lest', 'howbeit', 'peradventure', 'withal'])]],
   ['Old past forms', 'spake, smote, begat, wrought …', () => [glossRows(['spake', 'smote', 'slew', 'sware', 'begat', 'wrought', 'brake', 'bare', 'gat', 'clave', 'digged', 'forgat', 'shewed', 'dwelt', 'abode'])]],
   ['Numbers and measures', 'threescore, cubit, shekel …', () => [el('p', null, 'A score is twenty, so threescore and ten is seventy.'), glossRows(['score', 'threescore', 'fourscore', 'twain', 'cubit', 'shekel', 'talent', 'ephah', 'hin', 'omer']), exV(18, 89, 9)]],
+  ['1611 and 1769', 'the first edition and the standard text', () => {
+    const ed = WD.ed || {}, box = el('div', {style:'display:grid;gap:8px'});
+    const exPair = (b, c, v) => { const i = vIndex(b, c, v); return el('div', {class:'vrow'}, el('span', {class:'ref'}, refLong(i) + ' · 1769'), el('p', {class:'verse noword'}, vNodes(i)), el('span', {class:'ref'}, '1611'), el('p', {class:'verse old noword'}, oldNodes(i))); };
+    loadOld().then(() => fetch('kjv/ed.json').then(r => r.json())).then(j => put(box, exPair(0, 0, 1), exPair(42, 2, 15), exPair(7, 2, 14),
+      el('h3', null, 'Verses with the most changes in wording'), el('p', null, 'Besides spelling, the revisers corrected printing mistakes and changed some words. These verses changed most (pink words differ):'),
+      j.changed.slice(0, 15).map(([b, c, v]) => exPair(b, c, v)))).catch(() => put(box, el('p', {class:'muted'}, 'The 1611 text could not be loaded.')));
+    return [el('p', null, 'The King James Version was first printed in 1611 by Robert Barker in London. English spelling was not yet fixed, so the first edition prints vnto, haue, sonne and citie. Corrections were made in 1629 and 1638 at Cambridge. In 1769 Benjamin Blayney at Oxford revised the whole text: he made the spelling regular, corrected mistakes and checked the italics. Almost every KJV printed today follows that 1769 revision, with small differences between the Oxford and Cambridge printings.'),
+      el('p', null, 'This app uses the 1769 text as its main text and shows the 1611 first edition beside it. The two editions share the same words and verses; what changed is mostly how the words were written.'),
+      el('h3', null, 'How the spelling changed'),
+      el('ul', null, (ed.pat || []).map(([p, n]) => el('li', null, p + ': ' + fmt(n) + ' times'))),
+      el('p', null, fmt(ed.same || 0) + ' word forms are spelled the same in both editions; ' + fmt(ed.diff || 0) + ' were printed differently in 1611.'),
+      el('h3', null, 'Side by side'), box];
+  }],
   ['Italics, LORD and GOD', 'how to read the page', () => [el('h3', null, 'Words in italics'), el('p', null, 'The translators printed in italics the words they added to make the English read well. They are not in the Hebrew or Greek. In this app they are shown in italics too.'), exV(0, 0, 9), el('h3', null, 'LORD in capitals'), el('p', null, 'LORD in capital letters stands for God’s personal name in Hebrew (YHWH). Lord in small letters translates a word meaning master.'), exV(18, 109, 0)]]];
 function renderMe() {
   const learnt = WL.filter(isLearnt).length, mast = WL.filter(x => status(x) === 3).length;
@@ -1553,7 +1617,7 @@ function renderMe() {
       el('p', {class:'tip'}, 'How levels work: words in the app\'s other courses take the level of that course (1 basic to 5 advanced). Other words get a level from how often the KJV uses them; level 6 is rare. Kinds: Old KJV English (A), Bible words (B), Names (N).'),
       el('p', {class:'tip'}, 'Your progress is saved in this browser. Save a copy to move it to another device.'),
       el('div', {class:'row', style:'gap:8px;flex-wrap:wrap'}, el('button', {class:'btn', type:'button', onclick:exp}, 'Save a copy'), el('button', {class:'btn', type:'button', onclick:() => imp.click()}, 'Restore a copy'), imp),
-      el('p', {class:'tip'}, 'Text: King James Version (1769 edition), public domain. Meanings, Korean and lessons are written for this app.'),
+      el('p', {class:'tip'}, 'Main text: the standard King James text that follows Blayney\'s 1769 revision, in the form printed today (the Cambridge text, e.g. "she went into the city" in Ruth 3:15). Also the 1611 first edition, from a transcription. Both are public domain. Meanings, Korean and lessons are written for this app.'),
       el('button', {class:'btn ghost', type:'button', onclick:() => { if (confirm('Delete all progress in the KJV app? This cannot be undone.')) { const keep = S.set; S = blank(); S.set = keep; save(); renderMe(); } }}, 'Reset my progress')));
 }
 render();
