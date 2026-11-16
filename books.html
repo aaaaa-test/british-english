@@ -899,7 +899,7 @@ function DAY(d = new Date()) { return Math.floor(Date.UTC(d.getFullYear(), d.get
 function niceDate(d = new Date()) { return d.toLocaleDateString('en-GB', {weekday:'long', day:'numeric', month:'long'}); }
 /* a website copy can name its menu page in window.BW_HOME; Me then shows it first under All apps */
 const APPS = [['words.html', '5000 British Words', 'Ten levels of everyday British words'], ['writing.html', 'British Writing and Grammar', 'Writing tasks and grammar units'],
-  ['books.html', 'British Book Courses', 'Courses that follow the books, and IELTS']];
+  ['books.html', 'British Book Courses', 'Courses that follow the books, and IELTS'], ['kjv.html', 'KJV Words and Bible', 'Every King James Bible word, through its verses']];
 const appsToggle = () => {   // Me: a toggle that opens the list of all the apps, to move to another one (only when they are installed together)
   if (typeof window.BW_HOME !== 'string' || !window.BW_HOME) return null;
   const here = (location.pathname.split('/').pop() || '').toLowerCase();
