@@ -1,0 +1,42 @@
+// KJV app, the 1611 edition: reader switch (1769 / 1611 / Both), 1611 words tappable, word page spelling, filter,
+// lesson and spelling quiz. usage: node t48.js [base url]   SHOT=1 saves screenshots
+const { chromium } = require('playwright');
+const BASE = process.argv[2] || 'http://localhost:8765/';
+const T = async (p, sel) => ((await p.$(sel)) ? (await p.textContent(sel)).replace(/\s+/g, ' ').trim() : '');
+(async () => {
+  const b = await chromium.launch(process.env.USE_PROXY ? {proxy:{server:process.env.HTTPS_PROXY}} : {});
+  const p = await b.newPage({viewport:{width:390, height:844}, deviceScaleFactor:1});
+  p.setDefaultTimeout(10000);
+  const errs = []; p.on('pageerror', e => errs.push(e.message));
+  const shot = async n => { if (process.env.SHOT) await p.screenshot({path:__dirname + '/shots/kjv1611-' + n + '.png'}); };
+  await p.goto(BASE + 'kjv.html'); await p.evaluate(() => localStorage.clear()); await p.reload();
+  await p.waitForSelector('#view .btn.primary.big', {timeout:30000});
+  await p.click('.tab[data-tab="bible"]'); await p.waitForTimeout(300);
+  await p.click('#view .bk:has-text("John")'); await p.waitForTimeout(300);
+  await p.click('#ov .chb >> nth=2'); await p.waitForTimeout(500);
+  await p.click('#ov .seg[aria-label="Edition"] button:has-text("1611")'); await p.waitForSelector('#ov .vs p.old', {timeout:20000});
+  console.log('1611 John 3:16:', (await T(p, '#v' + (await p.evaluate(() => 0)) + '1') || ''), (await p.$$eval('#ov .vs p.old', xs => xs[15].textContent)).slice(0, 120));
+  await shot('1-reader-1611');
+  await p.click('#ov .seg[aria-label="Edition"] button:has-text("Both")'); await p.waitForTimeout(400);
+  console.log('both: pairs', (await p.$$('#ov .vs .pair')).length, '· changed words marked', (await p.$$('#ov .vs .chg')).length);
+  await shot('2-reader-both');
+  await p.click('#ov .vs .pair >> nth=15 >> p.old >> .kw:text-is("loued")'); await p.waitForTimeout(400);
+  console.log('tap 1611 "loued" opens:', await T(p, '#ov .ttl'), '|', (await p.$$eval('#ov .panel', xs => xs.map(x => x.textContent).find(t => /1611 first edition/.test(t)) || '')).replace(/\s+/g, ' ').slice(0, 120));
+  await p.click('#ov button:has-text("Compare its first verse")'); await p.waitForTimeout(800);
+  console.log('compare first verse:', (await p.$$eval('#ov .vrow', xs => xs.map(x => x.textContent).find(t => /1611/.test(t)) || '')).replace(/\s+/g, ' ').slice(0, 200));
+  await shot('3-word');
+  await p.keyboard.press('Escape'); await p.waitForTimeout(300); await p.keyboard.press('Escape'); await p.waitForTimeout(300); await p.keyboard.press('Escape'); await p.waitForTimeout(300);
+  await p.click('.tab[data-tab="words"]'); await p.waitForTimeout(300);
+  await p.click('#view details.more summary'); await p.click('#view .mode:has-text("Spelled differently in 1611")'); await p.waitForTimeout(500);
+  console.log('preset 1611:', await T(p, '#view .panel p[style*="font-weight:600"]'), (await p.$$eval('#view .wr .w', xs => xs.slice(0, 8).map(x => x.textContent))).join(' '));
+  await p.click('.tab[data-tab="study"]'); await p.waitForTimeout(300);
+  await p.click('#view .mode:has-text("1611 and 1769")'); await p.waitForTimeout(2500);
+  console.log('lesson:', (await T(p, '#ov .lesson ul')).slice(0, 200), '| pairs shown', (await p.$$('#ov .lesson .vrow')).length);
+  await shot('4-lesson');
+  await p.keyboard.press('Escape'); await p.waitForTimeout(300);
+  await p.click('#view .mode:has-text("Quiz: 1611 spelling")'); await p.waitForTimeout(400);
+  console.log('quiz:', await T(p, '#ov .qinstr'), '|', await T(p, '#ov .qtext'), '|', (await p.$$eval('#ov .opts .opt', xs => xs.map(x => x.textContent))).join(' / '));
+  await shot('5-quiz');
+  console.log(errs.length ? errs.join('\n') : 'no page errors');
+  await b.close();
+})();

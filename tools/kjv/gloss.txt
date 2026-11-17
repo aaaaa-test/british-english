@@ -1,0 +1,321 @@
+# word|modern English|Korean|kind (a = old English, b = Bible word)|note
+thou|you (one person, as the subject)|너, 당신 (주어)|a|Old English had two words for you: thou for one person, ye for more than one.
+thee|you (one person, as the object)|너를, 너에게|a|Thee is the object form of thou: "I will bless thee".
+thy|your (one person; before a consonant)|너의|a|Before a vowel the KJV uses thine: "thine eyes".
+thine|yours; your (before a vowel)|너의 것; 너의|a|
+thyself|yourself|너 자신|a|
+ye|you (more than one, as the subject)|너희 (주어)|a|Ye is plural; the object form is you.
+hath|has|가지다(has)|a|-th is the old third-person ending: he hath = he has.
+hast|have (with thou)|가지다(thou와 함께)|a|-st is the ending used with thou: thou hast = you have.
+hadst|had (with thou)|가졌다(thou와 함께)|a|
+doth|does|하다(does)|a|
+dost|do (with thou)|하다(thou와 함께)|a|
+didst|did (with thou)|했다(thou와 함께)|a|
+art|are (with thou)|이다(thou와 함께)|a|thou art = you are. It is not the noun art.
+wast|were (with thou)|였다(thou와 함께)|a|
+wert|were (with thou, in wishes)|였다(가정)|a|
+shalt|shall (with thou)|~할 것이다(thou와 함께)|a|In commands, thou shalt means you must: "Thou shalt not kill".
+wilt|will (with thou)|~하겠다(thou와 함께)|a|
+canst|can (with thou)|할 수 있다(thou와 함께)|a|
+couldest|could (with thou)|할 수 있었다(thou와 함께)|a|
+mayest|may (with thou)|~해도 된다(thou와 함께)|a|
+mightest|might (with thou)|~할 수도 있었다(thou와 함께)|a|
+shouldest|should (with thou)|~해야 한다(thou와 함께)|a|
+wouldest|would (with thou)|~하겠는가(thou와 함께)|a|
+knowest|know (with thou)|알다(thou와 함께)|a|
+saith|says|말하다(says)|a|"Thus saith the LORD" = This is what the LORD says.
+spake|spoke|말했다|a|
+spakest|spoke (with thou)|말했다(thou와 함께)|a|
+unto|to|~에게, ~까지|a|The most common word in the KJV after the, and, of.
+behold|look; see!|보라, 보다|a|Used to draw attention: "Behold, I bring you good tidings".
+lo|look! see!|보라|a|
+yea|yes; indeed|그렇다, 참으로|a|
+nay|no|아니다|a|
+verily|truly; certainly|진실로|a|"Verily, verily, I say unto you" = I tell you the truth.
+wherefore|why; therefore|어찌하여; 그러므로|a|Wherefore means why, not where: "Wherefore didst thou doubt?"
+whither|to where|어디로|a|
+whence|from where|어디로부터|a|
+thither|to there|그리로, 거기로|a|
+hither|to here|이리로|a|
+thence|from there|거기서부터|a|
+hence|from here; from now|여기서부터; 그러므로|a|
+thereof|of it|그것의|a|
+therein|in it|그 안에|a|
+thereon|on it|그 위에|a|
+therewith|with it|그것으로|a|
+wherein|in which|그 안에서|a|
+whereof|of which|그것에 대하여|a|
+wherewith|with which|무엇으로|a|
+whereby|by which|그것으로 인하여|a|
+whereon|on which|그 위에|a|
+whereupon|after which|그러자|a|
+whosoever|whoever|누구든지|a|
+whatsoever|whatever|무엇이든지|a|
+whoso|whoever|누구든지|a|
+lest|so that ... not; in case|~하지 않도록|a|"lest ye die" = so that you will not die.
+howbeit|however|그러나|a|
+forasmuch|because; since|~이므로|a|Usually forasmuch as.
+peradventure|perhaps|혹시, 아마|a|
+withal|as well; besides|게다가|a|
+afore|before|전에|a|
+aforetime|in the past|이전에|a|
+anon|soon; at once|곧, 즉시|a|
+ere|before|~하기 전에|a|
+oft|often|자주|a|
+nigh|near|가까이|a|
+yonder|over there|저기, 저쪽|a|
+twain|two|둘|a|
+threescore|sixty (three twenties)|육십|a|A score is twenty: threescore and ten = 70.
+fourscore|eighty|팔십|a|
+score|twenty|이십|a|
+morrow|the next day|이튿날, 내일|a|
+stead|place (in someone's stead = instead of them)|대신|a|
+midst|middle|가운데|a|
+shew|show|보이다|a|Old spelling of show, pronounced the same.
+shewed|showed|보였다|a|
+sware|swore|맹세했다|a|
+begat|was the father of|낳았다|a|Used in family lists: "Abraham begat Isaac".
+begotten|fathered; born of|낳은|a|"his only begotten Son" = his one and only Son.
+smote|struck; hit; killed|쳤다|a|
+smite|strike; hit; kill|치다|a|
+smitten|struck|맞은, 친|a|
+slew|killed|죽였다|a|
+slay|kill|죽이다|a|
+slain|killed|죽임을 당한|a|
+wrought|worked; made; did|행했다, 만들었다|a|Old past form of work: "What hath God wrought!"
+brake|broke|깨뜨렸다|a|
+bare|carried; gave birth to|낳았다; 짊어졌다|a|Past of bear: "Sarah bare Abraham a son".
+gat|got|얻었다|a|
+clave|stuck to; split|붙었다; 쪼갰다|a|Past of cleave, which can mean both stick to and split.
+digged|dug|팠다|a|
+forgat|forgot|잊었다|a|
+strake|struck|쳤다|a|
+abode|stayed; lived|머물렀다; 거처|a|
+dwelt|lived|살았다|a|
+tarry|stay; wait|머무르다, 기다리다|a|
+tarried|stayed; waited|머물렀다|a|
+sojourn|stay for a time as a foreigner|잠시 머물다, 우거하다|a|
+sojourned|stayed as a foreigner|우거했다|a|
+hearken|listen|듣다, 귀 기울이다|a|
+hearkened|listened|들었다|a|
+beseech|beg|간청하다|a|
+besought|begged|간청했다|a|
+wroth|very angry|노한|a|
+wrath|great anger|진노|a|
+raiment|clothing|의복|a|
+apparel|clothing|옷|a|
+damsel|young woman|소녀, 처녀|a|
+handmaid|female servant|여종|a|
+maidservant|female servant|여종|a|
+manservant|male servant|남종|a|
+bondman|slave|종|a|
+bondwoman|female slave|여종|a|
+kinsman|relative|친족|a|
+kinsmen|relatives|친족들|a|
+brethren|brothers; fellow believers|형제들|a|Old plural of brother.
+kine|cows|암소들|a|
+fowls|birds|새들|a|
+fowl|bird|새|a|
+ass|donkey|나귀|a|
+asses|donkeys|나귀들|a|
+bullock|young bull|수송아지|a|
+heifer|young cow|암송아지|a|
+hart|male deer|사슴|a|
+hind|female deer|암사슴|a|
+coney|rock badger|사반|a|
+leviathan|great sea creature|리워야단|a|
+staves|wooden poles|채, 막대기들|a|
+vail|veil; curtain|휘장|a|
+carcase|dead body|시체|a|
+victuals|food|양식|a|
+meat|food (of any kind)|음식|a|In the KJV meat means any food, not only flesh: "meat offering" is a grain offering.
+corn|grain|곡식|a|In British and KJV English corn means any grain, such as wheat.
+husbandman|farmer|농부|a|
+quick|alive|산, 살아 있는|a|"the quick and the dead" = the living and the dead.
+conversation|way of life; behaviour|행실|a|In the KJV conversation means how you live, not talking.
+charity|love|사랑|a|In 1 Corinthians 13, charity means Christian love.
+prevent|go before|앞서다|a|In the KJV prevent means come before, not stop.
+let|hinder; stop (in some verses)|막다 (일부 구절)|a|"he who now letteth will let" = he who holds back.
+suffer|allow|허락하다|a|"Suffer the little children to come unto me" = Let the children come to me.
+meet|right; fitting|합당한|a|"It is meet" = it is right.
+want|lack; need|부족하다|a|"I shall not want" = I will lack nothing.
+mansion|dwelling place|거처|a|
+countenance|face; expression|얼굴, 안색|a|
+loins|lower back and hips|허리|a|"gird up your loins" = get ready for action.
+bowels|inner feelings; insides|창자; 긍휼한 마음|a|
+reins|kidneys; inner feelings|신장; 마음 깊은 곳|a|
+froward|stubborn; perverse|패역한|a|
+divers|various|여러 가지의|a|Not the same as divers who swim: divers diseases = various diseases.
+sundry|various|여러|a|
+naught|nothing|아무것도 아닌|a|
+nought|nothing|아무것도 아님|a|
+aught|anything|무엇이든|a|
+haply|perhaps; by chance|혹시|a|
+lucre|money (gained dishonestly)|이익, 부정한 이득|a|
+usury|interest on a loan|이자, 고리|a|
+privily|secretly|은밀히|a|
+straightway|immediately|곧, 즉시|a|
+betimes|early|일찍|a|
+whit|the smallest amount|조금도|a|
+ought|anything (in some verses)|무엇이든|a|
+sith|since|~이므로|a|
+holpen|helped|도움을 받은|a|
+spoil|goods taken in war|노략물, 전리품|a|
+host|army; great number|군대, 무리|a|"the LORD of hosts" = the LORD of armies.
+hosts|armies|만군|a|
+quickened|made alive|살린|a|
+quicken|make alive|살리다|a|
+mete|measure|헤아리다|a|
+wist|knew|알았다|a|
+wot|know|알다|a|
+trow|think; believe|생각하다|a|
+list|wish; please|원하다|a|
+ensample|example|본보기|a|
+superfluity|excess|넘침|a|
+publican|tax collector|세리|a|
+fain|gladly|기꺼이|a|
+cumbered|troubled; burdened|분주한, 짐 진|a|
+ghost|spirit|영|a|"the Holy Ghost" = the Holy Spirit. "gave up the ghost" = died.
+gave|gave|주었다|a|
+unclean|ritually impure|부정한|b|
+clean|ritually pure|정결한|b|
+sabbath|the weekly day of rest|안식일|b|
+passover|feast remembering the escape from Egypt|유월절|b|
+tabernacle|portable tent where God was worshipped|성막, 장막|b|
+temple|house of God in Jerusalem|성전|b|
+sanctuary|holy place|성소|b|
+ark|the chest holding the covenant; Noah's boat|궤(언약궤); 방주|b|
+covenant|binding agreement between God and people|언약|b|
+altar|table or platform for sacrifices|제단|b|
+offering|gift given to God|제물, 예물|b|
+sacrifice|offering killed and given to God|제사, 희생 제물|b|
+atonement|making peace with God by covering sin|속죄|b|
+trespass|wrongdoing; offence|범죄, 허물|b|
+iniquity|wickedness; sin|죄악|b|
+transgression|breaking God's law|범법, 죄과|b|
+righteousness|being right with God; justice|의|b|
+righteous|right with God; just|의로운|b|
+grace|God's undeserved kindness|은혜|b|
+mercy|kindness to those who deserve punishment|자비, 긍휼|b|
+redeem|buy back; set free|구속하다, 속량하다|b|
+redeemer|one who buys back and sets free|구속자|b|
+salvation|being saved|구원|b|
+saviour|one who saves|구세주|b|
+gospel|good news|복음|b|
+disciple|follower and learner|제자|b|
+apostle|one sent out (one of the twelve)|사도|b|
+prophet|person who speaks God's message|선지자, 예언자|b|
+prophesy|speak God's message|예언하다|b|
+priest|one who offers sacrifices|제사장|b|
+levite|member of the tribe of Levi who served in worship|레위인|b|
+scribe|teacher of the law|서기관|b|
+pharisee|member of a strict Jewish group|바리새인|b|
+sadducee|member of a priestly Jewish group|사두개인|b|
+synagogue|Jewish meeting place|회당|b|
+congregation|assembly of God's people|회중|b|
+tribe|one of the twelve families of Israel|지파|b|
+heathen|nations that do not know God|이방인|b|
+gentiles|non-Jewish people|이방인들|b|
+circumcision|cutting the foreskin as a sign of the covenant|할례|b|
+uncircumcised|not circumcised; outside the covenant|할례 받지 않은|b|
+baptize|wash in water as a sign of faith|세례를 주다|b|
+baptism|washing as a sign of faith|세례|b|
+resurrection|rising from the dead|부활|b|
+crucify|kill on a cross|십자가에 못 박다|b|
+cross|wooden cross used for execution|십자가|b|
+repent|turn away from sin|회개하다|b|
+repentance|turning away from sin|회개|b|
+sanctify|make holy|거룩하게 하다|b|
+holiness|being holy|거룩함|b|
+glorify|give glory to|영화롭게 하다|b|
+blessed|happy because of God's favour|복된, 복이 있는|b|
+blessing|God's favour|복|b|
+curse|call down harm; harm from God|저주|b|
+abomination|something God hates|가증한 것|b|
+idol|image worshipped as a god|우상|b|
+graven|carved|새긴|b|"graven image" = carved idol.
+molten|made of melted metal|부어 만든|b|
+incense|sweet-smelling smoke burnt in worship|향|b|
+ephod|priest's special garment|에봇|b|
+cherubims|winged heavenly beings|그룹들|b|KJV adds -s to the Hebrew plural -im.
+seraphims|heavenly beings around God's throne|스랍들|b|
+cubit|measure from elbow to fingertip, about 45 cm|규빗|b|
+cubits|measures of about 45 cm|규빗|b|
+shekel|unit of weight or money|세겔|b|
+shekels|units of weight or money|세겔|b|
+talent|large weight of silver or gold|달란트|b|
+ephah|dry measure, about 22 litres|에바|b|
+omer|small dry measure|오멜|b|
+hin|liquid measure, about 4 litres|힌|b|
+firstborn|eldest son|장자, 처음 난 것|b|
+firstfruits|first part of the harvest given to God|첫 열매|b|
+tithe|tenth part given to God|십일조|b|
+jubile|year of release every fifty years|희년|b|
+leprosy|skin disease that made a person unclean|나병, 문둥병|b|
+leper|person with leprosy|나병 환자|b|
+sackcloth|rough cloth worn in grief|굵은 베옷|b|
+ashes|ash, a sign of grief|재|b|
+fasting|going without food to pray|금식|b|
+psalm|song of praise|시, 찬송|b|
+hallelujah|praise the LORD|할렐루야|b|
+amen|so be it; truly|아멘|b|
+hosanna|save now! (a shout of praise)|호산나|b|
+selah|a pause or musical note in the Psalms|셀라|b|
+manna|food from heaven in the desert|만나|b|
+parable|story that teaches a lesson|비유|b|
+epistle|letter|서신|b|
+testament|covenant; will|언약, 유언|b|
+judgment|decision of a judge; punishment|심판|b|
+heaven|sky; God's dwelling|하늘|b|
+hell|place of the dead; punishment|지옥, 음부|b|
+devil|evil spirit; Satan|마귀|b|
+satan|the adversary, the devil|사탄|b|
+angel|messenger of God|천사|b|
+saints|holy people; believers|성도들|b|
+elect|chosen by God|택하심을 받은|b|
+faith|trust in God|믿음|b|
+sin|wrongdoing against God|죄|b|
+lord|master; ruler|주인, 주|b|In capitals, LORD stands for God's personal name in Hebrew.
+god|God; a god|하나님; 신|b|
+jesus|Jesus|예수|b|
+christ|the anointed one, the Messiah|그리스도|b|
+messiah|anointed one|메시아|b|
+israel|Israel (Jacob; the nation)|이스라엘|b|
+jerusalem|Jerusalem|예루살렘|b|
+anoint|pour oil on to set apart|기름을 붓다|b|
+anointed|set apart with oil|기름 부음 받은|b|
+oblation|offering|예물, 거제|b|
+heave|lift up (heave offering)|들어 올리다 (거제)|b|
+wave|move to and fro (wave offering)|흔들다 (요제)|b|
+unleavened|made without yeast|누룩 없는|b|
+leaven|yeast|누룩|b|
+shewbread|holy bread in the tabernacle|진설병|b|
+candlestick|lampstand|등대, 촛대|b|
+laver|large basin for washing|물두멍|b|
+mercy|mercy|자비|b|
+throne|royal seat|보좌|b|
+sceptre|rod held by a king|홀|b|
+chariot|horse-drawn war cart|병거|b|
+harlot|prostitute|창녀|b|
+whoredom|unfaithfulness|음행|b|
+fornication|sexual sin|음행|b|
+adultery|unfaithfulness in marriage|간음|b|
+sepulchre|tomb|무덤|b|
+tidings|news|소식|b|
+vineyard|field of grapevines|포도원|b|
+threshingfloor|place where grain is separated|타작마당|b|
+winepress|place where grapes are pressed|포도주 틀|b|
+plague|disaster; disease|재앙|b|
+famine|lack of food|기근|b|
+pestilence|deadly disease|전염병|b|
+captivity|exile|포로 됨|b|
+exile|forced living away from home|포로, 유배|b|
+remnant|those left|남은 자|b|
+rent|tore (past of rend); a tear|찢었다; 찢어진 곳|a!|In the KJV rent is nearly always the past of rend: "rent his clothes" = tore them in grief.
+communicate|share, give to others|나누어 주다|a|"To do good and to communicate forget not" = do not forget to share.
+carriage|baggage, things carried|짐|a|In the KJV carriage means luggage, not a vehicle.
+allow|approve of|옳게 여기다|a|"That which I do I allow not" = I do not approve of it.
+tell|count|세다|a|"Tell the stars" = count them. Usually tell has its modern meaning.
+naughty|wicked, worthless|악한, 나쁜|a|"Naughty figs" = bad figs; a "naughty person" = a wicked one.
+careful|anxious, full of worry|염려하는|a|"Be careful for nothing" = do not worry about anything.
+presently|at once, immediately|즉시|a|In the KJV presently means right now, not soon.

@@ -1,0 +1,149 @@
+# The sense a common word usually has in the KJV, shown first in the KJV app (the everyday sense goes in the note).
+# word|KJV meaning|Korean (first sense = the one used word by word)|note
+shall|will; must (shows what will happen, or a command)|~할 것이다, ~하리라|"Thou shalt not kill" = you must not kill.
+will|will (what is going to happen); what someone wants|~할 것이다; 뜻|"Thy will be done" = what you want.
+saw|past form of see: looked at, noticed|보았다|Here not the tool for cutting wood.
+cast|to throw|던지다|"Cast out" = drive out.
+till|until; to plough and work the ground|~까지; (땅을) 갈다|"To till the ground" = to farm it.
+tilled|ploughed and worked (the ground)|갈았다, 경작했다|
+deliver|to rescue, set free; to hand over|구원하다, 건지다; 넘겨주다|"Deliver us from evil."
+call|to name; to cry out to; to summon|부르다, 일컫다|"He called the light Day" = he named it.
+answer|to reply|대답하다|
+mount|a mountain, a hill|산|"Mount Sinai", "the mount of Olives".
+been|past participle of be|~였다, 있었다|
+gone|past participle of go: went away|간, 가 버린|
+times|occasions; periods of time|때, 번|
+arise|to get up; to start to happen|일어나다|
+bear|to carry; to give birth to; to put up with|지다, 낳다, 견디다|
+word|something said; God's message|말, 말씀|"The word of the LORD."
+earth|the ground, the land; the whole world|땅, 세상|"The heaven and the earth."
+form|shape; to shape, to make|형체, 모양; 만들다|"Without form" = without shape.
+formed|shaped, made|지었다, 만들었다|"God formed man of the dust."
+spirit|God's Spirit; the breath of life; a person's inner self|영, 성령, 마음|"The Spirit of God."
+elder|older; a leader of the people|장로; 나이 많은|
+reign|to rule as king|다스리다, 왕이 되다|
+command|to order|명령하다|
+master|the one in charge; a teacher|주인, 선생|"Master" in the Gospels = teacher.
+like|the same as; similar to|~와 같은, 비슷한|"Like as a father" = just as a father.
+likeness|a copy, something that looks the same|모양, 형상|"In our image, after our likeness."
+image|a likeness; a carved idol|형상, 우상|
+vessel|a container: a pot, jar or bowl|그릇|
+offer|to give to God as an offering|드리다, 바치다|
+save|to rescue; except|구원하다; ~외에|"Save one" = except one.
+light|brightness; not heavy|빛; 가벼운|"Let there be light."
+power|strength; authority|권능, 힘|
+rest|to stop working; peace; the others|쉬다, 안식; 나머지|
+rested|stopped working, took rest|쉬었다, 안식했다|
+back|backwards, in return|뒤로, 돌아|
+house|a home; a family line|집, 집안|"The house of David" = David's family.
+seed|seed; children, descendants|씨, 자손|"Thy seed" = your descendants.
+flesh|the body; human nature; meat|육체, 살|"All flesh" = every living person.
+kind|type, sort|종류|"After his kind" = each by its own type.
+host|an army; a great number|군대, 무리|"The LORD of hosts." "The host of heaven" = the stars.
+great|big; important|큰, 위대한|
+evil|wicked; harm, disaster|악한; 재앙|
+holy|set apart for God|거룩한|
+fear|to be afraid; to honour God with awe|두려워하다, 경외하다|"The fear of the LORD" = deep respect for God.
+keep|to obey; to guard; to take care of|지키다|"Keep my commandments."
+servant|someone who serves; a slave|종|
+judge|to decide what is right; a leader of Israel|심판하다; 사사, 재판관|
+field|open country; a farmed field|들, 밭|
+gate|the gate of a city, where people met and judged|문, 성문|
+prince|a ruler, a leader|방백, 통치자|
+gather|to bring or come together|모으다, 모이다|
+well|a deep hole for water; well|우물; 잘|
+serve|to work for; to worship|섬기다|
+manner|way; custom|방식, 풍습|"After the manner of" = as is the custom of.
+certain|some, a particular|어떤|"A certain man" = a man.
+cry|to call out loudly|부르짖다, 외치다|
+border|the edge of a land|경계, 지경|
+deep|deep; the deep = the ocean|깊은; 깊음, 바다|"The face of the deep."
+fruit|fruit; children; the result of something|열매|"The fruit of the womb" = children.
+head|head; a leader; a source|머리; 우두머리|
+living|alive; a living|살아 있는|"A living soul."
+depart|to go away|떠나다|
+sight|seeing; in the sight of = before, in the eyes of|눈앞, 보기에|"In the sight of the LORD."
+round|around|둘레에, 둘러|"Round about" = all around.
+nation|a nation, a people; the nations = the Gentiles|민족, 나라|
+children|children; descendants; a people|자손, 자녀|"The children of Israel" = the Israelites.
+son|son; descendant|아들, 자손|"Son of David."
+father|father; ancestor|아버지, 조상|"Our fathers" = our ancestors.
+brother|brother; a fellow Israelite or believer|형제|
+hand|hand; power|손; 권세|"Into thine hand" = into your power.
+might|power, strength; could|힘; ~할 수 있었다|"With all thy might."
+even|even; just so; evening|~조차; 곧; 저녁|"At even" = in the evening.
+pass|to go by; to happen|지나가다; 일어나다|"It came to pass" = it happened.
+set|to put; to place; to appoint|두다, 세우다|
+according|in agreement with (according to)|~에 따라|
+wilderness|desert, empty land|광야|
+mighty|strong, powerful|능한, 강한|
+surely|certainly|반드시|"Thou shalt surely die."
+praise|to praise God|찬양하다|
+left|past of leave; the left side|남겼다, 떠났다; 왼쪽의|
+creature|a living being|피조물, 생물|
+sore|very, greatly; painful|심히; 아픈|"Sore afraid" = very afraid.
+quick|alive, living|산, 살아 있는|"The quick and the dead."
+corn|grain|곡식|
+meet|fitting, suitable; to meet|합당한; 만나다|"An help meet for him" = a suitable helper.
+divided|separated|나누었다|
+yielding|producing|맺는, 내는|"Herb yielding seed."
+season|a fixed time|때, 절기|"For signs, and for seasons."
+sign|a sign, a token, a miracle|징조, 표적|
+creeping|crawling|기는|"Every creeping thing."
+multiply|to increase in number|번성하다|"Be fruitful, and multiply."
+meat|food of any kind|음식, 양식|
+finished|completed|마쳤다, 완성되었다|
+ended|completed, finished|마쳤다|
+generations|the family history; descendants|대, 족보, 내력|"These are the generations of" = this is the story of.
+plant|a plant; to plant|초목; 심다|
+mist|a fog or mist|안개|
+dust|dust, earth|흙, 티끌|"Dust thou art."
+breathed|blew breath into|불어넣었다|
+soul|the life of a person; a person|혼, 생명|"Man became a living soul."
+garden|a garden|동산|"The garden of Eden."
+pleasant|lovely|보기에 좋은, 아름다운|
+parted|divided into parts|갈라졌다|
+dress|to look after (a garden or vine)|가꾸다, 다스리다|"To dress it and to keep it."
+freely|without limit|마음대로, 값없이|
+alone|on one's own|혼자, 홀로|
+ashamed|feeling shame|부끄러운|
+face|face; surface|얼굴; 표면|"The face of the waters" = the surface of the waters.
+glory|glory, honour; God's shining presence|영광|
+sought|looked for|찾았다|
+cattle|livestock: cows, sheep and goats|가축|
+fowl|birds|새|
+help|help; a helper|돕다; 돕는 자|
+rib|a rib|갈빗대|
+abundantly|plentifully|풍성하게|
+blessed|blessed, made happy by God|복된|
+lord|master; God|주, 주인|"LORD" in capitals stands for God's name.
+offering|a gift given to God|제물, 예물|
+sanctuary|a holy place|성소|
+temple|the house of God|성전|
+priest|one who offers sacrifices|제사장|
+heart|the inner person: mind, will, feelings|마음|
+way|path; way of life|길|
+people|a people, a nation|백성|"My people" = God's people.
+heaven|the sky; God's dwelling|하늘|
+heavens|the skies|하늘들, 하늘|
+darkness|the absence of light; also trouble or evil|흑암, 어둠|"Darkness was upon the face of the deep."
+moved|went to and fro; of the Spirit in Genesis 1: hovered|움직였다, 운행했다|
+dry|not wet; dry land = land, not sea|마른; 뭍|"Let the dry land appear."
+gathering|coming together|모임, 모인 것|
+called|named; summoned|불렀다, 일컬었다|
+day|day; a time|날, 낮; 때|
+whales|great sea creatures|큰 물고기, 큰 바다 짐승|
+moveth|moves|움직이다|
+replenish|to fill|채우다|
+beast|an animal, especially a wild one|짐승|
+behold|look; see!|보라|
+herb|a plant|채소, 풀|
+sixth|6th|여섯째|
+thus|in this way|이와 같이|
+work|work; what someone has made|일, 행사|
+created|made from nothing|창조했다|
+staff|a stick for walking or for support|지팡이|"Thy rod and thy staff."
+valley|a valley|골짜기|
+rod|a stick; a shepherd's rod|막대기, 지팡이|
+art|are (with thou): thou art = you are|~이다 (thou와 함께)|It is not the noun art (painting and drawing).
+wilt|will (with thou): thou wilt = you will|~하겠느냐, ~할 것이다 (thou와 함께)|In the KJV not the verb wilt (droop).
