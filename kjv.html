@@ -883,6 +883,11 @@ p.cxf{margin:0;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
 .il span{font:500 12.5px/1.25 "Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",system-ui,sans-serif;color:var(--gold);max-width:7.5em}
 .il.n span{color:#6cc9ff}
 .mod{color:var(--def);font-weight:600}
+.bhints{margin:0;padding-left:1.4em;display:grid;gap:4px;font:400 15px/1.45 var(--f-ui);color:var(--text)}
+.bhints .muted{color:var(--muted);font-size:13px}
+.il span.en{font:500 12px/1.25 var(--f-ui);color:var(--def)}
+.cvs{display:grid;gap:8px}
+.inl::placeholder{color:var(--muted);text-align:center}
 
 </style>
 </head>
@@ -935,7 +940,7 @@ const view = $('#view');
 
 /* ---------- saved progress ---------- */
 const LS = 'bwkjv-v1';
-const blank = () => ({p:{}, stars:[], trk:[], vstars:[], notes:{}, read:{}, mem:{}, log:{}, sets:[], hist:[], path:{v:0}, tr:{}, set:{pathN:10, pathLv:1, daily:10, revMax:20, ko:true, size:'normal', voice:true, rate:0.9, hl:'a', wordset:null, plan:'year', planStart:null, from:'all'}});
+const blank = () => ({p:{}, stars:[], trk:[], vstars:[], notes:{}, read:{}, mem:{}, log:{}, sets:[], hist:[], path:{v:0}, tr:{}, set:{pathN:10, pathLv:1, pathWords:'both', pathReview:true, pathPractice:'hints', cardV:1, daily:10, revMax:20, ko:true, size:'normal', voice:true, rate:0.9, hl:'a', wordset:null, plan:'year', planStart:null, from:'all'}});
 let S = blank();
 try { const j = JSON.parse(localStorage.getItem(LS) || 'null'); if (j) { S = Object.assign(blank(), j); S.set = Object.assign(blank().set, j.set || {}); S.path = Object.assign({v:0}, j.path || {}); if (!S.set.pathV2) { S.set.pathLv = 1; S.set.pathV2 = true; } } } catch (e) {}
 let saveT = null;
@@ -1269,13 +1274,7 @@ function runSession(o, title, steps, opt) {
     ask(s.q);
   }
   function card(x) {
-    const m = meaningOf(x), vi = goodVerse(x);
-    put(o.body, bar(), el('p', {class:'eyebrow', style:'text-align:center'}, 'New word'),
-      el('article', {class:'card', lang:'en-GB'}, el('div', {class:'head'}, el('h2', {class:'hw'}, x.k), sayBtn(x.k)),
-        el('div', {class:'meta'}, lvBadge(x), el('span', {class:'chip'}, KIND[x.kind]), el('span', null, fmt(x.n) + ' times in the KJV')),
-        m ? el('div', {class:'line def'}, el('p', null, m.def)) : null, m && m.ko && S.set.ko ? el('div', {class:'line ko', lang:'ko'}, el('p', null, m.ko)) : null,
-        oldForm(x) ? el('p', {class:'tip'}, oldForm(x)) : null,
-        vi != null ? el('div', {class:'vrow'}, el('span', {class:'ref'}, refLong(vi)), el('p', {class:'verse noword'}, vNodes(vi, x.k)), sayBtn(plainV(vi), 'sm')) : null),
+    put(o.body, bar(), el('p', {class:'eyebrow', style:'text-align:center'}, 'New word'), wordCard(x, goodVerse(x)),
       el('button', {class:'btn primary big', type:'button', 'data-enter':'', onclick:() => { st.pend.push(x); next(); }}, 'Got it'));
   }
   function ask(q) {
@@ -1344,10 +1343,11 @@ function runVerses(title, items, onEach) {
   step();
 }
 /* one verse exercise: blanks, word order or first letters; done(ok) is called once */
-function verseEx(vi, kind, done) {
+function verseEx(vi, kind, done, opt) {
+  opt = opt || {};
   const text = plainV(vi), words = text.split(' ');
   if (kind === 'order' && words.length > 22) kind = 'blanks';
-  if (kind === 'blanks' && !words.some(w => { const x = WM.get(keyOf(w.replace(/[^A-Za-z'’]/g, ''))); return x && x.lv >= 2 && w.replace(/[^A-Za-z]/g, '').length > 2; })) kind = words.length <= 22 ? 'order' : 'letters';
+  if (kind === 'blanks' && !opt.hints && !words.some(w => { const x = WM.get(keyOf(w.replace(/[^A-Za-z'’]/g, ''))); return x && x.lv >= 2 && w.replace(/[^A-Za-z]/g, '').length > 2; })) kind = words.length <= 22 ? 'order' : 'letters';
     if (kind === 'order') {
       const tiles = shuffle(words.map((w, k) => ({w, k}))), chosen = [];
       const line = el('div', {class:'oline'}), bank = el('div', {class:'otiles'});
@@ -1361,12 +1361,13 @@ function verseEx(vi, kind, done) {
       return [el('p', {class:'qinstr'}, 'Type the whole verse. The first letter of each word is shown.'), el('p', {class:'lhint'}, hint), ta,
         el('button', {class:'btn teal big', type:'button', onclick:e => { const a = normA(ta.value).split(' '), b = normA(text).split(' '); let same = 0; b.forEach((w, j) => { if (a[j] === w) same++; }); e.currentTarget.disabled = true; done(same / b.length >= 0.9); }}, 'Check')];
     } else {
-      const cand0 = words.map((w, k) => ({w, k, x:WM.get(keyOf(w.replace(/[^A-Za-z'’]/g, '')))})).filter(t => t.x && t.x.lv >= 2 && t.w.replace(/[^A-Za-z]/g, '').length > 2), cand = cand0;
-      const hide = new Set(sample(cand, Math.min(3, Math.max(1, Math.round(words.length / 8)))).map(t => t.k));
+      const cand0 = words.map((w, k) => ({w, k, x:WM.get(keyOf(w.replace(/[^A-Za-z'’]/g, '')))})).filter(t => t.x && t.x.lv >= 2 && t.w.replace(/[^A-Za-z]/g, '').length > 2), cand = opt.hints ? words.map((w, k) => ({w, k, x:WM.get(keyOf(w.replace(/[^A-Za-z'’]/g, '')))})).filter(t => t.x && t.x.kind !== 'n' && meaningOf(t.x) && t.w.replace(/[^A-Za-z]/g, '').length > 2).sort((a, b) => (hintOf(b.x, true).en ? 1 : 0) - (hintOf(a.x, true).en ? 1 : 0) || b.x.lv - a.x.lv).slice(0, 6) : cand0;
+      const hide = new Set(sample(cand, Math.min(3, Math.max(opt.hints ? 2 : 1, Math.round(words.length / (opt.hints ? 6 : 8))))).map(t => t.k));
       const inputs = [];
-      const sent = el('p', {class:'qtext ex', style:'line-height:2.1'}, words.map((w, k) => { if (!hide.has(k)) return w + ' '; const core = w.replace(/[^A-Za-z'’]/g, ''); const inp = el('input', {class:'inl', type:'text', size:Math.max(4, core.length), 'aria-label':'Missing word', autocapitalize:'off', autocorrect:'off', spellcheck:'false', autocomplete:'off'}); inputs.push([inp, core]); return [inp, w.slice(w.indexOf(core) + core.length) + ' ']; }));
+      const sent = el('p', {class:'qtext ex', style:'line-height:2.1'}, words.map((w, k) => { if (!hide.has(k)) return w + ' '; const core = w.replace(/[^A-Za-z'’]/g, ''); const inp = el('input', {class:'inl', type:'text', size:Math.max(4, core.length), 'aria-label':'Missing word', autocapitalize:'off', autocorrect:'off', spellcheck:'false', autocomplete:'off'}); inputs.push([inp, core]); if (opt.hints) inp.placeholder = String(inputs.length); return [inp, w.slice(w.indexOf(core) + core.length) + ' ']; }));
       if (inputs[0]) setTimeout(() => inputs[0][0].focus({preventScroll:true}), 60);
-      return [el('p', {class:'qinstr'}, 'Write the missing words.'), sent, el('button', {class:'btn teal big', type:'button', onclick:e => { const ok = inputs.every(([inp, w]) => normA(inp.value) === normA(w)); inputs.forEach(([inp, w]) => { inp.disabled = true; inp.style.color = normA(inp.value) === normA(w) ? 'var(--good)' : 'var(--bad)'; }); e.currentTarget.disabled = true; done(ok); }}, 'Check')];
+      const hl = opt.hints ? el('ol', {class:'bhints'}, inputs.map(([, core]) => { const x = WM.get(keyOf(core)), h = x && hintOf(x); return el('li', null, h && h.en ? h.en : '', h && h.ko ? [h.en ? ' · ' : '', el('span', {class:'ko'}, h.ko)] : null, el('span', {class:'muted'}, (h && (h.en || h.ko) ? ' · ' : '') + 'starts with “' + core[0].toLowerCase() + '”, ' + core.length + ' letters')); })) : null;
+      return [el('p', {class:'qinstr'}, opt.hints ? 'Write the missing words. Each one has a hint below.' : 'Write the missing words.'), sent, hl, el('button', {class:'btn teal big', type:'button', onclick:e => { const ok = inputs.every(([inp, w]) => normA(inp.value) === normA(w)); inputs.forEach(([inp, w]) => { inp.disabled = true; inp.style.color = normA(inp.value) === normA(w) ? 'var(--good)' : 'var(--bad)'; }); e.currentTarget.disabled = true; done(ok); }}, 'Check')];
     }
 }
 function memGrade(vi, ok) { const t = DAY(), r = S.mem[vi] || [0, t]; if (ok) { r[0] = Math.min(7, r[0] + 1); r[1] = t + INT[r[0]]; } else { r[0] = Math.max(0, r[0] - 1); r[1] = t + 1; } S.mem[vi] = r; logAct(ok ? 'review' : null, ok); save(); }
@@ -1427,6 +1428,49 @@ function modernNodes(vi) {
   out.push(t.slice(last));
   return out;
 }
+/* hints that do not give the answer away: the word and its other forms are hidden */
+let FORMS = null;
+function formsOf(x) {
+  if (!FORMS) { FORMS = new Map(); WL.forEach(y => { const b = y.base || y.k; if (!FORMS.has(b)) FORMS.set(b, []); FORMS.get(b).push(y.k); }); }
+  const b = x.base || x.k; return new Set([x.k, b, ...(FORMS.get(b) || []), ...(FORMS.get(x.k) || [])]);
+}
+function maskHint(text, x) { const fs = formsOf(x); let hit = 0; return {text:String(text || '').replace(/[A-Za-z]+(?:['’][A-Za-z]+)*/g, w => fs.has(keyOf(w)) ? (hit++, '___') : w), hit}; }
+function hintOf(x, enOnly) {   // {en, ko}: the meaning with the word hidden (en is null when too little is left to help)
+  const m = meaningOf(x); if (!m) return null;
+  const h = maskHint(m.def, x), left = h.text.replace(/___/g, ' ').replace(/[^A-Za-z]+/g, ' ').trim().split(' ').filter(w => w.length > 1).length;
+  return {en:left >= 1 && h.text.replace(/[^A-Za-z]/g, '').length >= 3 ? h.text : null, ko:!enOnly && S.set.ko ? koOf(x) : null};
+}
+function hintNode(x) { const h = hintOf(x); if (!h || (!h.en && !h.ko)) return null; return el('p', {class:'tip'}, 'Hint: ', h.en || '', h.en && h.ko ? ' · ' : '', h.ko ? el('span', {class:'ko'}, h.ko) : null); }
+const shortDef = x => { const m = x && meaningOf(x); if (!m) return ''; const d = m.def.split(/;\s*/)[0]; return d.length <= 30 && !maskHint(d, x).hit ? d : ''; };
+/* a word card: meaning, then a set number of verses (more on request) */
+function cardVerses(x, first, n, skip) {
+  const out = first != null ? [first] : [], no = new Set(skip || []); if (first != null) no.add(first);
+  const pool = versesOf(x).filter(i => !no.has(i)).map(i => [i, plainV(i).length]).sort((a, b) => a[1] - b[1]).slice(0, Math.max(40, n * 4));
+  for (const [i] of shuffle(pool)) { if (out.length >= n) break; out.push(i); }
+  return out;
+}
+function wordCard(x, first) {
+  const m = meaningOf(x); let shown = cardVerses(x, first, S.set.cardV || 1);
+  const box = el('div', {class:'cvs'});
+  const drawV = () => put(box, shown.map((vi, j) => el('div', {class:'vrow'}, el('span', {class:'ref'}, refLong(vi) + (j === 0 && first != null ? ' · this verse' : '')), el('p', {class:'verse noword'}, vNodes(vi, x.k)), sayBtn(plainV(vi), 'sm'))),
+    x.nv > shown.length ? el('button', {class:'btn small', type:'button', onclick:() => { shown = shown.concat(cardVerses(x, null, 5, shown)); drawV(); }}, 'Show more verses · ' + fmt(x.nv - shown.length) + ' more in the Bible') : null);
+  drawV();
+  return el('article', {class:'card', lang:'en-GB'}, el('div', {class:'head'}, el('h2', {class:'hw'}, x.k), sayBtn(x.k)),
+    el('div', {class:'meta'}, lvBadge(x), el('span', {class:'chip'}, KIND[x.kind]), el('span', null, fmt(x.n) + ' times in the KJV')),
+    m ? el('div', {class:'line def'}, el('p', null, m.via ? el('span', {class:'muted'}, 'from ' + m.via + ': ') : null, m.def)) : null,
+    m && m.ko && S.set.ko ? el('div', {class:'line ko', lang:'ko'}, el('p', null, m.ko)) : null,
+    m && m.note ? el('p', {class:'tip'}, m.note) : null, oldForm(x) ? el('p', {class:'tip'}, oldForm(x)) : null, box);
+}
+/* settings for the Bible-order study and word cards (used in Me and in the study panel) */
+const PATH_OPTS = [
+  ['pathWords', 'How to learn the new words of a verse', [['both', 'Cards, then fill the verse'], ['cards', 'Cards, then choose the meaning'], ['verse', 'Fill the verse only']]],
+  ['pathReview', 'A verse with no new words', [[true, 'Review its words in English'], [false, 'Go straight to the meaning']]],
+  ['pathPractice', 'Verse practice', [['hints', 'Blanks with meaning hints'], ['order', 'Put in order'], ['letters', 'First letters'], ['off', 'Off']]],
+  ['cardV', 'Verses on a word card', [[1, '1'], [3, '3'], [5, '5']]],
+  ['pathN', 'Verses in a Bible-order passage', [[5, '5'], [10, '10'], [15, '15'], [20, '20'], [30, '30']]],
+  ['pathLv', 'Words to learn in Bible order', [[1, 'Every word'], [2, 'Level 2+'], [3, 'Level 3+'], [4, 'Level 4+'], [5, 'Level 5+']]]];
+const optSegs = after => PATH_OPTS.map(([key, label, opts]) => [el('span', {class:'lab'}, label), el('div', {class:'seg', role:'group', 'aria-label':label}, opts.map(([v, t]) => el('button', {type:'button', 'aria-pressed':(S.set[key] ?? blank().set[key]) === v ? 'true' : 'false', onclick:() => { S.set[key] = v; save(); after(); }}, t)))]);
+function pathOptions() { const o = openOv('Study options'); const draw = () => put(o.body, el('section', {class:'panel set'}, optSegs(draw), el('p', {class:'tip'}, 'Korean meanings follow the setting in Me (한국어 뜻 보기 / English only).'))); draw(); }
 const pathPos = () => Math.min(S.path.v || 0, V.length);
 const versesToday = t => S.hist.filter(h => h[0] === DAY() && (!t || t.includes(h[1])) && h[2] >= 0).reduce((n, h) => n + h[3] - h[2] + 1, 0);
 function runPath(mode) {
@@ -1451,56 +1495,103 @@ function runPath(mode) {
         : el('p', {class:'tip'}, 'No new words: you have learnt every word in this verse.'),
       known.length ? el('div', {class:'knew'}, el('span', {class:'not'}, 'Already learnt · not taught again'), el('div', {class:'chips'}, known.map(x => el('button', {class:'kchip', type:'button', onclick:() => openWord(x)}, x.k)))) : null,
       names.length ? el('div', {class:'knew'}, el('span', {class:'not'}, 'Names'), el('div', {class:'chips'}, names.map(x => el('button', {class:'kchip n', type:'button', onclick:() => openWord(x)}, x.k)))) : null,
-      el('button', {class:'btn primary big', type:'button', 'data-enter':'', onclick:() => learn(vi, ws)}, ws.length ? 'Learn these ' + ws.length + ' words' : 'Go on to the meaning'),
+      el('button', {class:'btn primary big', type:'button', 'data-enter':'', onclick:() => ws.length ? learn(vi, ws) : S.set.pathReview !== false ? review(vi) : meaning(vi, 0, 0, 0)}, ws.length ? 'Learn these ' + ws.length + ' words' : S.set.pathReview !== false ? 'Review this verse\'s words' : 'Go on to the meaning'),
       el('button', {class:'btn ghost', type:'button', onclick:() => advance(vi, 0, 0, 0)}, 'Next verse without studying this one'));
   }
-  function learn(vi, ws) {   // every new word, checked in this verse; a word missed comes back once at the end
+  function learn(vi, ws) {   // word cards first (as in Today's words), unless the setting is "in the verse only"
+    const wm = S.set.pathWords || 'both';
+    if (wm === 'verse' || !ws.length) return check(vi, ws, 'cloze');
+    let k = 0;
+    const step = () => {
+      $('#ov').scrollTop = 0;
+      if (k >= ws.length) return check(vi, ws, wm === 'cards' ? 'meaning' : 'cloze');
+      const x = ws[k];
+      put(o.body, head(vi, 'card ' + (k + 1) + ' of ' + ws.length), steps('words', ws.length), el('p', {class:'eyebrow', style:'text-align:center'}, 'New word ' + (k + 1) + ' of ' + ws.length), wordCard(x, vi),
+        el('button', {class:'btn primary big', type:'button', 'data-enter':'', onclick:() => { k++; step(); }}, k + 1 < ws.length ? 'Got it · next word' : 'Got it · check the words'),
+        k ? el('button', {class:'btn ghost', type:'button', onclick:() => { k--; step(); }}, 'Back') : null);
+    };
+    step();
+  }
+  function check(vi, ws, kind) {   // each new word checked once (a word missed comes back once at the end)
     const queue = ws.map(x => ({x, again:false})); let n = 0, right = 0, tried = 0, k = 0;
     const step = () => {
       $('#ov').scrollTop = 0;
       if (k >= queue.length) return meaning(vi, n, right, tried);
-      const it = queue[k], x = it.x, d = distractors(x, 3);
-      if (d.length < 2) { const was = isLearnt(x); grade(x, true, 'check'); if (!was) { n++; logAct('new', true); } k++; return step(); }
-      const o4 = shuffle([x.k, ...d.map(y => y.k)]), fb = el('div'), prompt = el('p', {class:'qtext ex', lang:'en-GB'}, clozeNodes(vi, x.k)), m = meaningOf(x);
-      const opts = el('div', {class:'opts'}, o4.map(t => el('button', {class:'opt', type:'button', lang:'en-GB', onclick:e => {
-        opts.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (b.textContent === x.k) b.classList.add('right'); });
-        const ok = t === x.k; if (!ok) e.currentTarget.classList.add('wrong');
+      const it = queue[k], x = it.x, m = meaningOf(x);
+      let q = null;
+      if (kind === 'meaning' && m) { const o4 = [...new Set([m.def, ...distractors(x, 12, y => !!meaningOf(y)).map(y => meaningOf(y).def).filter(d => d !== m.def)])].slice(0, 4); if (o4.length >= 3) q = {k:'meaning', o:shuffle(o4), a:m.def}; }
+      if (!q) { const d = distractors(x, 3); if (d.length >= 2) q = {k:'cloze', o:shuffle([x.k, ...d.map(y => y.k)]), a:x.k}; }
+      if (!q) { const was = isLearnt(x); grade(x, true, 'check'); if (!was) { n++; logAct('new', true); } k++; return step(); }
+      const fb = el('div'), prompt = q.k === 'cloze' ? el('p', {class:'qtext ex', lang:'en-GB'}, clozeNodes(vi, x.k)) : el('div', null, el('p', {class:'qtext big', lang:'en-GB'}, x.k), el('p', {class:'verse noword'}, vNodes(vi, x.k)));
+      const h = q.k === 'cloze' ? hintNode(x) : null;
+      const opts = el('div', {class:'opts' + (q.k === 'meaning' ? ' long' : '')}, q.o.map(t => el('button', {class:'opt', type:'button', lang:'en-GB', onclick:e => {
+        opts.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (b.textContent === q.a) b.classList.add('right'); });
+        const ok = t === q.a; if (!ok) e.currentTarget.classList.add('wrong');
         const was = isLearnt(x); grade(x, ok, 'check'); if (ok && !was) { n++; logAct('new', true); } else logAct(null, ok);
         if (ok) right++; tried++; if (!ok && !it.again) queue.push({x, again:true});
-        put(prompt, clozeNodes(vi, x.k, true));
-        put(fb, el('section', {class:'fb ' + (ok ? 'ok' : 'no')}, el('h3', null, ok ? 'Well done!' : 'The word is "' + x.k + '"' + (it.again ? '' : ' · it will come back')), m ? el('p', {class:'why', style:'color:var(--def)'}, x.k + ': ' + m.def) : null, S.set.ko && koOf(x) ? el('p', {class:'why ko', lang:'ko'}, x.k + ' · ' + koOf(x)) : null),
+        if (q.k === 'cloze') put(prompt, clozeNodes(vi, x.k, true));
+        put(fb, el('section', {class:'fb ' + (ok ? 'ok' : 'no')}, el('h3', null, ok ? 'Well done!' : (q.k === 'cloze' ? 'The word is "' + x.k + '"' : 'Not quite')) , !ok && !it.again ? el('p', {class:'why'}, 'It will come back once more.') : null,
+            m ? el('p', {class:'why', style:'color:var(--def)'}, x.k + ': ' + m.def) : null, S.set.ko && koOf(x) ? el('p', {class:'why ko', lang:'ko'}, x.k + ' · ' + koOf(x)) : null),
           el('button', {class:'btn primary big', type:'button', onclick:() => { k++; step(); }}, 'Next'));
         fb.querySelector('.btn.primary').focus({preventScroll:true});
       }}, t)));
       put(o.body, head(vi, 'word ' + (k + 1) + ' of ' + queue.length), steps('words', ws.length),
-        el('p', {class:'qinstr'}, 'Which word completes the verse?' + (m ? '' : '')), m ? el('p', {class:'tip'}, 'Hint: ' + m.def + (S.set.ko && koOf(x) ? ' · ' : ''), S.set.ko && koOf(x) ? el('span', {class:'ko'}, koOf(x)) : null) : null, prompt, opts, fb);
+        el('p', {class:'qinstr'}, q.k === 'cloze' ? 'Which word completes the verse?' : 'What does "' + x.k + '" mean here?'), h, prompt, opts, fb);
     };
     step();
   }
-  function meaning(vi, n, right, tried) {   // understand the verse: word by word, in today's English, then your own Korean
+  function review(vi) {   // a verse with no new words: its words again, in English
+    const vw = verseWords(vi).filter(x => x.kind !== 'n' && meaningOf(x));
+    const good = vw.filter(x => { const h = hintOf(x, true); return h && h.en; }).sort((a, b) => b.lv - a.lv || a.n - b.n);
+    const pick = shuffle(good.slice(0, 6)).slice(0, Math.min(3, good.length));
+    let k = 0, right = 0, tried = 0;
+    const step = () => {
+      $('#ov').scrollTop = 0;
+      if (k >= pick.length) return meaning(vi, 0, right, tried);
+      const x = pick[k], h = hintOf(x, true);
+      const others = shuffle(vw.filter(y => y !== x && !formsOf(x).has(y.k))).slice(0, 3);
+      if (others.length < 3) others.push(...distractors(x, 3 - others.length));
+      const o4 = shuffle([x, ...others.slice(0, 3)]), fb = el('div');
+      const opts = el('div', {class:'opts'}, o4.map(y => el('button', {class:'opt', type:'button', lang:'en-GB', onclick:e => {
+        opts.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (b.textContent === x.k) b.classList.add('right'); });
+        const ok = y === x; if (!ok) e.currentTarget.classList.add('wrong');
+        grade(x, ok, isDue(x) ? 'review' : 'practice'); logAct(isDue(x) ? 'review' : null, ok); if (ok) right++; tried++;
+        put(fb, el('section', {class:'fb ' + (ok ? 'ok' : 'no')}, el('h3', null, ok ? 'Well done!' : 'It is "' + x.k + '"'), el('p', {class:'why', style:'color:var(--def)'}, x.k + ': ' + meaningOf(x).def)),
+          el('button', {class:'btn primary big', type:'button', onclick:() => { k++; step(); }}, 'Next'));
+        fb.querySelector('.btn.primary').focus({preventScroll:true});
+      }}, y.k)));
+      put(o.body, head(vi, 'review ' + (k + 1) + ' of ' + pick.length), steps('words'), el('p', {class:'qinstr'}, 'Every word here is one you know. Which word in the verse means …'),
+        el('p', {class:'qtext def', lang:'en-GB'}, '“' + h.en + '”'), el('p', {class:'verse', lang:'en-GB'}, plainV(vi)), opts, fb);
+    };
+    step();
+  }
+  function meaning(vi, n, right, tried) {   // understand the verse: word by word, in today's English, then (with Korean on) your own translation
     $('#ov').scrollTop = 0;
-    const t = plainV(vi), toks = []; let last = 0;
-    for (const m of t.matchAll(TOK)) { const x = WM.get(keyOf(m[0])); toks.push(el('span', {class:'il' + (x && x.kind === 'n' ? ' n' : ''), role:'button', tabindex:'0', onclick:() => x && openWord(x)}, el('b', null, m[0] + t.slice(m.index + m[0].length).match(/^[^A-Za-z]*/)[0].replace(/\s+$/, '')), el('span', null, koOf(x) || '·'))); last = m.index + m[0].length; }
-    const ta = el('textarea', {class:'memo', rows:'3', lang:'ko', 'aria-label':'My Korean translation', placeholder:'이 절을 내 말로 우리말로 옮겨 보세요'}); ta.value = S.tr[vi] || '';
+    const t = plainV(vi), toks = [], ko = !!S.set.ko;
+    for (const m of t.matchAll(TOK)) { const x = WM.get(keyOf(m[0])); toks.push(el('span', {class:'il' + (x && x.kind === 'n' ? ' n' : ''), role:'button', tabindex:'0', onclick:() => x && openWord(x)}, el('b', null, m[0] + t.slice(m.index + m[0].length).match(/^[^A-Za-z]*/)[0].replace(/\s+$/, '')), el('span', {class:ko ? '' : 'en'}, (ko ? koOf(x) : x && x.kind === 'n' ? 'name' : shortDef(x)) || (ko ? '·' : '\u00a0')))); }
     const modern = modernNodes(vi), changed = modern.some(z => z && z.className === 'mod');
+    const ta = ko ? el('textarea', {class:'memo', rows:'3', lang:'ko', 'aria-label':'My Korean translation', placeholder:'이 절을 내 말로 우리말로 옮겨 보세요'}) : null; if (ta) ta.value = S.tr[vi] || '';
+    const go = () => { if (ta) { const v = ta.value.trim(); if (v) S.tr[vi] = v; else delete S.tr[vi]; save(); } practise(vi, n, right, tried); };
     put(o.body, head(vi, 'meaning'), steps('meaning'),
       el('p', {class:'eyebrow'}, 'Word by word'), el('div', {class:'interlin', lang:'en-GB'}, toks),
       changed ? [el('p', {class:'eyebrow'}, 'In today\'s English'), el('p', {class:'verse', lang:'en-GB'}, modern), el('p', {class:'tip'}, 'Only the old forms are changed (thou → you, -eth → -s, unto → to …). It is a guide made by the app, not a new translation.')] : null,
-      el('p', {class:'eyebrow'}, 'Translate it · 우리말로 옮기기'), el('p', {class:'tip'}, 'Write the verse in Korean in your own words, using the words above. It is saved with the verse.'), ta,
-      el('button', {class:'btn primary big', type:'button', onclick:() => { const v = ta.value.trim(); if (v) S.tr[vi] = v; else delete S.tr[vi]; save(); practise(vi, n, right, tried); }}, ta.value ? 'Save and practise the verse' : 'Practise the verse'));
-    ta.addEventListener('input', () => { o.body.querySelector('.btn.primary.big').textContent = ta.value.trim() ? 'Save and practise the verse' : 'Practise the verse'; });
+      ta ? [el('p', {class:'eyebrow'}, 'Translate it · 우리말로 옮기기'), el('p', {class:'tip'}, 'Write the verse in Korean in your own words, using the words above. It is saved with the verse.'), ta] : null,
+      el('button', {class:'btn primary big', type:'button', onclick:go}, ta && ta.value ? 'Save and practise the verse' : (S.set.pathPractice || 'hints') === 'off' ? 'Next' : 'Practise the verse'));
+    if (ta) ta.addEventListener('input', () => { o.body.querySelector('.btn.primary.big').textContent = ta.value.trim() ? 'Save and practise the verse' : 'Practise the verse'; });
   }
   function practise(vi, n, right, tried) {
     $('#ov').scrollTop = 0;
+    const kind = S.set.pathPractice || 'hints', ko = !!S.set.ko;
+    const next = () => el('button', {class:'btn primary big', type:'button', onclick:() => advance(vi, n, right, tried)}, one || st.count + 1 < N ? 'Next verse · ' + (vi + 1 < V.length ? refOf(vi + 1) : 'the end') : 'See how I did');
+    const stop = () => one ? el('button', {class:'btn ghost', type:'button', onclick:() => advance(vi, n, right, tried, true)}, 'Stop here for now') : null;
+    if (kind === 'off') { put(o.body, head(vi, 'done'), el('p', {class:'verse big1', lang:'en-GB'}, vNodes(vi)), ko && S.tr[vi] ? el('p', {class:'why ko', lang:'ko'}, S.tr[vi]) : null, next(), stop()); return; }
     const res = el('div');
     const done = ok => {
       if (ok) right++; tried++;
-      put(res, el('section', {class:'fb ' + (ok ? 'ok' : 'no')}, el('h3', null, ok ? 'Well done!' : 'Here is the verse'), el('p', {class:'verse noword'}, vNodes(vi)), S.tr[vi] ? el('p', {class:'why ko', lang:'ko'}, S.tr[vi]) : null),
-        el('button', {class:'btn primary big', type:'button', onclick:() => advance(vi, n, right, tried)}, one || st.count + 1 < N ? 'Next verse · ' + (vi + 1 < V.length ? refOf(vi + 1) : 'the end') : 'See how I did'),
-        one ? el('button', {class:'btn ghost', type:'button', onclick:() => advance(vi, n, right, tried, true)}, 'Stop here for now') : null);
+      put(res, el('section', {class:'fb ' + (ok ? 'ok' : 'no')}, el('h3', null, ok ? 'Well done!' : 'Here is the verse'), el('p', {class:'verse noword'}, vNodes(vi)), ko && S.tr[vi] ? el('p', {class:'why ko', lang:'ko'}, S.tr[vi]) : null), next(), stop());
       res.querySelector('.btn.primary').focus({preventScroll:true});
     };
-    put(o.body, head(vi, 'verse'), steps('verse'), verseEx(vi, one ? ['blanks', 'order', 'letters'][st.count % 3] : 'blanks', done), res);
+    put(o.body, head(vi, 'verse'), steps('verse'), verseEx(vi, kind === 'hints' ? 'blanks' : kind, done, {hints:kind === 'hints'}), res);
   }
   function advance(vi, n, right, tried, stop) {
     logStudy(one ? 'one' : 'path', vi, vi, n, right, tried);
@@ -1548,6 +1639,7 @@ function pathPanel(redraw) {
     el('div', {class:'modes'},
       modeBtn('➡️', "Today's passage", (S.set.pathN || 10) + ' verses from ' + (done ? '—' : refOf(pos)), () => runPath('path'), done),
       modeBtn('☝️', 'One verse at a time', 'Go on verse by verse; stop whenever you like', () => runPath('one'), done),
+      modeBtn('⚙️', 'Study options', 'How to learn the words, verse practice, verses on a card', () => pathOptions()),
       modeBtn('📍', 'Change where to go on from', 'A book, chapter and verse, or where you last read', () => pickPlace(redraw)),
       modeBtn('🗓️', 'My study record', 'By date, by passage and on a calendar', () => openRecord())));
 }
@@ -1924,8 +2016,7 @@ function renderMe() {
     el('section', {class:'panel set'}, el('p', {class:'eyebrow'}, 'Settings'),
       el('span', {class:'lab'}, 'New words a day'), pick('New words a day', 'daily', [5, 10, 15, 20, 30].map(n => [n, String(n)])),
       el('span', {class:'lab'}, 'Most reviews at a time'), pick('Most reviews at a time', 'revMax', [5, 10, 20, 30, 50].map(n => [n, String(n)])),
-      el('span', {class:'lab'}, 'Verses in a Bible-order passage'), pick('Verses in a passage', 'pathN', [5, 10, 15, 20, 30].map(n => [n, String(n)])),
-      el('span', {class:'lab'}, 'Words to learn in Bible order'), pick('Words to learn', 'pathLv', [[1, 'Every word'], [2, 'Level 2+'], [3, 'Level 3+'], [4, 'Level 4+'], [5, 'Level 5+']]),
+      optSegs(renderMe),
       el('p', {class:'tip'}, 'Every word: each word of each verse is learnt once, the first time it appears; words you have learnt are not taught again. With a level, only words from that level are taught (old KJV English and Bible words from level 2).'),
       el('span', {class:'lab'}, 'Reviews come from'), pick('Reviews come from', 'from', [['all', 'All words'], ['star', 'Starred'], ['trk', 'Tricky']]),
       el('span', {class:'lab'}, 'How to answer word questions'), el('div', {class:'seg', role:'group'}, [['choose', 'Choose'], ['see', 'See & type'], ['type', 'Type']].map(([k, l]) => el('button', {type:'button', 'aria-pressed':am === k ? 'true' : 'false', onclick:() => { try { localStorage.setItem(ANSWER_KEY, k); } catch (e) {} renderMe(); }}, l))),
