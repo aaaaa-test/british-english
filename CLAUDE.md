@@ -20,6 +20,9 @@ vanilla JS and CSS inline, plus data files.
 - The apps share these `localStorage` keys: `bw-answer` (answer mode: choose / see / type) and `bw-bg` (light or dark).
 - Each app has its own progress key, e.g. `bwkjv-v1`. Look for `const LS =` or `localStorage` in each file.
 - Every app's Me tab has "Save a copy" / "Restore a copy" for moving progress between devices.
+- Keyboard in sessions (`words.html`, `books.html`): Enter = next / Got it, 1–9 = a choice. Where there is no choice, 1 / 2 / 3 =
+  Star / Tricky / My sentence. ← or Backspace = Previous (buttons marked `data-prev`). Escape = back.
+  The key badges (`.kk`) show only on computers with a mouse. Test: `tools/tests/t52-keys.js`.
 
 ## Courses (books.html)
 
