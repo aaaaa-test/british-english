@@ -1,17 +1,17 @@
-/* Keeps 5000 British Words, British Writing and Grammar, British Book Courses and KJV Words and Bible working without internet.
+/* Keeps 5000 British Words, British Writing and Grammar and British Book Courses working without internet.
    Pages come from the internet when it answers quickly, so updates show up at once; otherwise the saved copy is used.
    Signing in and saving progress to an account go straight to the internet and are never stored here. */
-const CACHE = 'bw-site-26';
-const FILES = ['./', 'index.html', 'words.html', 'writing.html', 'books.html', 'kjv.html', 'config.js', 'words.webmanifest', 'writing.webmanifest', 'books.webmanifest',
+const CACHE = 'bw-site-27';
+const FILES = ['./', 'index.html', 'words.html', 'writing.html', 'books.html', 'config.js', 'words.webmanifest', 'writing.webmanifest', 'books.webmanifest',
   'icon-words-192.png', 'icon-words-512.png', 'icon-words-maskable.png', 'icon-writing-192.png', 'icon-writing-512.png', 'icon-writing-maskable.png',
-  'icon-books-192.png', 'icon-books-512.png', 'icon-books-maskable.png', 'kjv.webmanifest', 'icon-kjv-192.png', 'icon-kjv-512.png'];   // course files (courses/*.json) are kept the first time a book is opened
+  'icon-books-192.png', 'icon-books-512.png', 'icon-books-maskable.png'];   // course files (courses/*.json) are kept the first time a book is opened
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => Promise.all(FILES.map(f => c.add(new Request(f, {cache: 'reload'})).catch(() => null)))));   // fresh copies, not the browser's
   self.skipWaiting();
 });
-self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+self.addEventListener('activate', e => {   // only this site's caches: KJV Words and Bible (kjv-words) is on the same address and keeps its own
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k.startsWith('bw-site-') && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
 self.addEventListener('fetch', e => {
   const req = e.request;
