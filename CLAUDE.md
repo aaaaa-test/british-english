@@ -12,7 +12,6 @@ vanilla JS and CSS inline, plus data files.
 | `words.html` | 5000 British Words | Word data is inline in `<script id="wordData">` (`word|pos|meaning|…`), with Korean in `<script id="koData">`. |
 | `writing.html` | British Writing and Grammar | Diary, calendar, range reviews. |
 | `books.html` | British Book Courses | The engine for every course in `courses/`. |
-| `kjv.html` | Redirect only | KJV Words and Bible moved to its own repo `aaaaa-test/kjv-words` (https://aaaaa-test.github.io/kjv-words/). This page and `kjv.webmanifest` / `icon-kjv-*` only keep old links and home-screen icons working. |
 | `sw.js` | Service worker | Network-first, with an offline copy. |
 | `config.js` | Firebase config for optional accounts | Public web config, not a secret. |
 
@@ -52,8 +51,8 @@ vanilla JS and CSS inline, plus data files.
 1. **Test** in a real browser with Playwright. Chromium is pre-installed in the cloud environment.
    - Serve the repo with `python3 -m http.server 8765` and open `http://localhost:8765/<app>.html`.
    - Check that the page reports no errors (`page.on('pageerror')`).
-2. **Bump the cache** in `sw.js` (`const CACHE = 'bw-site-NN'`) so installed apps get the new files. The service worker may delete
-   only `bw-site-*` caches: the KJV site on the same address keeps its own `kjv-site-*` caches.
+2. **Bump the cache** in `sw.js` (`const CACHE = 'bw-site-NN'`) so installed apps get the new files. The service worker deletes
+   only `bw-site-*` caches, so it never removes another site's caches on the same address.
    - When you add a new top-level file, also add it to `FILES`.
 3. **Commit and push to both branches.**
    - Work on `book-courses`, then fast-forward `main`: `git checkout main && git merge --ff-only book-courses && git push origin main`.
